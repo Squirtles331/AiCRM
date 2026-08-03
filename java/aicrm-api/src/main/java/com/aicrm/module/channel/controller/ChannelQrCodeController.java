@@ -82,7 +82,7 @@ public class ChannelQrCodeController {
                     "}\n" +
                     "```")
     @ApiResponse(responseCode = "400", description = "活码名称/引流渠道账号不能为空")
-    @ApiResponse(responseCode = "1302", description = "引流渠道账号不存在")
+    @ApiResponse(responseCode = "404", description = "引流渠道账号不存在（业务码 1302）")
     @OperLog(module = "渠道管理", operation = "生成渠道活码")
     @RequirePermission(perms = "channel:add")
     @PostMapping

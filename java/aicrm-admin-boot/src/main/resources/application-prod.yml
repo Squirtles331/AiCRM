@@ -22,12 +22,18 @@ spring:
     password: ${RABBITMQ_PASSWORD:}
     virtual-host: ${RABBITMQ_VHOST:/}
 
-# 生产环境强制关闭接口文档（/doc.html、/v3/api-docs 不可访问）
+# 生产环境强制关闭接口文档（/doc.html、/v3/api-docs、/swagger-ui.html 均不可访问）
 springdoc:
   api-docs:
     enabled: false
   swagger-ui:
     enabled: false
+
+# 生产环境强制关闭 Knife4j 增强 UI（/doc.html）
+knife4j:
+  enable: false
+  setting:
+    mock: false
 
 logging:
   level:

@@ -62,7 +62,7 @@ public class UserController {
     }
 
     @Operation(summary = "更新坐席", description = "需权限 user:edit")
-    @ApiResponse(responseCode = "1101", description = "用户不存在")
+    @ApiResponse(responseCode = "404", description = "用户不存在（业务码 1101）")
     @OperLog(module = "用户管理", operation = "更新用户")
     @RequirePermission(perms = "user:edit")
     @PutMapping("/{id}")
@@ -72,7 +72,7 @@ public class UserController {
     }
 
     @Operation(summary = "删除坐席（逻辑删除）", description = "需权限 user:delete")
-    @ApiResponse(responseCode = "1101", description = "用户不存在")
+    @ApiResponse(responseCode = "404", description = "用户不存在（业务码 1101）")
     @OperLog(module = "用户管理", operation = "删除用户")
     @RequirePermission(perms = "user:delete")
     @DeleteMapping("/{id}")
@@ -83,7 +83,7 @@ public class UserController {
 
     @Operation(summary = "重置密码", description = "需权限 user:reset-password")
     @ApiResponse(responseCode = "400", description = "新密码长度不能少于 6 位")
-    @ApiResponse(responseCode = "1101", description = "用户不存在")
+    @ApiResponse(responseCode = "404", description = "用户不存在（业务码 1101）")
     @OperLog(module = "用户管理", operation = "重置密码")
     @RequirePermission(perms = "user:reset-password")
     @PutMapping("/{id}/password")
@@ -95,7 +95,7 @@ public class UserController {
 
     @Operation(summary = "启用/停用坐席", description = "需权限 user:edit")
     @ApiResponse(responseCode = "400", description = "status 仅支持 0/1")
-    @ApiResponse(responseCode = "1101", description = "用户不存在")
+    @ApiResponse(responseCode = "404", description = "用户不存在（业务码 1101）")
     @OperLog(module = "用户管理", operation = "启用/停用用户")
     @RequirePermission(perms = "user:edit")
     @PutMapping("/{id}/status")
@@ -113,7 +113,7 @@ public class UserController {
     }
 
     @Operation(summary = "分配用户角色（全量覆盖）", description = "需权限 user:edit")
-    @ApiResponse(responseCode = "1101", description = "用户不存在")
+    @ApiResponse(responseCode = "404", description = "用户不存在（业务码 1101）")
     @OperLog(module = "用户管理", operation = "分配用户角色")
     @RequirePermission(perms = "user:edit")
     @PutMapping("/{id}/roles")

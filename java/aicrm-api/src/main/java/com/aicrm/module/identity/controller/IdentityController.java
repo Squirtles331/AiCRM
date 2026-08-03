@@ -55,7 +55,7 @@ public class IdentityController {
     @Operation(summary = "手动绑定身份到线索",
             description = "权限：identity:edit。将一条身份（手机号/邮箱/社媒ID/企微ID/WhatsApp/企业域名）手动绑定到指定线索；tenantId 为空时默认当前租户。")
     @ApiResponse(responseCode = "400", description = "身份类型与值不能为空")
-    @ApiResponse(responseCode = "1201", description = "线索不存在")
+    @ApiResponse(responseCode = "404", description = "线索不存在（业务码 1201）")
     @OperLog(module = "身份归一", operation = "绑定身份")
     @RequirePermission(perms = "identity:edit")
     @PostMapping("/bind")
@@ -79,7 +79,7 @@ public class IdentityController {
     @Operation(summary = "线索合并（次要线索归并到主线索）",
             description = "权限：identity:merge。将次要线索的身份映射、跟进记录等归并到主线索，并删除次要线索；返回合并后的主线索 ID。")
     @ApiResponse(responseCode = "400", description = "不能合并自身")
-    @ApiResponse(responseCode = "1201", description = "线索不存在")
+    @ApiResponse(responseCode = "404", description = "线索不存在（业务码 1201）")
     @OperLog(module = "身份归一", operation = "线索合并")
     @RequirePermission(perms = "identity:merge")
     @PostMapping("/leads/{primaryId}/merge/{secondaryId}")

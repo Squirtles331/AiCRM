@@ -40,7 +40,7 @@ public class FileController {
 
     @Operation(summary = "上传文件", description = "multipart/form-data 表单上传，file 字段为文件流，返回文件记录与访问地址")
     @ApiResponse(responseCode = "400", description = "上传文件不能为空")
-    @ApiResponse(responseCode = "1701", description = "文件上传失败")
+    @ApiResponse(responseCode = "500", description = "文件上传失败（业务码 1701）")
     @OperLog(module = "文件管理", operation = "上传文件")
     @PostMapping("/upload")
     public Result<FileUploadVO> upload(

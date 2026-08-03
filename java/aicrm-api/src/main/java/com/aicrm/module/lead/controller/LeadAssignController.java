@@ -34,7 +34,7 @@ public class LeadAssignController {
 
     @Operation(summary = "手动分配单条线索",
             description = "权限：lead:assign。按当前租户已启用的分配规则（product/region/round_robin）将线索自动分配给匹配销售；无匹配规则时保持未分配。")
-    @ApiResponse(responseCode = "1201", description = "线索不存在")
+    @ApiResponse(responseCode = "404", description = "线索不存在（业务码 1201）")
     @OperLog(module = "线索管理", operation = "分配线索")
     @RequirePermission(perms = "lead:assign")
     @PostMapping("/leads/{id}/assign")

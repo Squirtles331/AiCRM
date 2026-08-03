@@ -88,7 +88,7 @@ public class ChannelAccountController {
 
     @Operation(summary = "更新账号信息/授权配置",
             description = "更新渠道账号信息或授权配置（整体覆盖提交字段，未提交字段保持原值）。需权限 channel:edit。")
-    @ApiResponse(responseCode = "1302", description = "渠道账号不存在")
+    @ApiResponse(responseCode = "404", description = "渠道账号不存在（业务码 1302）")
     @OperLog(module = "渠道管理", operation = "更新渠道账号")
     @RequirePermission(perms = "channel:edit")
     @PutMapping("/{id}")
@@ -100,7 +100,7 @@ public class ChannelAccountController {
 
     @Operation(summary = "删除渠道账号",
             description = "删除渠道账号（逻辑删除）。需权限 channel:delete。")
-    @ApiResponse(responseCode = "1302", description = "渠道账号不存在")
+    @ApiResponse(responseCode = "404", description = "渠道账号不存在（业务码 1302）")
     @OperLog(module = "渠道管理", operation = "删除渠道账号")
     @RequirePermission(perms = "channel:delete")
     @DeleteMapping("/{id}")
@@ -111,8 +111,8 @@ public class ChannelAccountController {
 
     @Operation(summary = "刷新授权令牌",
             description = "手动刷新渠道账号的 access_token（token 过期或手动触发场景）。刷新成功返回 true，失败返回 false（如密钥错误/接口异常）。需权限 channel:token。")
-    @ApiResponse(responseCode = "1302", description = "渠道账号不存在")
-    @ApiResponse(responseCode = "1304", description = "渠道开放平台 API 调用失败")
+    @ApiResponse(responseCode = "404", description = "渠道账号不存在（业务码 1302）")
+    @ApiResponse(responseCode = "502", description = "渠道开放平台 API 调用失败（业务码 1304）")
     @OperLog(module = "渠道管理", operation = "刷新渠道令牌")
     @RequirePermission(perms = "channel:token")
     @PostMapping("/{id}/refresh-token")
@@ -122,7 +122,7 @@ public class ChannelAccountController {
 
     @Operation(summary = "更新健康状态（状态监控回调）",
             description = "更新渠道账号健康状态/风控等级（供定时巡检或人工标记调用）。需权限 channel:token。")
-    @ApiResponse(responseCode = "1302", description = "渠道账号不存在")
+    @ApiResponse(responseCode = "404", description = "渠道账号不存在（业务码 1302）")
     @RequirePermission(perms = "channel:token")
     @PostMapping("/{id}/health")
     public Result<Void> updateHealth(@Parameter(description = "渠道账号 ID", required = true) @PathVariable Long id,

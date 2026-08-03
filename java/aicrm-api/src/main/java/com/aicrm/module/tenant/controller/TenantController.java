@@ -55,8 +55,8 @@ public class TenantController {
 
     @Operation(summary = "创建租户（自动初始化默认管理员账号）", description = "需权限 admin")
     @ApiResponse(responseCode = "400", description = "管理员手机号不能为空")
-    @ApiResponse(responseCode = "1004", description = "套餐不存在")
-    @ApiResponse(responseCode = "1005", description = "套餐已下架")
+    @ApiResponse(responseCode = "404", description = "套餐不存在（业务码 1004）")
+    @ApiResponse(responseCode = "404", description = "套餐已下架（业务码 1005）")
     @OperLog(module = "租户管理", operation = "创建租户")
     @RequirePermission("admin")
     @PostMapping
@@ -65,7 +65,7 @@ public class TenantController {
     }
 
     @Operation(summary = "更新租户（含套餐/到期时间/联系人等）", description = "需权限 admin")
-    @ApiResponse(responseCode = "1001", description = "租户不存在")
+    @ApiResponse(responseCode = "404", description = "租户不存在（业务码 1001）")
     @OperLog(module = "租户管理", operation = "更新租户")
     @RequirePermission("admin")
     @PutMapping("/{id}")
@@ -76,7 +76,7 @@ public class TenantController {
 
     @Operation(summary = "启用/停用租户", description = "需权限 admin")
     @ApiResponse(responseCode = "400", description = "status 仅支持 0（停用）/1（启用）")
-    @ApiResponse(responseCode = "1001", description = "租户不存在")
+    @ApiResponse(responseCode = "404", description = "租户不存在（业务码 1001）")
     @OperLog(module = "租户管理", operation = "启用/停用租户")
     @RequirePermission("admin")
     @PutMapping("/{id}/status")
@@ -87,7 +87,7 @@ public class TenantController {
     }
 
     @Operation(summary = "删除租户（逻辑删除）", description = "需权限 admin")
-    @ApiResponse(responseCode = "1001", description = "租户不存在")
+    @ApiResponse(responseCode = "404", description = "租户不存在（业务码 1001）")
     @OperLog(module = "租户管理", operation = "删除租户")
     @RequirePermission("admin")
     @DeleteMapping("/{id}")

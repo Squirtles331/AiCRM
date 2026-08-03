@@ -33,9 +33,9 @@ public class AuthController {
 
     @Operation(summary = "登录（签发 JWT）", description = "公开接口，无需登录；成功返回 JWT 令牌")
     @ApiResponse(responseCode = "400", description = "账号或密码错误/账号已禁用/参数缺失")
-    @ApiResponse(responseCode = "1001", description = "租户不存在")
-    @ApiResponse(responseCode = "1002", description = "租户已停用")
-    @ApiResponse(responseCode = "1003", description = "租户已到期")
+    @ApiResponse(responseCode = "404", description = "租户不存在（业务码 1001）")
+    @ApiResponse(responseCode = "403", description = "租户已停用（业务码 1002）")
+    @ApiResponse(responseCode = "403", description = "租户已到期（业务码 1003）")
     @OperLog(module = "认证", operation = "用户登录")
     @PostMapping("/login")
     public Result<LoginResponse> login(@Valid @RequestBody LoginRequest request,

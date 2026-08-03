@@ -118,7 +118,7 @@ public class ConversationController {
                     + "```\n"
                     + "注意：conversationId 以路径参数为准，请求体中的值会被覆盖；msgType 不传默认 text。")
     @ApiResponse(responseCode = "400", description = "conversationId/消息内容不能为空")
-    @ApiResponse(responseCode = "1401", description = "会话不存在")
+    @ApiResponse(responseCode = "404", description = "会话不存在（业务码 1401）")
     @OperLog(module = "会话管理", operation = "追加消息")
     @RequirePermission(perms = "message:add")
     @PostMapping("/{id}/messages")
@@ -132,7 +132,7 @@ public class ConversationController {
     @Operation(summary = "关闭会话",
             description = "会话管理 - 关闭会话（权限 conversation:edit），已归档会话不可关闭，关闭后状态置为 closed。")
     @ApiResponse(responseCode = "400", description = "已归档会话不能关闭")
-    @ApiResponse(responseCode = "1401", description = "会话不存在")
+    @ApiResponse(responseCode = "404", description = "会话不存在（业务码 1401）")
     @OperLog(module = "会话管理", operation = "关闭会话")
     @RequirePermission(perms = "conversation:edit")
     @PostMapping("/{id}/close")
@@ -142,7 +142,7 @@ public class ConversationController {
 
     @Operation(summary = "归档会话",
             description = "会话管理 - 归档会话（权限 conversation:edit），归档后状态置为 archived。")
-    @ApiResponse(responseCode = "1401", description = "会话不存在")
+    @ApiResponse(responseCode = "404", description = "会话不存在（业务码 1401）")
     @OperLog(module = "会话管理", operation = "归档会话")
     @RequirePermission(perms = "conversation:edit")
     @PostMapping("/{id}/archive")
@@ -154,7 +154,7 @@ public class ConversationController {
             description = "会话管理 - AI 接待入口（权限 message:add）：客户消息落库 → 意向判定 → 生成 AI 回复（AI 不可用降级规则话术）→ 回复落库。\n\n"
                     + "请求体为 JSON 字符串（裸字符串），例如：\"我想了解贵司产品的报价\"\n"
                     + "返回 AiReply 字段：content 回复内容、intent 意向（quote/sample/selection/other）、confidence 置信度、shouldTransfer 是否建议转人工。")
-    @ApiResponse(responseCode = "1401", description = "会话不存在")
+    @ApiResponse(responseCode = "404", description = "会话不存在（业务码 1401）")
     @OperLog(module = "会话管理", operation = "AI 接待")
     @RequirePermission(perms = "message:add")
     @PostMapping("/{id}/ai-reply")
@@ -211,7 +211,7 @@ public class ConversationController {
                     + "}\n"
                     + "```")
     @ApiResponse(responseCode = "400", description = "暂无可接手的在线坐席/operatorId 不能为空")
-    @ApiResponse(responseCode = "1401", description = "会话不存在")
+    @ApiResponse(responseCode = "404", description = "会话不存在（业务码 1401）")
     @OperLog(module = "会话管理", operation = "转人工并生成交接包")
     @RequirePermission(perms = "conversation:edit")
     @PostMapping("/{id}/transfer")

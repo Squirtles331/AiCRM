@@ -73,7 +73,7 @@ public class DocumentController {
 
     @Operation(summary = "上传资料文件（返回可访问 URL）", description = "multipart/form-data 表单上传，返回 /uploads/xxx 形式的访问 URL")
     @ApiResponse(responseCode = "400", description = "文件不能为空")
-    @ApiResponse(responseCode = "1701", description = "文件上传失败")
+    @ApiResponse(responseCode = "500", description = "文件上传失败（业务码 1701）")
     @OperLog(module = "知识库", operation = "上传资料文件")
     @PostMapping("/upload")
     public Result<String> upload(
