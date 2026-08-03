@@ -1,0 +1,25 @@
+# AI获客销售系统 - 本地开发中间件
+# 启动：docker compose up -d
+# 说明：Redis 使用本机已有实例（6379），此处仅编排 PostgreSQL
+services:
+  postgres:
+    image: postgres:16
+    container_name: aicrm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aicrm
+      POSTGRES_PASSWORD: aicrm_dev_123
+      POSTGRES_DB: aicrm
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./java/src/main/resources/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aicrm -d aicrm"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

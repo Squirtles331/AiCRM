@@ -1,0 +1,10 @@
+package com.aicrm.module.log.mapper;
+
+import com.aicrm.module.log.entity.OperLog;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+/**
+ * 操作日志 Mapper
+ */
+public interface OperLogMapper extends BaseMapper<OperLog> {
+}
