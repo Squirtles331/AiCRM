@@ -1,0 +1,50 @@
+AiCRM
+Copyright 2026 AiCRM Project Contributors
+
+本产品基于 Apache License 2.0 开源（见根目录 LICENSE）。
+本项目包含以下第三方开源组件，各组件版权归其各自作者所有，并遵守各自原始开源协议。
+
+============================================================
+Java 后端（java/，经 Maven 依赖管理）
+============================================================
+
+| 组件 | 版本 | 协议 |
+| --- | --- | --- |
+| Spring Boot | 3.2.5 | Apache-2.0 |
+| Spring Framework（spring-web / spring-aop / spring-context 等） | 6.1.x | Apache-2.0 |
+| Spring AMQP（spring-boot-starter-amqp） | 3.1.x | Apache-2.0 |
+| Spring Data Redis（spring-boot-starter-data-redis） | 3.2.x | Apache-2.0 |
+| Quartz（spring-boot-starter-quartz） | 2.3.x | Apache-2.0 |
+| MyBatis-Plus | 3.5.7 | Apache-2.0 |
+| Redisson | 3.27.2 | Apache-2.0 |
+| SpringDoc OpenAPI | 2.3.0 | Apache-2.0 |
+| Knife4j | 4.5.0 | Apache-2.0 |
+| swagger-annotations（jakarta） | 2.2.22 | Apache-2.0 |
+| jjwt（jjwt-api / jjwt-impl / jjwt-jackson） | 0.12.5 | Apache-2.0 |
+| pgvector（pgvector-java） | 0.1.6 | Apache-2.0 |
+| PostgreSQL JDBC Driver | 42.x | BSD-2-Clause |
+| Lombok | 1.18.x | MIT |
+
+============================================================
+Python AI 服务（python/，经 pyproject.toml 管理）
+============================================================
+
+| 组件 | 版本 | 协议 |
+| --- | --- | --- |
+| FastAPI | 0.115+ | MIT |
+| Uvicorn | 0.32+ | BSD-3-Clause |
+| Pydantic | 2.12+ | MIT |
+| pydantic-settings | 2.8+ | MIT |
+| httpx | 0.27+ | BSD-3-Clause |
+| python-dotenv | 1.0+ | BSD-3-Clause |
+
+============================================================
+文档与工具链
+============================================================
+
+| 组件 | 用途 | 协议 |
+| --- | --- | --- |
+| redocly / ReDoc | 离线接口文档渲染 | MIT |
+| widdershins | OpenAPI → Markdown 转换 | MIT |
+
+完整依赖清单与许可证声明请以各构建产物中的依赖树（`mvn dependency:tree` / `uv tree`）为准。

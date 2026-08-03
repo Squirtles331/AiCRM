@@ -15,6 +15,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](#开源协议)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#参与贡献)
+[![Changelog](https://img.shields.io/badge/Changelog-keep--a--changelog-important.svg)](CHANGELOG.md)
 
 </div>
 
@@ -30,6 +31,7 @@
 - [接口文档](#接口文档)
 - [项目结构](#项目结构)
 - [文档索引](#文档索引)
+- [社区与治理](#社区与治理)
 - [参与贡献](#参与贡献)
 - [开源协议](#开源协议)
 
@@ -210,7 +212,13 @@ curl -X POST http://localhost:8080/api/auth/login \
 ├── python/                   # AI 能力服务（FastAPI）
 │   └── app/                  #   main.py 入口 / api / core / schemas / services
 ├── docker-compose.yml        # 本地中间件编排（PostgreSQL）
-└── README.md
+├── README.md                 # 项目说明（入口）
+├── CHANGELOG.md              # 版本变更记录
+├── CONTRIBUTING.md           # 贡献指南
+├── CODE_OF_CONDUCT.md        # 贡献者公约
+├── SECURITY.md               # 安全政策 / 漏洞披露
+├── NOTICE                    # 第三方组件与协议声明
+└── LICENSE                   # Apache-2.0 开源协议
 ```
 
 ## 文档索引
@@ -227,16 +235,29 @@ curl -X POST http://localhost:8080/api/auth/login \
 | [WebSocket 接入指南](docs/websocket-guide.md) | 实时消息推送接入说明 |
 | [客户对接确认单](docs/customer-onboarding-confirmation.md) | 客户侧对接交付物清单 |
 
+## 社区与治理
+
+| 文件 | 说明 |
+| --- | --- |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献指南：Issue / 开发流程 / PR 规范 / 代码要求 |
+| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | 贡献者公约：社区交流与行为准则 |
+| [SECURITY.md](SECURITY.md) | 安全政策：漏洞披露渠道、处理承诺与加固建议 |
+| [CHANGELOG.md](CHANGELOG.md) | 版本变更记录（Keep a Changelog + 语义化版本） |
+| [NOTICE](NOTICE) | 第三方开源组件与协议声明 |
+| [LICENSE](LICENSE) | Apache License 2.0 |
+
 ## 参与贡献
 
-我们欢迎任何形式的贡献：功能建议、Bug 报告、文档完善、代码提交。
+我们欢迎任何形式的贡献：功能建议、Bug 报告、文档完善、代码提交。完整流程与要求请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 建议流程：
 
-1. Fork 本仓库并创建特性分支：`git checkout -b feature/xxx`
+1. Fork 本仓库并从 `develop` 创建特性分支：`git checkout -b feature/xxx develop`
 2. 提交变更并确保通过 `mvn -DskipTests package` 构建
 3. 遵循《[接口文档迭代维护规范](docs/api-doc-maintenance-guide.md)》中的评审检查项
-4. 发起 Pull Request，描述变更内容与验证结果
+4. 发起 Pull Request（目标分支 `develop`），描述变更内容与验证结果
+
+所有贡献者需遵守 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)；发现安全漏洞请通过 [SECURITY.md](SECURITY.md) 中的渠道私下报告。
 
 ## 开源协议
 
