@@ -31,9 +31,11 @@
 2. **登记错误码**：若新增异常分支，先在 `ResultCode.java` 增加业务码，再同步 `docs/error-code-table.md`；
 3. **刷新导出产物**（发布前执行）：
    ```bash
-   # 启动 dev 环境后
+   # 启动 dev 环境后；注意：必须用 curl -o 保存原始字节，勿用 PowerShell 的 Invoke-WebRequest $res.Content（会按本地代码页解码导致中文双重编码乱码）
    curl -s http://localhost:8080/v3/api-docs -o docs/openapi.json
    npx @redocly/cli@latest build-docs docs/openapi.json -o docs/offline-api-doc.html --title "AiCRM 接口文档（离线版）"
+   # 内嵌 ReDoc 渲染引擎 + 移除外部字体引用，保证单文件完全离线可打开（脚本见 scripts/embed-offline.cjs）
+   node scripts/embed-offline.cjs
    npx --yes widdershins@4.0.1 --language_tabs "shell:Shell" "javascript:JavaScript" --summary docs/openapi.json -o docs/offline-api-doc.md
    ```
 4. **通知受影响方**：在联调台账 `docs/integration-issues.md` 或项目群同步变更点（新增/废弃接口、字段类型变更、错误码变化），标注"破坏性变更"或"兼容变更"。

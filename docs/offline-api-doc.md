@@ -1,5 +1,5 @@
 ---
-title: "AiCRM æ¥å£ææ¡£ v0.1.0"
+title: AiCRM 接口文档 v0.1.0
 language_tabs:
   - shell: Shell
   - javascript: JavaScript
@@ -16,18 +16,18 @@ headingLevel: 2
 
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="aicrm-">AiCRM æ¥å£ææ¡£ v0.1.0</h1>
+<h1 id="aicrm-">AiCRM 接口文档 v0.1.0</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
-AIè·å®¢éå®ç³»ç»ï¼AiCRMï¼æ ¸å¿ä¸å¡æ¥å£ææ¡£ã
+AI获客销售系统（AiCRM）核心业务接口文档。
 
-ç»ä¸è¿åç»æï¼`{ code, message, data }`ï¼code=200 è¡¨ç¤ºæåï¼
-åé¡µæ¥å£ data ä¸º `PageResult{ page, size, total, pages, records }`ï¼
-éè¯¯ç ï¼400 åæ°éè¯¯ / 401 æªç»å½ / 403 æ æé / 404 èµæºä¸å­å¨ / 500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ è§åæ¥å£æè¿°ã
+统一返回结构：`{ code, message, data }`，code=200 表示成功；
+分页接口 data 为 `PageResult{ page, size, total, pages, records }`；
+错误码：400 参数错误 / 401 未登录 / 403 无权限 / 404 资源不存在 / 500 系统错误，业务错误码 1000+ 见各接口描述。
 
-é´æï¼é¤ç»å½å¤çæ¥å£éæºå¸¦è¯·æ±å¤´ `Authorization: Bearer <token>`ï¼
-å¤ç§æ·æ¥å£å»ºè®®åæ¶æºå¸¦è¯·æ±å¤´ `X-Tenant-Id`ã
+鉴权：除登录外的接口需携带请求头 `Authorization: Bearer <token>`；
+多租户接口建议同时携带请求头 `X-Tenant-Id`。
 
 Base URLs:
 
@@ -35,11 +35,11 @@ Base URLs:
 
 # Authentication
 
-- HTTP Authentication, scheme: bearer ç»å½åè·åç JWT ä»¤çï¼æ ¼å¼ï¼Bearer <token>
+- HTTP Authentication, scheme: bearer 登录后获取的 JWT 令牌，格式：Bearer <token>
 
-<h1 id="aicrm---">åå¸­ç®¡ç</h1>
+<h1 id="aicrm---">坐席管理</h1>
 
-## æ¥è¯¢åå¸­è¯¦æ
+## 查询坐席详情
 
 <a id="opIddetail"></a>
 
@@ -78,20 +78,20 @@ fetch('http://localhost:8080/api/users/{id}',
 
 `GET /api/users/{id}`
 
-éæé user:list
+需权限 user:list
 
-<h3 id="æ¥è¯¢åå¸­è¯¦æ-parameters">Parameters</h3>
+<h3 id="查询坐席详情-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åå¸­ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|坐席 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ¥è¯¢åå¸­è¯¦æ-responses">Responses</h3>
+<h3 id="查询坐席详情-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -102,7 +102,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ´æ°åå¸­
+## 更新坐席
 
 <a id="opIdupdate"></a>
 
@@ -154,7 +154,7 @@ fetch('http://localhost:8080/api/users/{id}',
 
 `PUT /api/users/{id}`
 
-éæé user:edit
+需权限 user:edit
 
 > Body parameter
 
@@ -173,30 +173,30 @@ fetch('http://localhost:8080/api/users/{id}',
 }
 ```
 
-<h3 id="æ´æ°åå¸­-parameters">Parameters</h3>
+<h3 id="更新坐席-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åå¸­ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|坐席 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[User](#schemauser)|true|none|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="æ´æ°åå¸­-responses">Responses</h3>
+<h3 id="更新坐席-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç¨æ·ä¸å­å¨ï¼ä¸å¡ç  1101ï¼|[ResultUser](#schemaresultuser)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|用户不存在（业务码 1101）|[ResultUser](#schemaresultuser)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤åå¸­ï¼é»è¾å é¤ï¼
+## 删除坐席（逻辑删除）
 
 <a id="opIddelete"></a>
 
@@ -235,31 +235,31 @@ fetch('http://localhost:8080/api/users/{id}',
 
 `DELETE /api/users/{id}`
 
-éæé user:delete
+需权限 user:delete
 
-<h3 id="å é¤åå¸­ï¼é»è¾å é¤ï¼-parameters">Parameters</h3>
+<h3 id="删除坐席（逻辑删除）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åå¸­ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|坐席 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤åå¸­ï¼é»è¾å é¤ï¼-responses">Responses</h3>
+<h3 id="删除坐席（逻辑删除）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç¨æ·ä¸å­å¨ï¼ä¸å¡ç  1101ï¼|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|用户不存在（业务码 1101）|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å¯ç¨/åç¨åå¸­
+## 启用/停用坐席
 
 <a id="opIdupdateStatus"></a>
 
@@ -298,33 +298,33 @@ fetch('http://localhost:8080/api/users/{id}/status?status=0',
 
 `PUT /api/users/{id}/status`
 
-éæé user:edit
+需权限 user:edit
 
-<h3 id="å¯ç¨/åç¨åå¸­-parameters">Parameters</h3>
+<h3 id="启用/停用坐席-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åå¸­ ID|
-|status|query|integer(int32)|true|ç¶æï¼1å¯ç¨/0åç¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|坐席 ID|
+|status|query|integer(int32)|true|状态：1启用/0停用|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="å¯ç¨/åç¨åå¸­-responses">Responses</h3>
+<h3 id="启用/停用坐席-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|status ä»æ¯æ 0/1|[ResultVoid](#schemaresultvoid)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç¨æ·ä¸å­å¨ï¼ä¸å¡ç  1101ï¼|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|status 仅支持 0/1|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|用户不存在（业务码 1101）|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ¥è¯¢ç¨æ·å·²åéè§è² ID
+## 查询用户已分配角色 ID
 
 <a id="opIdroleIds"></a>
 
@@ -363,20 +363,20 @@ fetch('http://localhost:8080/api/users/{id}/roles',
 
 `GET /api/users/{id}/roles`
 
-éæé user:list
+需权限 user:list
 
-<h3 id="æ¥è¯¢ç¨æ·å·²åéè§è²-id-parameters">Parameters</h3>
+<h3 id="查询用户已分配角色-id-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åå¸­ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|坐席 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ¥è¯¢ç¨æ·å·²åéè§è²-id-responses">Responses</h3>
+<h3 id="查询用户已分配角色-id-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -387,7 +387,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åéç¨æ·è§è²ï¼å¨éè¦çï¼
+## 分配用户角色（全量覆盖）
 
 <a id="opIdsetRoles"></a>
 
@@ -430,7 +430,7 @@ fetch('http://localhost:8080/api/users/{id}/roles',
 
 `PUT /api/users/{id}/roles`
 
-éæé user:edit
+需权限 user:edit
 
 > Body parameter
 
@@ -440,30 +440,30 @@ fetch('http://localhost:8080/api/users/{id}/roles',
 ]
 ```
 
-<h3 id="åéç¨æ·è§è²ï¼å¨éè¦çï¼-parameters">Parameters</h3>
+<h3 id="分配用户角色（全量覆盖）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åå¸­ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|坐席 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|array[integer]|true|none|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="åéç¨æ·è§è²ï¼å¨éè¦çï¼-responses">Responses</h3>
+<h3 id="分配用户角色（全量覆盖）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç¨æ·ä¸å­å¨ï¼ä¸å¡ç  1101ï¼|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|用户不存在（业务码 1101）|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## éç½®å¯ç 
+## 重置密码
 
 <a id="opIdresetPassword"></a>
 
@@ -502,33 +502,33 @@ fetch('http://localhost:8080/api/users/{id}/password?newPassword=string',
 
 `PUT /api/users/{id}/password`
 
-éæé user:reset-password
+需权限 user:reset-password
 
-<h3 id="éç½®å¯ç -parameters">Parameters</h3>
+<h3 id="重置密码-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åå¸­ ID|
-|newPassword|query|string|true|æ°å¯ç ï¼ææï¼|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|坐席 ID|
+|newPassword|query|string|true|新密码（明文）|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="éç½®å¯ç -responses">Responses</h3>
+<h3 id="重置密码-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|æ°å¯ç é¿åº¦ä¸è½å°äº 6 ä½|[ResultVoid](#schemaresultvoid)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç¨æ·ä¸å­å¨ï¼ä¸å¡ç  1101ï¼|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|新密码长度不能少于 6 位|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|用户不存在（业务码 1101）|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## åé¡µæ¥è¯¢åå¸­
+## 分页查询坐席
 
 <a id="opIdpage"></a>
 
@@ -567,22 +567,22 @@ fetch('http://localhost:8080/api/users',
 
 `GET /api/users`
 
-éæé user:list
+需权限 user:list
 
-<h3 id="åé¡µæ¥è¯¢åå¸­-parameters">Parameters</h3>
+<h3 id="分页查询坐席-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|tenantId|query|integer(int64)|false|ç§æ· ID|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|tenantId|query|integer(int64)|false|租户 ID|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="åé¡µæ¥è¯¢åå¸­-responses">Responses</h3>
+<h3 id="分页查询坐席-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -593,7 +593,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºåå¸­
+## 创建坐席
 
 <a id="opIdcreate"></a>
 
@@ -645,7 +645,7 @@ fetch('http://localhost:8080/api/users',
 
 `POST /api/users`
 
-éæé user:add
+需权限 user:add
 
 > Body parameter
 
@@ -664,31 +664,31 @@ fetch('http://localhost:8080/api/users',
 }
 ```
 
-<h3 id="åå»ºåå¸­-parameters">Parameters</h3>
+<h3 id="创建坐席-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[User](#schemauser)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºåå¸­-responses">Responses</h3>
+<h3 id="创建坐席-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|ç§æ· ID/ææºå·/å¯ç ä¸è½ä¸ºç©º|[ResultUser](#schemaresultuser)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|租户 ID/手机号/密码不能为空|[ResultUser](#schemaresultuser)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">ç§æ·ç®¡ç</h1>
+<h1 id="aicrm---">租户管理</h1>
 
-## ç§æ·è¯¦æ
+## 租户详情
 
 <a id="opIddetail_1"></a>
 
@@ -727,20 +727,20 @@ fetch('http://localhost:8080/api/tenants/{id}',
 
 `GET /api/tenants/{id}`
 
-éæé admin
+需权限 admin
 
-<h3 id="ç§æ·è¯¦æ-parameters">Parameters</h3>
+<h3 id="租户详情-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ç§æ· ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|租户 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="ç§æ·è¯¦æ-responses">Responses</h3>
+<h3 id="租户详情-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -751,7 +751,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ´æ°ç§æ·ï¼å«å¥é¤/å°ææ¶é´/èç³»äººç­ï¼
+## 更新租户（含套餐/到期时间/联系人等）
 
 <a id="opIdupdate_1"></a>
 
@@ -804,7 +804,7 @@ fetch('http://localhost:8080/api/tenants/{id}',
 
 `PUT /api/tenants/{id}`
 
-éæé admin
+需权限 admin
 
 > Body parameter
 
@@ -824,30 +824,30 @@ fetch('http://localhost:8080/api/tenants/{id}',
 }
 ```
 
-<h3 id="æ´æ°ç§æ·ï¼å«å¥é¤/å°ææ¶é´/èç³»äººç­ï¼-parameters">Parameters</h3>
+<h3 id="更新租户（含套餐/到期时间/联系人等）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ç§æ· ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|租户 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Tenant](#schematenant)|true|none|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="æ´æ°ç§æ·ï¼å«å¥é¤/å°ææ¶é´/èç³»äººç­ï¼-responses">Responses</h3>
+<h3 id="更新租户（含套餐/到期时间/联系人等）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç§æ·ä¸å­å¨ï¼ä¸å¡ç  1001ï¼|[ResultTenant](#schemaresulttenant)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|租户不存在（业务码 1001）|[ResultTenant](#schemaresulttenant)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤ç§æ·ï¼é»è¾å é¤ï¼
+## 删除租户（逻辑删除）
 
 <a id="opIddelete_1"></a>
 
@@ -886,31 +886,31 @@ fetch('http://localhost:8080/api/tenants/{id}',
 
 `DELETE /api/tenants/{id}`
 
-éæé admin
+需权限 admin
 
-<h3 id="å é¤ç§æ·ï¼é»è¾å é¤ï¼-parameters">Parameters</h3>
+<h3 id="删除租户（逻辑删除）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ç§æ· ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|租户 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤ç§æ·ï¼é»è¾å é¤ï¼-responses">Responses</h3>
+<h3 id="删除租户（逻辑删除）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç§æ·ä¸å­å¨ï¼ä¸å¡ç  1001ï¼|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|租户不存在（业务码 1001）|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å¯ç¨/åç¨ç§æ·
+## 启用/停用租户
 
 <a id="opIdupdateStatus_1"></a>
 
@@ -949,33 +949,33 @@ fetch('http://localhost:8080/api/tenants/{id}/status?status=0',
 
 `PUT /api/tenants/{id}/status`
 
-éæé admin
+需权限 admin
 
-<h3 id="å¯ç¨/åç¨ç§æ·-parameters">Parameters</h3>
+<h3 id="启用/停用租户-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ç§æ· ID|
-|status|query|integer(int32)|true|ç¶æï¼1å¯ç¨/0åç¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|租户 ID|
+|status|query|integer(int32)|true|状态：1启用/0停用|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="å¯ç¨/åç¨ç§æ·-responses">Responses</h3>
+<h3 id="启用/停用租户-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|status ä»æ¯æ 0ï¼åç¨ï¼/1ï¼å¯ç¨ï¼|[ResultVoid](#schemaresultvoid)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç§æ·ä¸å­å¨ï¼ä¸å¡ç  1001ï¼|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|status 仅支持 0（停用）/1（启用）|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|租户不存在（业务码 1001）|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## åé¡µæ¥è¯¢ç§æ·
+## 分页查询租户
 
 <a id="opIdpage_1"></a>
 
@@ -1014,24 +1014,24 @@ fetch('http://localhost:8080/api/tenants',
 
 `GET /api/tenants`
 
-éæé admin
+需权限 admin
 
-<h3 id="åé¡µæ¥è¯¢ç§æ·-parameters">Parameters</h3>
+<h3 id="分页查询租户-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|å³é®å­ï¼ä¼ä¸åç§°ï¼|
-|planCode|query|string|false|å¥é¤ç¼ç ï¼starter/pro/enterprise|
-|status|query|integer(int32)|false|ç¶æï¼1å¯ç¨/0åç¨|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|关键字（企业名称）|
+|planCode|query|string|false|套餐编码：starter/pro/enterprise|
+|status|query|integer(int32)|false|状态：1启用/0停用|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="åé¡µæ¥è¯¢ç§æ·-responses">Responses</h3>
+<h3 id="分页查询租户-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -1042,7 +1042,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºç§æ·ï¼èªå¨åå§åé»è®¤ç®¡çåè´¦å·ï¼
+## 创建租户（自动初始化默认管理员账号）
 
 <a id="opIdcreate_1"></a>
 
@@ -1094,7 +1094,7 @@ fetch('http://localhost:8080/api/tenants',
 
 `POST /api/tenants`
 
-éæé admin
+需权限 admin
 
 > Body parameter
 
@@ -1113,32 +1113,32 @@ fetch('http://localhost:8080/api/tenants',
 }
 ```
 
-<h3 id="åå»ºç§æ·ï¼èªå¨åå§åé»è®¤ç®¡çåè´¦å·ï¼-parameters">Parameters</h3>
+<h3 id="创建租户（自动初始化默认管理员账号）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[TenantCreateRequest](#schematenantcreaterequest)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºç§æ·ï¼èªå¨åå§åé»è®¤ç®¡çåè´¦å·ï¼-responses">Responses</h3>
+<h3 id="创建租户（自动初始化默认管理员账号）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|ç®¡çåææºå·ä¸è½ä¸ºç©º|[ResultTenant](#schemaresulttenant)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|å¥é¤å·²ä¸æ¶ï¼ä¸å¡ç  1005ï¼|[ResultTenant](#schemaresulttenant)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|管理员手机号不能为空|[ResultTenant](#schemaresulttenant)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|套餐已下架（业务码 1005）|[ResultTenant](#schemaresulttenant)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">å®¢æ·æ ç­¾</h1>
+<h1 id="aicrm---">客户标签</h1>
 
-## æ´æ°æ ç­¾
+## 更新标签
 
 <a id="opIdupdateTag"></a>
 
@@ -1160,7 +1160,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "é«æåå®¢æ·",
+  "name": "高意向客户",
   "color": "#FF5733",
   "remark": "string",
   "status": 1
@@ -1188,7 +1188,7 @@ fetch('http://localhost:8080/api/tags/{id}',
 
 `PUT /api/tags/{id}`
 
-æéï¼tag:editãæ ID æ´æ°æ ç­¾åç§°/é¢è²/å¤æ³¨ã
+权限：tag:edit。按 ID 更新标签名称/颜色/备注。
 
 > Body parameter
 
@@ -1198,37 +1198,37 @@ fetch('http://localhost:8080/api/tags/{id}',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "é«æåå®¢æ·",
+  "name": "高意向客户",
   "color": "#FF5733",
   "remark": "string",
   "status": 1
 }
 ```
 
-<h3 id="æ´æ°æ ç­¾-parameters">Parameters</h3>
+<h3 id="更新标签-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æ ç­¾ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|标签 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[CustomerTag](#schemacustomertag)|true|none|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="æ´æ°æ ç­¾-responses">Responses</h3>
+<h3 id="更新标签-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ ç­¾ä¸å­å¨|[ResultCustomerTag](#schemaresultcustomertag)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|标签不存在|[ResultCustomerTag](#schemaresultcustomertag)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤æ ç­¾
+## 删除标签
 
 <a id="opIddeleteTag"></a>
 
@@ -1267,31 +1267,31 @@ fetch('http://localhost:8080/api/tags/{id}',
 
 `DELETE /api/tags/{id}`
 
-æéï¼tag:deleteãæ ID å é¤æ ç­¾ï¼å«å®¢æ·å³èå³ç³»ä¸å¹¶è§£é¤ï¼ã
+权限：tag:delete。按 ID 删除标签（含客户关联关系一并解除）。
 
-<h3 id="å é¤æ ç­¾-parameters">Parameters</h3>
+<h3 id="删除标签-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æ ç­¾ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|标签 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤æ ç­¾-responses">Responses</h3>
+<h3 id="删除标签-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ ç­¾ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|标签不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ ç­¾å¯å
+## 标签启停
 
 <a id="opIdupdateTagStatus"></a>
 
@@ -1330,32 +1330,32 @@ fetch('http://localhost:8080/api/tags/{id}/status?status=0',
 
 `PUT /api/tags/{id}/status`
 
-æéï¼tag:editãå¯åæ ç­¾ï¼status åå¼ï¼1å¯ç¨/0åç¨ã
+权限：tag:edit。启停标签；status 取值：1启用/0停用。
 
-<h3 id="æ ç­¾å¯å-parameters">Parameters</h3>
+<h3 id="标签启停-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æ ç­¾ ID|
-|status|query|integer(int32)|true|ç¶æï¼1å¯ç¨/0åç¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|标签 ID|
+|status|query|integer(int32)|true|状态：1启用/0停用|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æ ç­¾å¯å-responses">Responses</h3>
+<h3 id="标签启停-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|status ä»æ¯æ 0/1|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|status 仅支持 0/1|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ´æ°èªå¨æ ç­¾è§å
+## 更新自动标签规则
 
 <a id="opIdupdateRule"></a>
 
@@ -1377,7 +1377,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "ruleName": "è¯åé«äº80èªå¨ææ ",
+  "ruleName": "评分高于80自动打标",
   "tagId": 0,
   "conditionField": "score",
   "conditionOp": "gte",
@@ -1407,7 +1407,7 @@ fetch('http://localhost:8080/api/tags/rules/{id}',
 
 `PUT /api/tags/rules/{id}`
 
-æéï¼tag:ruleãæ ID æ´æ°èªå¨æ ç­¾è§åï¼condition_field/condition_op åå¼è§åå»ºæ¥å£ã
+权限：tag:rule。按 ID 更新自动标签规则；condition_field/condition_op 取值见创建接口。
 
 > Body parameter
 
@@ -1417,7 +1417,7 @@ fetch('http://localhost:8080/api/tags/rules/{id}',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "ruleName": "è¯åé«äº80èªå¨ææ ",
+  "ruleName": "评分高于80自动打标",
   "tagId": 0,
   "conditionField": "score",
   "conditionOp": "gte",
@@ -1426,31 +1426,31 @@ fetch('http://localhost:8080/api/tags/rules/{id}',
 }
 ```
 
-<h3 id="æ´æ°èªå¨æ ç­¾è§å-parameters">Parameters</h3>
+<h3 id="更新自动标签规则-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è§å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|规则 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[CustomerTagRule](#schemacustomertagrule)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æ´æ°èªå¨æ ç­¾è§å-responses">Responses</h3>
+<h3 id="更新自动标签规则-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è§ååç§°/æ¡ä»¶å¼/è§åå­æ®µéæ³|[ResultCustomerTagRule](#schemaresultcustomertagrule)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ ç­¾è§åä¸å­å¨|[ResultCustomerTagRule](#schemaresultcustomertagrule)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|规则名称/条件值/规则字段非法|[ResultCustomerTagRule](#schemaresultcustomertagrule)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|标签规则不存在|[ResultCustomerTagRule](#schemaresultcustomertagrule)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤èªå¨æ ç­¾è§å
+## 删除自动标签规则
 
 <a id="opIddeleteRule"></a>
 
@@ -1489,31 +1489,31 @@ fetch('http://localhost:8080/api/tags/rules/{id}',
 
 `DELETE /api/tags/rules/{id}`
 
-æéï¼tag:ruleãæ ID å é¤èªå¨æ ç­¾è§åã
+权限：tag:rule。按 ID 删除自动标签规则。
 
-<h3 id="å é¤èªå¨æ ç­¾è§å-parameters">Parameters</h3>
+<h3 id="删除自动标签规则-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è§å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|规则 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤èªå¨æ ç­¾è§å-responses">Responses</h3>
+<h3 id="删除自动标签规则-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ ç­¾è§åä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|标签规则不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ ç­¾åé¡µæ¥è¯¢
+## 标签分页查询
 
 <a id="opIdpageTags"></a>
 
@@ -1552,22 +1552,22 @@ fetch('http://localhost:8080/api/tags',
 
 `GET /api/tags`
 
-æéï¼tag:listãæå³é®å­ï¼æ ç­¾åç§°æ¨¡ç³å¹éï¼åé¡µæ¥è¯¢æ ç­¾ã
+权限：tag:list。按关键字（标签名称模糊匹配）分页查询标签。
 
-<h3 id="æ ç­¾åé¡µæ¥è¯¢-parameters">Parameters</h3>
+<h3 id="标签分页查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|å³é®å­ï¼æ ç­¾åç§°æ¨¡ç³å¹éï¼|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|关键字（标签名称模糊匹配）|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ ç­¾åé¡µæ¥è¯¢-responses">Responses</h3>
+<h3 id="标签分页查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -1578,7 +1578,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºæ ç­¾
+## 创建标签
 
 <a id="opIdcreateTag"></a>
 
@@ -1600,7 +1600,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "é«æåå®¢æ·",
+  "name": "高意向客户",
   "color": "#FF5733",
   "remark": "string",
   "status": 1
@@ -1628,7 +1628,7 @@ fetch('http://localhost:8080/api/tags',
 
 `POST /api/tags`
 
-æéï¼tag:addãæ°å»ºå®¢æ·æ ç­¾å®ä¹ï¼status é»è®¤ 1å¯ç¨ã
+权限：tag:add。新建客户标签定义，status 默认 1启用。
 
 > Body parameter
 
@@ -1638,36 +1638,36 @@ fetch('http://localhost:8080/api/tags',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "é«æåå®¢æ·",
+  "name": "高意向客户",
   "color": "#FF5733",
   "remark": "string",
   "status": 1
 }
 ```
 
-<h3 id="åå»ºæ ç­¾-parameters">Parameters</h3>
+<h3 id="创建标签-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[CustomerTag](#schemacustomertag)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºæ ç­¾-responses">Responses</h3>
+<h3 id="创建标签-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|æ ç­¾åç§°ä¸è½ä¸ºç©º|[ResultCustomerTag](#schemaresultcustomertag)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|标签名称不能为空|[ResultCustomerTag](#schemaresultcustomertag)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## è§ååé¡µæ¥è¯¢
+## 规则分页查询
 
 <a id="opIdpageRules"></a>
 
@@ -1706,21 +1706,21 @@ fetch('http://localhost:8080/api/tags/rules',
 
 `GET /api/tags/rules`
 
-æéï¼tag:ruleãåé¡µæ¥è¯¢èªå¨æ ç­¾è§åã
+权限：tag:rule。分页查询自动标签规则。
 
-<h3 id="è§ååé¡µæ¥è¯¢-parameters">Parameters</h3>
+<h3 id="规则分页查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="è§ååé¡µæ¥è¯¢-responses">Responses</h3>
+<h3 id="规则分页查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -1731,7 +1731,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºèªå¨æ ç­¾è§å
+## 创建自动标签规则
 
 <a id="opIdcreateRule"></a>
 
@@ -1753,7 +1753,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "ruleName": "è¯åé«äº80èªå¨ææ ",
+  "ruleName": "评分高于80自动打标",
   "tagId": 0,
   "conditionField": "score",
   "conditionOp": "gte",
@@ -1783,7 +1783,7 @@ fetch('http://localhost:8080/api/tags/rules',
 
 `POST /api/tags/rules`
 
-æéï¼tag:ruleãæ°å»ºèªå¨æ ç­¾è§åï¼condition_field åå¼ï¼scoreè¯å/intent_levelæåç­çº§/stageå®¢æ·é¶æ®µ/industryè¡ä¸/regionå°åº/sourceæ¥æºï¼condition_op åå¼ï¼gtå¤§äº/gteå¤§äºç­äº/ltå°äº/lteå°äºç­äº/eqç­äº/containsåå«ã
+权限：tag:rule。新建自动标签规则；condition_field 取值：score评分/intent_level意向等级/stage客户阶段/industry行业/region地区/source来源；condition_op 取值：gt大于/gte大于等于/lt小于/lte小于等于/eq等于/contains包含。
 
 > Body parameter
 
@@ -1793,7 +1793,7 @@ fetch('http://localhost:8080/api/tags/rules',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "ruleName": "è¯åé«äº80èªå¨ææ ",
+  "ruleName": "评分高于80自动打标",
   "tagId": 0,
   "conditionField": "score",
   "conditionOp": "gte",
@@ -1802,29 +1802,29 @@ fetch('http://localhost:8080/api/tags/rules',
 }
 ```
 
-<h3 id="åå»ºèªå¨æ ç­¾è§å-parameters">Parameters</h3>
+<h3 id="创建自动标签规则-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[CustomerTagRule](#schemacustomertagrule)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºèªå¨æ ç­¾è§å-responses">Responses</h3>
+<h3 id="创建自动标签规则-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è§ååç§°/è§åå­æ®µ/æ¡ä»¶å¼éæ³|[ResultCustomerTagRule](#schemaresultcustomertagrule)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|规则名称/规则字段/条件值非法|[ResultCustomerTagRule](#schemaresultcustomertagrule)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æå¨æ§è¡è§å
+## 手动执行规则
 
 <a id="opIdapplyRule"></a>
 
@@ -1863,31 +1863,31 @@ fetch('http://localhost:8080/api/tags/rules/{id}/apply',
 
 `POST /api/tags/rules/{id}/apply`
 
-æéï¼tag:ruleãç«å³å¯¹å¨éå®¢æ·æ§è¡ä¸æ¬¡æå®è§åï¼å½ä¸­å®¢æ·èªå¨æä¸è§åç»å®çæ ç­¾ï¼è¿åæ¬æ¬¡å½ä¸­å®¢æ·æ°ã
+权限：tag:rule。立即对全量客户执行一次指定规则，命中客户自动打上规则绑定的标签；返回本次命中客户数。
 
-<h3 id="æå¨æ§è¡è§å-parameters">Parameters</h3>
+<h3 id="手动执行规则-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è§å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|规则 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="æå¨æ§è¡è§å-responses">Responses</h3>
+<h3 id="手动执行规则-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ ç­¾è§åä¸å­å¨|[ResultInteger](#schemaresultinteger)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|标签规则不存在|[ResultInteger](#schemaresultinteger)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## ç»å®¢æ·æ¹éææ 
+## 给客户批量打标
 
 <a id="opIdtagCustomers"></a>
 
@@ -1930,7 +1930,7 @@ fetch('http://localhost:8080/api/tags/customers/{customerId}',
 
 `POST /api/tags/customers/{customerId}`
 
-æéï¼tag:editãè¯·æ±ä½ä¸ºæ ç­¾ ID åè¡¨ï¼å°å¤ä¸ªæ ç­¾ç»å®å°æå®å®¢æ·ã
+权限：tag:edit。请求体为标签 ID 列表，将多个标签绑定到指定客户。
 
 > Body parameter
 
@@ -1940,31 +1940,31 @@ fetch('http://localhost:8080/api/tags/customers/{customerId}',
 ]
 ```
 
-<h3 id="ç»å®¢æ·æ¹éææ -parameters">Parameters</h3>
+<h3 id="给客户批量打标-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|customerId|path|integer(int64)|true|å®¢æ· ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|customerId|path|integer(int64)|true|客户 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|array[integer]|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="ç»å®¢æ·æ¹éææ -responses">Responses</h3>
+<h3 id="给客户批量打标-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|æ ç­¾åè¡¨ä¸è½ä¸ºç©º|[ResultVoid](#schemaresultvoid)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|å®¢æ·ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|标签列表不能为空|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|客户不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ ç­¾ç­éï¼æ¥è¯¢ææ ç­¾ä¸çå®¢æ·
+## 标签筛选：查询某标签下的客户
 
 <a id="opIdpageCustomersByTag"></a>
 
@@ -2003,22 +2003,22 @@ fetch('http://localhost:8080/api/tags/{id}/customers',
 
 `GET /api/tags/{id}/customers`
 
-æéï¼tag:listãææ ç­¾ ID åé¡µæ¥è¯¢æä¸è¯¥æ ç­¾çå®¢æ·åè¡¨ã
+权限：tag:list。按标签 ID 分页查询打上该标签的客户列表。
 
-<h3 id="æ ç­¾ç­éï¼æ¥è¯¢ææ ç­¾ä¸çå®¢æ·-parameters">Parameters</h3>
+<h3 id="标签筛选：查询某标签下的客户-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æ ç­¾ ID|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|标签 ID|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ ç­¾ç­éï¼æ¥è¯¢ææ ç­¾ä¸çå®¢æ·-responses">Responses</h3>
+<h3 id="标签筛选：查询某标签下的客户-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -2029,7 +2029,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## ç§»é¤å®¢æ·æ ç­¾
+## 移除客户标签
 
 <a id="opIduntagCustomer"></a>
 
@@ -2068,34 +2068,34 @@ fetch('http://localhost:8080/api/tags/customers/{customerId}/{tagId}',
 
 `DELETE /api/tags/customers/{customerId}/{tagId}`
 
-æéï¼tag:editãè§£é¤æå®å®¢æ·ä¸çåä¸ªæ ç­¾ç»å®ã
+权限：tag:edit。解除指定客户上的单个标签绑定。
 
-<h3 id="ç§»é¤å®¢æ·æ ç­¾-parameters">Parameters</h3>
+<h3 id="移除客户标签-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|customerId|path|integer(int64)|true|å®¢æ· ID|
-|tagId|path|integer(int64)|true|æ ç­¾ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|customerId|path|integer(int64)|true|客户 ID|
+|tagId|path|integer(int64)|true|标签 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="ç§»é¤å®¢æ·æ ç­¾-responses">Responses</h3>
+<h3 id="移除客户标签-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|å®¢æ·/æ ç­¾ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|客户/标签不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">è¯æ¯åº</h1>
+<h1 id="aicrm---">话术库</h1>
 
-## è¯æ¯è¯¦æ
+## 话术详情
 
 <a id="opIddetail_2"></a>
 
@@ -2134,20 +2134,20 @@ fetch('http://localhost:8080/api/speech-libraries/{id}',
 
 `GET /api/speech-libraries/{id}`
 
-æ ID æ¥è¯¢è¯æ¯åå®¹ï¼åºæ¯ï¼è¯æ¯åºç®¡çãä¸é®åéé¢è§ï¼æéï¼speech:list
+按 ID 查询话术内容，场景：话术库管理、一键发送预览；权限：speech:list
 
-<h3 id="è¯æ¯è¯¦æ-parameters">Parameters</h3>
+<h3 id="话术详情-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è¯æ¯ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|话术 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="è¯æ¯è¯¦æ-responses">Responses</h3>
+<h3 id="话术详情-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -2158,7 +2158,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ´æ°è¯æ¯
+## 更新话术
 
 <a id="opIdupdate_2"></a>
 
@@ -2180,7 +2180,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "title": "å¼åºç½-æ åç",
+  "title": "开场白-标准版",
   "category": "general",
   "content": "string",
   "status": 1
@@ -2208,7 +2208,7 @@ fetch('http://localhost:8080/api/speech-libraries/{id}',
 
 `PUT /api/speech-libraries/{id}`
 
-ä¿®æ¹è¯æ¯æ é¢/åç±»/åå®¹ï¼åºæ¯ï¼è¯æ¯åºç®¡çç»´æ¤ï¼æéï¼speech:editãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+修改话术标题/分类/内容，场景：话术库管理维护；权限：speech:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
 > Body parameter
 
@@ -2218,38 +2218,38 @@ fetch('http://localhost:8080/api/speech-libraries/{id}',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "title": "å¼åºç½-æ åç",
+  "title": "开场白-标准版",
   "category": "general",
   "content": "string",
   "status": 1
 }
 ```
 
-<h3 id="æ´æ°è¯æ¯-parameters">Parameters</h3>
+<h3 id="更新话术-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è¯æ¯ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|话术 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[SpeechLibrary](#schemaspeechlibrary)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æ´æ°è¯æ¯-responses">Responses</h3>
+<h3 id="更新话术-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è¯æ¯åå®¹ä¸è½ä¸ºç©º|[ResultSpeechLibrary](#schemaresultspeechlibrary)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|è¯æ¯ä¸å­å¨|[ResultSpeechLibrary](#schemaresultspeechlibrary)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|话术内容不能为空|[ResultSpeechLibrary](#schemaresultspeechlibrary)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|话术不存在|[ResultSpeechLibrary](#schemaresultspeechlibrary)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤è¯æ¯
+## 删除话术
 
 <a id="opIddelete_2"></a>
 
@@ -2288,31 +2288,31 @@ fetch('http://localhost:8080/api/speech-libraries/{id}',
 
 `DELETE /api/speech-libraries/{id}`
 
-å é¤è¯æ¯ï¼åºæ¯ï¼è¯æ¯åºç®¡çç»´æ¤ï¼æéï¼speech:deleteãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+删除话术，场景：话术库管理维护；权限：speech:delete。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
-<h3 id="å é¤è¯æ¯-parameters">Parameters</h3>
+<h3 id="删除话术-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è¯æ¯ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|话术 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤è¯æ¯-responses">Responses</h3>
+<h3 id="删除话术-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|è¯æ¯ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|话术不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## è¯æ¯å¯å
+## 话术启停
 
 <a id="opIdupdateStatus_2"></a>
 
@@ -2351,32 +2351,32 @@ fetch('http://localhost:8080/api/speech-libraries/{id}/status?status=0',
 
 `PUT /api/speech-libraries/{id}/status`
 
-å¯ç¨/åç¨è¯æ¯ï¼åç¨åä¸å¯è¢«ä¸é®åéæ£ç´¢ï¼åºæ¯ï¼è¯æ¯åºä¸ä¸æ¶ç®¡çï¼æéï¼speech:editãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+启用/停用话术，停用后不可被一键发送检索，场景：话术库上下架管理；权限：speech:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
-<h3 id="è¯æ¯å¯å-parameters">Parameters</h3>
+<h3 id="话术启停-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è¯æ¯ ID|
-|status|query|integer(int32)|true|ç¶æï¼1 å¯ç¨ / 0 åç¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|话术 ID|
+|status|query|integer(int32)|true|状态：1 启用 / 0 停用|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="è¯æ¯å¯å-responses">Responses</h3>
+<h3 id="话术启停-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|è¯æ¯ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|话术不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## è¯æ¯åé¡µæ¥è¯¢ï¼keyword/åºæ¯åç±»/ç¶æè¿æ»¤ï¼
+## 话术分页查询（keyword/场景分类/状态过滤）
 
 <a id="opIdpage_2"></a>
 
@@ -2415,24 +2415,24 @@ fetch('http://localhost:8080/api/speech-libraries',
 
 `GET /api/speech-libraries`
 
-è¯æ¯åè¡¨æ£ç´¢ï¼æ¯æå³é®å­/åºæ¯åç±»/ç¶æè¿æ»¤ï¼åºæ¯ï¼è¯æ¯åºç®¡çãä¸é®åéééï¼æéï¼speech:list
+话术列表检索，支持关键字/场景分类/状态过滤，场景：话术库管理、一键发送适配；权限：speech:list
 
-<h3 id="è¯æ¯åé¡µæ¥è¯¢ï¼keyword/åºæ¯åç±»/ç¶æè¿æ»¤ï¼-parameters">Parameters</h3>
+<h3 id="话术分页查询（keyword/场景分类/状态过滤）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|å³é®å­ï¼è¯æ¯æ é¢/åå®¹æ¨¡ç³å¹éï¼|
-|category|query|string|false|åºæ¯åç±»ï¼generaléç¨/quoteæ¥ä»·/selectionéå/objectionå¼è®®/followè·è¿/openingå¼åº|
-|status|query|integer(int32)|false|ç¶æï¼1 å¯ç¨ / 0 åç¨|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|关键字（话术标题/内容模糊匹配）|
+|category|query|string|false|场景分类：general通用/quote报价/selection选型/objection异议/follow跟进/opening开场|
+|status|query|integer(int32)|false|状态：1 启用 / 0 停用|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="è¯æ¯åé¡µæ¥è¯¢ï¼keyword/åºæ¯åç±»/ç¶æè¿æ»¤ï¼-responses">Responses</h3>
+<h3 id="话术分页查询（keyword/场景分类/状态过滤）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -2443,7 +2443,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºè¯æ¯
+## 创建话术
 
 <a id="opIdcreate_2"></a>
 
@@ -2465,7 +2465,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "title": "å¼åºç½-æ åç",
+  "title": "开场白-标准版",
   "category": "general",
   "content": "string",
   "status": 1
@@ -2493,7 +2493,7 @@ fetch('http://localhost:8080/api/speech-libraries',
 
 `POST /api/speech-libraries`
 
-æ°å¢è¯æ¯ï¼éç¨/åºæ¯åç±»ï¼ï¼åºæ¯ï¼è¯æ¯åºç®¡çç»´æ¤ï¼æéï¼speech:addãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+新增话术（通用/场景分类），场景：话术库管理维护；权限：speech:add。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
 > Body parameter
 
@@ -2503,38 +2503,38 @@ fetch('http://localhost:8080/api/speech-libraries',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "title": "å¼åºç½-æ åç",
+  "title": "开场白-标准版",
   "category": "general",
   "content": "string",
   "status": 1
 }
 ```
 
-<h3 id="åå»ºè¯æ¯-parameters">Parameters</h3>
+<h3 id="创建话术-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[SpeechLibrary](#schemaspeechlibrary)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºè¯æ¯-responses">Responses</h3>
+<h3 id="创建话术-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è¯æ¯æ é¢/åå®¹ä¸è½ä¸ºç©º|[ResultSpeechLibrary](#schemaresultspeechlibrary)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|话术标题/内容不能为空|[ResultSpeechLibrary](#schemaresultspeechlibrary)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">è§è²ç®¡ç</h1>
+<h1 id="aicrm---">角色管理</h1>
 
-## è§è²è¯¦æ
+## 角色详情
 
 <a id="opIddetail_3"></a>
 
@@ -2573,20 +2573,20 @@ fetch('http://localhost:8080/api/roles/{id}',
 
 `GET /api/roles/{id}`
 
-éæé role:list
+需权限 role:list
 
-<h3 id="è§è²è¯¦æ-parameters">Parameters</h3>
+<h3 id="角色详情-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è§è² ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|角色 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="è§è²è¯¦æ-responses">Responses</h3>
+<h3 id="角色详情-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -2597,7 +2597,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ´æ°è§è²
+## 更新角色
 
 <a id="opIdupdate_3"></a>
 
@@ -2647,7 +2647,7 @@ fetch('http://localhost:8080/api/roles/{id}',
 
 `PUT /api/roles/{id}`
 
-éæé role:edit
+需权限 role:edit
 
 > Body parameter
 
@@ -2664,30 +2664,30 @@ fetch('http://localhost:8080/api/roles/{id}',
 }
 ```
 
-<h3 id="æ´æ°è§è²-parameters">Parameters</h3>
+<h3 id="更新角色-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è§è² ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|角色 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Role](#schemarole)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æ´æ°è§è²-responses">Responses</h3>
+<h3 id="更新角色-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è§è²ä¸å­å¨|[ResultRole](#schemaresultrole)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|角色不存在|[ResultRole](#schemaresultrole)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤è§è²
+## 删除角色
 
 <a id="opIddelete_3"></a>
 
@@ -2726,31 +2726,31 @@ fetch('http://localhost:8080/api/roles/{id}',
 
 `DELETE /api/roles/{id}`
 
-éæé role:delete
+需权限 role:delete
 
-<h3 id="å é¤è§è²-parameters">Parameters</h3>
+<h3 id="删除角色-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è§è² ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|角色 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="å é¤è§è²-responses">Responses</h3>
+<h3 id="删除角色-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è§è²ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|角色不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å¯ç¨/åç¨è§è²
+## 启用/停用角色
 
 <a id="opIdupdateStatus_3"></a>
 
@@ -2789,32 +2789,32 @@ fetch('http://localhost:8080/api/roles/{id}/status?status=0',
 
 `PUT /api/roles/{id}/status`
 
-éæé role:edit
+需权限 role:edit
 
-<h3 id="å¯ç¨/åç¨è§è²-parameters">Parameters</h3>
+<h3 id="启用/停用角色-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è§è² ID|
-|status|query|integer(int32)|true|ç¶æï¼1å¯ç¨/0åç¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|角色 ID|
+|status|query|integer(int32)|true|状态：1启用/0停用|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="å¯ç¨/åç¨è§è²-responses">Responses</h3>
+<h3 id="启用/停用角色-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è§è²ä¸å­å¨/status ä»æ¯æ 0/1|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|角色不存在/status 仅支持 0/1|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ¥è¯¢è§è²å·²åéçèå ID
+## 查询角色已分配的菜单 ID
 
 <a id="opIdmenuIds"></a>
 
@@ -2853,20 +2853,20 @@ fetch('http://localhost:8080/api/roles/{id}/menus',
 
 `GET /api/roles/{id}/menus`
 
-éæé role:assign-menu
+需权限 role:assign-menu
 
-<h3 id="æ¥è¯¢è§è²å·²åéçèå-id-parameters">Parameters</h3>
+<h3 id="查询角色已分配的菜单-id-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è§è² ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|角色 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ¥è¯¢è§è²å·²åéçèå-id-responses">Responses</h3>
+<h3 id="查询角色已分配的菜单-id-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -2877,7 +2877,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åéè§è²èåï¼å¨éè¦çï¼
+## 分配角色菜单（全量覆盖）
 
 <a id="opIdsetMenus"></a>
 
@@ -2920,7 +2920,7 @@ fetch('http://localhost:8080/api/roles/{id}/menus',
 
 `PUT /api/roles/{id}/menus`
 
-éæé role:assign-menu
+需权限 role:assign-menu
 
 > Body parameter
 
@@ -2930,30 +2930,30 @@ fetch('http://localhost:8080/api/roles/{id}/menus',
 ]
 ```
 
-<h3 id="åéè§è²èåï¼å¨éè¦çï¼-parameters">Parameters</h3>
+<h3 id="分配角色菜单（全量覆盖）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|è§è² ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|角色 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|array[integer]|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åéè§è²èåï¼å¨éè¦çï¼-responses">Responses</h3>
+<h3 id="分配角色菜单（全量覆盖）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è§è²ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|角色不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## åé¡µæ¥è¯¢è§è²
+## 分页查询角色
 
 <a id="opIdpage_3"></a>
 
@@ -2992,22 +2992,22 @@ fetch('http://localhost:8080/api/roles',
 
 `GET /api/roles`
 
-éæé role:list
+需权限 role:list
 
-<h3 id="åé¡µæ¥è¯¢è§è²-parameters">Parameters</h3>
+<h3 id="分页查询角色-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|å³é®å­ï¼è§è²åç§°/ç¼ç ï¼|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|关键字（角色名称/编码）|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="åé¡µæ¥è¯¢è§è²-responses">Responses</h3>
+<h3 id="分页查询角色-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -3018,7 +3018,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºè§è²
+## 创建角色
 
 <a id="opIdcreate_3"></a>
 
@@ -3068,7 +3068,7 @@ fetch('http://localhost:8080/api/roles',
 
 `POST /api/roles`
 
-éæé role:add
+需权限 role:add
 
 > Body parameter
 
@@ -3085,29 +3085,29 @@ fetch('http://localhost:8080/api/roles',
 }
 ```
 
-<h3 id="åå»ºè§è²-parameters">Parameters</h3>
+<h3 id="创建角色-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Role](#schemarole)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºè§è²-responses">Responses</h3>
+<h3 id="创建角色-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è§è²ç¼ç ä¸åç§°ä¸è½ä¸ºç©º/è§è²ç¼ç å·²å­å¨|[ResultRole](#schemaresultrole)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|角色编码与名称不能为空/角色编码已存在|[ResultRole](#schemaresultrole)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å¯ç¨è§è²åè¡¨ï¼ä¸æç¨ï¼
+## 启用角色列表（下拉用）
 
 <a id="opIdenabled"></a>
 
@@ -3146,19 +3146,19 @@ fetch('http://localhost:8080/api/roles/enabled',
 
 `GET /api/roles/enabled`
 
-ç»å½ç¨æ·å³å¯è®¿é®
+登录用户即可访问
 
-<h3 id="å¯ç¨è§è²åè¡¨ï¼ä¸æç¨ï¼-parameters">Parameters</h3>
+<h3 id="启用角色列表（下拉用）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="å¯ç¨è§è²åè¡¨ï¼ä¸æç¨ï¼-responses">Responses</h3>
+<h3 id="启用角色列表（下拉用）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -3169,9 +3169,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">äº§ååº</h1>
+<h1 id="aicrm---">产品库</h1>
 
-## äº§åè¯¦æ
+## 产品详情
 
 <a id="opIddetail_4"></a>
 
@@ -3210,20 +3210,20 @@ fetch('http://localhost:8080/api/products/{id}',
 
 `GET /api/products/{id}`
 
-æ ID æ¥è¯¢äº§åå®æ´èµæï¼å«åæ°/éä»¶ï¼ï¼åºæ¯ï¼äº§ååºç®¡çãå¿«æ·åéé¢è§ï¼æéï¼product:list
+按 ID 查询产品完整资料（含参数/附件），场景：产品库管理、快捷发送预览；权限：product:list
 
-<h3 id="äº§åè¯¦æ-parameters">Parameters</h3>
+<h3 id="产品详情-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|äº§å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|产品 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="äº§åè¯¦æ-responses">Responses</h3>
+<h3 id="产品详情-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -3234,7 +3234,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ´æ°äº§åï¼å«åæ°/éä»¶ï¼
+## 更新产品（含参数/附件）
 
 <a id="opIdupdate_4"></a>
 
@@ -3257,12 +3257,12 @@ const inputBody = '{
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
   "categoryId": 0,
-  "name": "ä¼ä¸ç CRM",
+  "name": "企业版 CRM",
   "sku": "CRM-ENT-001",
-  "spec": "æ åç",
+  "spec": "标准版",
   "price": 1999,
-  "params": "{\"å®¹é\":\"100GB\",\"å¹¶åæ°\":\"500\"}",
-  "attachments": "[{\"name\":\"éåè¡¨.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
+  "params": "{\"容量\":\"100GB\",\"并发数\":\"500\"}",
+  "attachments": "[{\"name\":\"选型表.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
   "description": "string",
   "status": 1
 }';
@@ -3289,7 +3289,7 @@ fetch('http://localhost:8080/api/products/{id}',
 
 `PUT /api/products/{id}`
 
-ä¿®æ¹äº§åèµæï¼å«åæ°/éä»¶ï¼ï¼åºæ¯ï¼äº§ååºç®¡çç»´æ¤ï¼æéï¼product:editãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+修改产品资料（含参数/附件），场景：产品库管理维护；权限：product:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
 > Body parameter
 
@@ -3300,42 +3300,42 @@ fetch('http://localhost:8080/api/products/{id}',
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
   "categoryId": 0,
-  "name": "ä¼ä¸ç CRM",
+  "name": "企业版 CRM",
   "sku": "CRM-ENT-001",
-  "spec": "æ åç",
+  "spec": "标准版",
   "price": 1999,
-  "params": "{\"å®¹é\":\"100GB\",\"å¹¶åæ°\":\"500\"}",
-  "attachments": "[{\"name\":\"éåè¡¨.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
+  "params": "{\"容量\":\"100GB\",\"并发数\":\"500\"}",
+  "attachments": "[{\"name\":\"选型表.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
   "description": "string",
   "status": 1
 }
 ```
 
-<h3 id="æ´æ°äº§åï¼å«åæ°/éä»¶ï¼-parameters">Parameters</h3>
+<h3 id="更新产品（含参数/附件）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|äº§å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|产品 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Product](#schemaproduct)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æ´æ°äº§åï¼å«åæ°/éä»¶ï¼-responses">Responses</h3>
+<h3 id="更新产品（含参数/附件）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|äº§ååç§°ä¸è½ä¸ºç©º|[ResultProduct](#schemaresultproduct)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|äº§åä¸å­å¨|[ResultProduct](#schemaresultproduct)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|产品名称不能为空|[ResultProduct](#schemaresultproduct)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|产品不存在|[ResultProduct](#schemaresultproduct)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤äº§å
+## 删除产品
 
 <a id="opIddelete_4"></a>
 
@@ -3374,31 +3374,31 @@ fetch('http://localhost:8080/api/products/{id}',
 
 `DELETE /api/products/{id}`
 
-å é¤äº§åèµæï¼åºæ¯ï¼äº§ååºç®¡çç»´æ¤ï¼æéï¼product:deleteãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+删除产品资料，场景：产品库管理维护；权限：product:delete。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
-<h3 id="å é¤äº§å-parameters">Parameters</h3>
+<h3 id="删除产品-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|äº§å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|产品 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤äº§å-responses">Responses</h3>
+<h3 id="删除产品-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|äº§åä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|产品不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## äº§åä¸ä¸æ¶
+## 产品上下架
 
 <a id="opIdupdateStatus_4"></a>
 
@@ -3437,32 +3437,32 @@ fetch('http://localhost:8080/api/products/{id}/status?status=0',
 
 `PUT /api/products/{id}/status`
 
-ä¸æ¶/ä¸æ¶äº§åï¼ä¸æ¶åä¸å¯è¢«å¿«æ·åéæ£ç´¢ï¼åºæ¯ï¼äº§ååºä¸ä¸æ¶ç®¡çï¼æéï¼product:editãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+上架/下架产品，下架后不可被快捷发送检索，场景：产品库上下架管理；权限：product:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
-<h3 id="äº§åä¸ä¸æ¶-parameters">Parameters</h3>
+<h3 id="产品上下架-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|äº§å ID|
-|status|query|integer(int32)|true|ç¶æï¼1 ä¸æ¶ / 0 ä¸æ¶|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|产品 ID|
+|status|query|integer(int32)|true|状态：1 上架 / 0 下架|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="äº§åä¸ä¸æ¶-responses">Responses</h3>
+<h3 id="产品上下架-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|äº§åä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|产品不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ´æ°åç±»
+## 更新分类
 
 <a id="opIdupdateCategory"></a>
 
@@ -3484,7 +3484,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "CRM äº§åçº¿",
+  "name": "CRM 产品线",
   "parentId": 0,
   "sort": 1,
   "status": 1
@@ -3512,7 +3512,7 @@ fetch('http://localhost:8080/api/product-categories/{id}',
 
 `PUT /api/product-categories/{id}`
 
-ä¿®æ¹äº§ååç±»åç§°/ç¶çº§/æåº/ç¶æï¼åºæ¯ï¼äº§ååºåç±»ä½ç³»ç»´æ¤ï¼æéï¼product:editãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+修改产品分类名称/父级/排序/状态，场景：产品库分类体系维护；权限：product:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
 > Body parameter
 
@@ -3522,37 +3522,37 @@ fetch('http://localhost:8080/api/product-categories/{id}',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "CRM äº§åçº¿",
+  "name": "CRM 产品线",
   "parentId": 0,
   "sort": 1,
   "status": 1
 }
 ```
 
-<h3 id="æ´æ°åç±»-parameters">Parameters</h3>
+<h3 id="更新分类-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åç±» ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|分类 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[ProductCategory](#schemaproductcategory)|true|none|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="æ´æ°åç±»-responses">Responses</h3>
+<h3 id="更新分类-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|äº§ååç±»ä¸å­å¨|[ResultProductCategory](#schemaresultproductcategory)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|产品分类不存在|[ResultProductCategory](#schemaresultproductcategory)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤åç±»
+## 删除分类
 
 <a id="opIddeleteCategory"></a>
 
@@ -3591,31 +3591,31 @@ fetch('http://localhost:8080/api/product-categories/{id}',
 
 `DELETE /api/product-categories/{id}`
 
-å é¤äº§ååç±»èç¹ï¼å­å¨å­åç±»/å³èäº§åæ¶æä¸å¡è§åå¤çï¼ï¼åºæ¯ï¼äº§ååºåç±»ä½ç³»ç»´æ¤ï¼æéï¼product:deleteãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+删除产品分类节点（存在子分类/关联产品时按业务规则处理），场景：产品库分类体系维护；权限：product:delete。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
-<h3 id="å é¤åç±»-parameters">Parameters</h3>
+<h3 id="删除分类-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åç±» ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|分类 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="å é¤åç±»-responses">Responses</h3>
+<h3 id="删除分类-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|å­å¨å­åç±»/åç±»ä¸å­å¨äº§åï¼ä¸è½å é¤|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|存在子分类/分类下存在产品，不能删除|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## åç±»å¯å
+## 分类启停
 
 <a id="opIdupdateCategoryStatus"></a>
 
@@ -3654,32 +3654,32 @@ fetch('http://localhost:8080/api/product-categories/{id}/status?status=0',
 
 `PUT /api/product-categories/{id}/status`
 
-å¯ç¨/åç¨äº§ååç±»ï¼åç¨åä¸çº§ä¸åå±ç¤ºï¼åºæ¯ï¼äº§ååºåç±»ä½ç³»ç»´æ¤ï¼æéï¼product:editãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+启用/停用产品分类，停用后下级不再展示，场景：产品库分类体系维护；权限：product:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
-<h3 id="åç±»å¯å-parameters">Parameters</h3>
+<h3 id="分类启停-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åç±» ID|
-|status|query|integer(int32)|true|ç¶æï¼1 å¯ç¨ / 0 åç¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|分类 ID|
+|status|query|integer(int32)|true|状态：1 启用 / 0 停用|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="åç±»å¯å-responses">Responses</h3>
+<h3 id="分类启停-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|äº§ååç±»ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|产品分类不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## äº§ååé¡µæ¥è¯¢
+## 产品分页查询
 
 <a id="opIdpage_4"></a>
 
@@ -3718,24 +3718,24 @@ fetch('http://localhost:8080/api/products',
 
 `GET /api/products`
 
-äº§ååè¡¨æ£ç´¢ï¼æ¯æå³é®å­/åç±»/ä¸ä¸æ¶ç¶æè¿æ»¤ï¼åºæ¯ï¼äº§ååºç®¡çãä¾§è¾¹æ å¿«æ·åééåï¼æéï¼product:list
+产品列表检索，支持关键字/分类/上下架状态过滤，场景：产品库管理、侧边栏快捷发送选品；权限：product:list
 
-<h3 id="äº§ååé¡µæ¥è¯¢-parameters">Parameters</h3>
+<h3 id="产品分页查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|å³é®å­ï¼äº§ååç§°/ç¼ç /è§æ ¼æ¨¡ç³å¹éï¼|
-|categoryId|query|integer(int64)|false|åç±» ID|
-|status|query|integer(int32)|false|ä¸ä¸æ¶ç¶æï¼1 ä¸æ¶ / 0 ä¸æ¶|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|关键字（产品名称/编码/规格模糊匹配）|
+|categoryId|query|integer(int64)|false|分类 ID|
+|status|query|integer(int32)|false|上下架状态：1 上架 / 0 下架|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="äº§ååé¡µæ¥è¯¢-responses">Responses</h3>
+<h3 id="产品分页查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -3746,7 +3746,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºäº§å
+## 创建产品
 
 <a id="opIdcreate_4"></a>
 
@@ -3769,12 +3769,12 @@ const inputBody = '{
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
   "categoryId": 0,
-  "name": "ä¼ä¸ç CRM",
+  "name": "企业版 CRM",
   "sku": "CRM-ENT-001",
-  "spec": "æ åç",
+  "spec": "标准版",
   "price": 1999,
-  "params": "{\"å®¹é\":\"100GB\",\"å¹¶åæ°\":\"500\"}",
-  "attachments": "[{\"name\":\"éåè¡¨.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
+  "params": "{\"容量\":\"100GB\",\"并发数\":\"500\"}",
+  "attachments": "[{\"name\":\"选型表.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
   "description": "string",
   "status": 1
 }';
@@ -3801,7 +3801,7 @@ fetch('http://localhost:8080/api/products',
 
 `POST /api/products`
 
-æ°å¢äº§åèµæï¼å«åæ°/éä»¶ï¼ï¼åºæ¯ï¼äº§ååºç®¡çç»´æ¤ï¼æéï¼product:addãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+新增产品资料（含参数/附件），场景：产品库管理维护；权限：product:add。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
 > Body parameter
 
@@ -3812,40 +3812,40 @@ fetch('http://localhost:8080/api/products',
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
   "categoryId": 0,
-  "name": "ä¼ä¸ç CRM",
+  "name": "企业版 CRM",
   "sku": "CRM-ENT-001",
-  "spec": "æ åç",
+  "spec": "标准版",
   "price": 1999,
-  "params": "{\"å®¹é\":\"100GB\",\"å¹¶åæ°\":\"500\"}",
-  "attachments": "[{\"name\":\"éåè¡¨.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
+  "params": "{\"容量\":\"100GB\",\"并发数\":\"500\"}",
+  "attachments": "[{\"name\":\"选型表.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
   "description": "string",
   "status": 1
 }
 ```
 
-<h3 id="åå»ºäº§å-parameters">Parameters</h3>
+<h3 id="创建产品-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Product](#schemaproduct)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºäº§å-responses">Responses</h3>
+<h3 id="创建产品-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|äº§ååç§°ä¸è½ä¸ºç©º|[ResultProduct](#schemaresultproduct)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|产品名称不能为空|[ResultProduct](#schemaresultproduct)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## åç±»æ åè¡¨
+## 分类树列表
 
 <a id="opIdcategories"></a>
 
@@ -3884,19 +3884,19 @@ fetch('http://localhost:8080/api/product-categories',
 
 `GET /api/product-categories`
 
-æå±çº§è¿åäº§ååç±»æ ï¼åºæ¯ï¼äº§ååºç®¡çãä¾§è¾¹æ å¿«æ·åééååç±»ï¼æéï¼product:list
+按层级返回产品分类树，场景：产品库管理、侧边栏快捷发送选品分类；权限：product:list
 
-<h3 id="åç±»æ åè¡¨-parameters">Parameters</h3>
+<h3 id="分类树列表-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="åç±»æ åè¡¨-responses">Responses</h3>
+<h3 id="分类树列表-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -3907,7 +3907,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºåç±»
+## 创建分类
 
 <a id="opIdcreateCategory"></a>
 
@@ -3929,7 +3929,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "CRM äº§åçº¿",
+  "name": "CRM 产品线",
   "parentId": 0,
   "sort": 1,
   "status": 1
@@ -3957,7 +3957,7 @@ fetch('http://localhost:8080/api/product-categories',
 
 `POST /api/product-categories`
 
-æ°å¢äº§ååç±»èç¹ï¼åºæ¯ï¼äº§ååºåç±»ä½ç³»ç»´æ¤ï¼æéï¼product:editãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+新增产品分类节点，场景：产品库分类体系维护；权限：product:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
 > Body parameter
 
@@ -3967,38 +3967,38 @@ fetch('http://localhost:8080/api/product-categories',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "CRM äº§åçº¿",
+  "name": "CRM 产品线",
   "parentId": 0,
   "sort": 1,
   "status": 1
 }
 ```
 
-<h3 id="åå»ºåç±»-parameters">Parameters</h3>
+<h3 id="创建分类-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[ProductCategory](#schemaproductcategory)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºåç±»-responses">Responses</h3>
+<h3 id="创建分类-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|åç±»åç§°ä¸è½ä¸ºç©º|[ResultProductCategory](#schemaresultproductcategory)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|分类名称不能为空|[ResultProductCategory](#schemaresultproductcategory)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">èåç®¡ç</h1>
+<h1 id="aicrm---">菜单管理</h1>
 
-## æ´æ°èå
+## 更新菜单
 
 <a id="opIdupdate_5"></a>
 
@@ -4071,7 +4071,7 @@ fetch('http://localhost:8080/api/menus/{id}',
 
 `PUT /api/menus/{id}`
 
-éæé menu:edit
+需权限 menu:edit
 
 > Body parameter
 
@@ -4111,30 +4111,30 @@ fetch('http://localhost:8080/api/menus/{id}',
 }
 ```
 
-<h3 id="æ´æ°èå-parameters">Parameters</h3>
+<h3 id="更新菜单-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|èå ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|菜单 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Menu](#schemamenu)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æ´æ°èå-responses">Responses</h3>
+<h3 id="更新菜单-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|èåä¸å­å¨/ç¶èåä¸è½æ¯èªå·±|[ResultMenu](#schemaresultmenu)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|菜单不存在/父菜单不能是自己|[ResultMenu](#schemaresultmenu)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤èå
+## 删除菜单
 
 <a id="opIddelete_5"></a>
 
@@ -4173,31 +4173,31 @@ fetch('http://localhost:8080/api/menus/{id}',
 
 `DELETE /api/menus/{id}`
 
-éæé menu:delete
+需权限 menu:delete
 
-<h3 id="å é¤èå-parameters">Parameters</h3>
+<h3 id="删除菜单-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|èå ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|菜单 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="å é¤èå-responses">Responses</h3>
+<h3 id="删除菜单-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|èåä¸å­å¨/å­å¨å­èåï¼è¯·åå é¤å­èå|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|菜单不存在/存在子菜单，请先删除子菜单|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å¨éèåæ ï¼å«æé®ï¼å¹³å°ç®¡çç¨ï¼
+## 全量菜单树（含按钮，平台管理用）
 
 <a id="opIdtree"></a>
 
@@ -4236,19 +4236,19 @@ fetch('http://localhost:8080/api/menus',
 
 `GET /api/menus`
 
-éæé menu:list
+需权限 menu:list
 
-<h3 id="å¨éèåæ ï¼å«æé®ï¼å¹³å°ç®¡çç¨ï¼-parameters">Parameters</h3>
+<h3 id="全量菜单树（含按钮，平台管理用）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="å¨éèåæ ï¼å«æé®ï¼å¹³å°ç®¡çç¨ï¼-responses">Responses</h3>
+<h3 id="全量菜单树（含按钮，平台管理用）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -4259,7 +4259,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºèå
+## 创建菜单
 
 <a id="opIdcreate_5"></a>
 
@@ -4332,7 +4332,7 @@ fetch('http://localhost:8080/api/menus',
 
 `POST /api/menus`
 
-éæé menu:add
+需权限 menu:add
 
 > Body parameter
 
@@ -4372,29 +4372,29 @@ fetch('http://localhost:8080/api/menus',
 }
 ```
 
-<h3 id="åå»ºèå-parameters">Parameters</h3>
+<h3 id="创建菜单-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Menu](#schemamenu)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºèå-responses">Responses</h3>
+<h3 id="创建菜单-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|èååç§°ä¸è½ä¸ºç©º|[ResultMenu](#schemaresultmenu)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|菜单名称不能为空|[ResultMenu](#schemaresultmenu)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å½åç¨æ·å¯è§èåæ ï¼åç«¯è·¯ç±ï¼
+## 当前用户可见菜单树（前端路由）
 
 <a id="opIdrouters"></a>
 
@@ -4433,19 +4433,19 @@ fetch('http://localhost:8080/api/menus/routers',
 
 `GET /api/menus/routers`
 
-ç»å½ç¨æ·å³å¯è®¿é®
+登录用户即可访问
 
-<h3 id="å½åç¨æ·å¯è§èåæ ï¼åç«¯è·¯ç±ï¼-parameters">Parameters</h3>
+<h3 id="当前用户可见菜单树（前端路由）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="å½åç¨æ·å¯è§èåæ ï¼åç«¯è·¯ç±ï¼-responses">Responses</h3>
+<h3 id="当前用户可见菜单树（前端路由）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -4456,9 +4456,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">çº¿ç´¢åé</h1>
+<h1 id="aicrm---">线索分配</h1>
 
-## æ´æ°åéè§å
+## 更新分配规则
 
 <a id="opIdupdateRule_1"></a>
 
@@ -4480,9 +4480,9 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "ruleName": "åä¸åºåçº¿ç´¢åé",
+  "ruleName": "华东区域线索分配",
   "ruleType": "region",
-  "matchValue": "åä¸",
+  "matchValue": "华东",
   "targetUserId": 0,
   "targetGroupIds": "string",
   "sort": 1,
@@ -4511,7 +4511,7 @@ fetch('http://localhost:8080/api/lead-assign-rules/{id}',
 
 `PUT /api/lead-assign-rules/{id}`
 
-æéï¼lead:assignãæ ID æ´æ°åéè§åï¼rule_type åå¼ï¼productæäº§åçº¿/regionæå°å/round_robinè½®è¯¢ç»ã
+权限：lead:assign。按 ID 更新分配规则；rule_type 取值：product按产品线/region按地域/round_robin轮询组。
 
 > Body parameter
 
@@ -4521,9 +4521,9 @@ fetch('http://localhost:8080/api/lead-assign-rules/{id}',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "ruleName": "åä¸åºåçº¿ç´¢åé",
+  "ruleName": "华东区域线索分配",
   "ruleType": "region",
-  "matchValue": "åä¸",
+  "matchValue": "华东",
   "targetUserId": 0,
   "targetGroupIds": "string",
   "sort": 1,
@@ -4531,30 +4531,30 @@ fetch('http://localhost:8080/api/lead-assign-rules/{id}',
 }
 ```
 
-<h3 id="æ´æ°åéè§å-parameters">Parameters</h3>
+<h3 id="更新分配规则-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åéè§å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|分配规则 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[LeadAssignRule](#schemaleadassignrule)|true|none|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="æ´æ°åéè§å-responses">Responses</h3>
+<h3 id="更新分配规则-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|åéè§åä¸å­å¨|[ResultLeadAssignRule](#schemaresultleadassignrule)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|分配规则不存在|[ResultLeadAssignRule](#schemaresultleadassignrule)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤åéè§å
+## 删除分配规则
 
 <a id="opIddeleteRule_1"></a>
 
@@ -4593,31 +4593,31 @@ fetch('http://localhost:8080/api/lead-assign-rules/{id}',
 
 `DELETE /api/lead-assign-rules/{id}`
 
-æéï¼lead:assignãæ ID å é¤åéè§åã
+权限：lead:assign。按 ID 删除分配规则。
 
-<h3 id="å é¤åéè§å-parameters">Parameters</h3>
+<h3 id="删除分配规则-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åéè§å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|分配规则 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤åéè§å-responses">Responses</h3>
+<h3 id="删除分配规则-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|åéè§åä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|分配规则不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## åéè§åå¯å
+## 分配规则启停
 
 <a id="opIdupdateRuleStatus"></a>
 
@@ -4656,32 +4656,32 @@ fetch('http://localhost:8080/api/lead-assign-rules/{id}/status?status=0',
 
 `PUT /api/lead-assign-rules/{id}/status`
 
-æéï¼lead:assignãå¯ååéè§åï¼status åå¼ï¼1å¯ç¨/0åç¨ã
+权限：lead:assign。启停分配规则；status 取值：1启用/0停用。
 
-<h3 id="åéè§åå¯å-parameters">Parameters</h3>
+<h3 id="分配规则启停-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åéè§å ID|
-|status|query|integer(int32)|true|ç¶æï¼1å¯ç¨/0åç¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|分配规则 ID|
+|status|query|integer(int32)|true|状态：1启用/0停用|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="åéè§åå¯å-responses">Responses</h3>
+<h3 id="分配规则启停-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|åéè§åä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|分配规则不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æå¨åéåæ¡çº¿ç´¢
+## 手动分配单条线索
 
 <a id="opIdassign"></a>
 
@@ -4720,31 +4720,31 @@ fetch('http://localhost:8080/api/leads/{id}/assign',
 
 `POST /api/leads/{id}/assign`
 
-æéï¼lead:assignãæå½åç§æ·å·²å¯ç¨çåéè§åï¼product/region/round_robinï¼å°çº¿ç´¢èªå¨åéç»å¹ééå®ï¼æ å¹éè§åæ¶ä¿ææªåéã
+权限：lead:assign。按当前租户已启用的分配规则（product/region/round_robin）将线索自动分配给匹配销售；无匹配规则时保持未分配。
 
-<h3 id="æå¨åéåæ¡çº¿ç´¢-parameters">Parameters</h3>
+<h3 id="手动分配单条线索-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|çº¿ç´¢ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|线索 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="æå¨åéåæ¡çº¿ç´¢-responses">Responses</h3>
+<h3 id="手动分配单条线索-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|çº¿ç´¢ä¸å­å¨ï¼ä¸å¡ç  1201ï¼|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|线索不存在（业务码 1201）|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## åæ¶è¶æ¶çº¿ç´¢å¹¶éæ°åé
+## 回收超时线索并重新分配
 
 <a id="opIdreassign"></a>
 
@@ -4783,19 +4783,19 @@ fetch('http://localhost:8080/api/leads/reassign',
 
 `POST /api/leads/reassign`
 
-æéï¼lead:assignãæ«æè¶è¿ååº SLAï¼sla_deadlineï¼ä»æªå¤çççº¿ç´¢ï¼åæ¶åæåéè§åéæ°åéï¼è¿åæ¬æ¬¡åæ¶å¹¶éæ°åéççº¿ç´¢æ°ã
+权限：lead:assign。扫描超过响应 SLA（sla_deadline）仍未处理的线索，回收后按分配规则重新分配；返回本次回收并重新分配的线索数。
 
-<h3 id="åæ¶è¶æ¶çº¿ç´¢å¹¶éæ°åé-parameters">Parameters</h3>
+<h3 id="回收超时线索并重新分配-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="åæ¶è¶æ¶çº¿ç´¢å¹¶éæ°åé-responses">Responses</h3>
+<h3 id="回收超时线索并重新分配-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -4806,7 +4806,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åéè§ååé¡µæ¥è¯¢
+## 分配规则分页查询
 
 <a id="opIdpageRules_1"></a>
 
@@ -4845,21 +4845,21 @@ fetch('http://localhost:8080/api/lead-assign-rules',
 
 `GET /api/lead-assign-rules`
 
-æéï¼lead:assignãåé¡µæ¥è¯¢å½åç§æ·ççº¿ç´¢åéè§åã
+权限：lead:assign。分页查询当前租户的线索分配规则。
 
-<h3 id="åéè§ååé¡µæ¥è¯¢-parameters">Parameters</h3>
+<h3 id="分配规则分页查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="åéè§ååé¡µæ¥è¯¢-responses">Responses</h3>
+<h3 id="分配规则分页查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -4870,7 +4870,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºåéè§å
+## 创建分配规则
 
 <a id="opIdcreateRule_1"></a>
 
@@ -4892,9 +4892,9 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "ruleName": "åä¸åºåçº¿ç´¢åé",
+  "ruleName": "华东区域线索分配",
   "ruleType": "region",
-  "matchValue": "åä¸",
+  "matchValue": "华东",
   "targetUserId": 0,
   "targetGroupIds": "string",
   "sort": 1,
@@ -4923,7 +4923,7 @@ fetch('http://localhost:8080/api/lead-assign-rules',
 
 `POST /api/lead-assign-rules`
 
-æéï¼lead:assignãæ°å»ºçº¿ç´¢åéè§åï¼rule_type åå¼ï¼productæäº§åçº¿/regionæå°å/round_robinè½®è¯¢ç»ã
+权限：lead:assign。新建线索分配规则；rule_type 取值：product按产品线/region按地域/round_robin轮询组。
 
 > Body parameter
 
@@ -4933,9 +4933,9 @@ fetch('http://localhost:8080/api/lead-assign-rules',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "ruleName": "åä¸åºåçº¿ç´¢åé",
+  "ruleName": "华东区域线索分配",
   "ruleType": "region",
-  "matchValue": "åä¸",
+  "matchValue": "华东",
   "targetUserId": 0,
   "targetGroupIds": "string",
   "sort": 1,
@@ -4943,31 +4943,31 @@ fetch('http://localhost:8080/api/lead-assign-rules',
 }
 ```
 
-<h3 id="åå»ºåéè§å-parameters">Parameters</h3>
+<h3 id="创建分配规则-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[LeadAssignRule](#schemaleadassignrule)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºåéè§å-responses">Responses</h3>
+<h3 id="创建分配规则-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è§ååç§°/è§åç±»å/è½®è¯¢ç»/å¹éå¼/æå®éå®ä¸è½ä¸ºç©º|[ResultLeadAssignRule](#schemaresultleadassignrule)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|规则名称/规则类型/轮询组/匹配值/指定销售不能为空|[ResultLeadAssignRule](#schemaresultleadassignrule)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">èµæåä¸­å¿</h1>
+<h1 id="aicrm---">资料包中心</h1>
 
-## åå¸èµæ
+## 发布资料
 
 <a id="opIdpublish"></a>
 
@@ -5006,31 +5006,31 @@ fetch('http://localhost:8080/api/documents/{id}/publish',
 
 `PUT /api/documents/{id}/publish`
 
-å°èç¨¿èµæç½®ä¸ºå·²åå¸ç¶æ
+将草稿资料置为已发布状态
 
-<h3 id="åå¸èµæ-parameters">Parameters</h3>
+<h3 id="发布资料-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|èµæ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|资料 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="åå¸èµæ-responses">Responses</h3>
+<h3 id="发布资料-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|èµæä¸å­å¨|[ResultDocument](#schemaresultdocument)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|资料不存在|[ResultDocument](#schemaresultdocument)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## åé¡µæ¥è¯¢èµæ
+## 分页查询资料
 
 <a id="opIdpage_8"></a>
 
@@ -5069,23 +5069,23 @@ fetch('http://localhost:8080/api/documents',
 
 `GET /api/documents`
 
-æç§æ·/èµæç±»åè¿æ»¤
+按租户/资料类型过滤
 
-<h3 id="åé¡µæ¥è¯¢èµæ-parameters">Parameters</h3>
+<h3 id="分页查询资料-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|tenantId|query|integer(int64)|false|ç§æ· IDï¼å¹³å°ç®¡çåå¯æå®ï¼ä¸ºç©ºé»è®¤å½åç§æ·ï¼|
-|docType|query|string|false|èµæç±»åï¼product_brochureäº§åæå/caseæ¡ä¾/whitepaperç½ç®ä¹¦/selection_tableéåè¡¨|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|tenantId|query|integer(int64)|false|租户 ID（平台管理员可指定，为空默认当前租户）|
+|docType|query|string|false|资料类型：product_brochure产品手册/case案例/whitepaper白皮书/selection_table选型表|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="åé¡µæ¥è¯¢èµæ-responses">Responses</h3>
+<h3 id="分页查询资料-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -5096,7 +5096,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ°å¢èµæ
+## 新增资料
 
 <a id="opIdcreate_8"></a>
 
@@ -5118,12 +5118,12 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "title": "AI å¤å¼ç³»ç»äº§åæå",
+  "title": "AI 外呼系统产品手册",
   "docType": "product_brochure",
   "fileUrl": "/uploads/xxx.pdf",
   "version": 1,
   "status": 0,
-  "tags": "[\"AI\",\"å¤å¼\"]"
+  "tags": "[\"AI\",\"外呼\"]"
 }';
 const headers = {
   'Content-Type':'application/json',
@@ -5148,7 +5148,7 @@ fetch('http://localhost:8080/api/documents',
 
 `POST /api/documents`
 
-è¯·æ±ä½ä¸ºèµæä¿¡æ¯ï¼ä¸å«æä»¶ï¼æä»¶éè¿ä¸ä¼ æ¥å£è·å URL ååå¥ fileUrlï¼
+请求体为资料信息（不含文件，文件通过上传接口获取 URL 后写入 fileUrl）
 
 > Body parameter
 
@@ -5158,38 +5158,38 @@ fetch('http://localhost:8080/api/documents',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "title": "AI å¤å¼ç³»ç»äº§åæå",
+  "title": "AI 外呼系统产品手册",
   "docType": "product_brochure",
   "fileUrl": "/uploads/xxx.pdf",
   "version": 1,
   "status": 0,
-  "tags": "[\"AI\",\"å¤å¼\"]"
+  "tags": "[\"AI\",\"外呼\"]"
 }
 ```
 
-<h3 id="æ°å¢èµæ-parameters">Parameters</h3>
+<h3 id="新增资料-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Document](#schemadocument)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æ°å¢èµæ-responses">Responses</h3>
+<h3 id="新增资料-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|tenantId/title/docType ä¸è½ä¸ºç©º|[ResultDocument](#schemaresultdocument)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|tenantId/title/docType 不能为空|[ResultDocument](#schemaresultdocument)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## ä¸ä¼ èµææä»¶ï¼è¿åå¯è®¿é® URLï¼
+## 上传资料文件（返回可访问 URL）
 
 <a id="opIdupload_1"></a>
 
@@ -5232,7 +5232,7 @@ fetch('http://localhost:8080/api/documents/upload',
 
 `POST /api/documents/upload`
 
-multipart/form-data è¡¨åä¸ä¼ ï¼è¿å /uploads/xxx å½¢å¼çè®¿é® URL
+multipart/form-data 表单上传，返回 /uploads/xxx 形式的访问 URL
 
 > Body parameter
 
@@ -5242,33 +5242,33 @@ multipart/form-data è¡¨åä¸ä¼ ï¼è¿å /uploads/xxx å½
 }
 ```
 
-<h3 id="ä¸ä¼ èµææä»¶ï¼è¿åå¯è®¿é®-urlï¼-parameters">Parameters</h3>
+<h3 id="上传资料文件（返回可访问-url）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|object|false|none|
-|» file|body|string(binary)|true|æä»¶|
+|» file|body|string(binary)|true|文件|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="ä¸ä¼ èµææä»¶ï¼è¿åå¯è®¿é®-urlï¼-responses">Responses</h3>
+<h3 id="上传资料文件（返回可访问-url）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|æä»¶ä¸è½ä¸ºç©º|[ResultString](#schemaresultstring)|
-|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|æä»¶ä¸ä¼ å¤±è´¥ï¼ä¸å¡ç  1701ï¼|[ResultString](#schemaresultstring)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|文件不能为空|[ResultString](#schemaresultstring)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|文件上传失败（业务码 1701）|[ResultString](#schemaresultstring)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">å­å¸ç®¡ç</h1>
+<h1 id="aicrm---">字典管理</h1>
 
-## æ´æ°å­å¸ç±»å
+## 更新字典类型
 
 <a id="opIdupdateType"></a>
 
@@ -5290,7 +5290,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "dictType": "lead_status",
-  "dictName": "çº¿ç´¢ç¶æ",
+  "dictName": "线索状态",
   "status": 1,
   "remark": "string"
 }';
@@ -5317,7 +5317,7 @@ fetch('http://localhost:8080/api/dicts/types/{id}',
 
 `PUT /api/dicts/types/{id}`
 
-éæé dict:edit
+需权限 dict:edit
 
 > Body parameter
 
@@ -5327,36 +5327,36 @@ fetch('http://localhost:8080/api/dicts/types/{id}',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "dictType": "lead_status",
-  "dictName": "çº¿ç´¢ç¶æ",
+  "dictName": "线索状态",
   "status": 1,
   "remark": "string"
 }
 ```
 
-<h3 id="æ´æ°å­å¸ç±»å-parameters">Parameters</h3>
+<h3 id="更新字典类型-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|å­å¸ç±»å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|字典类型 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[DictType](#schemadicttype)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æ´æ°å­å¸ç±»å-responses">Responses</h3>
+<h3 id="更新字典类型-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|å­å¸ç±»åä¸å­å¨|[ResultDictType](#schemaresultdicttype)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|字典类型不存在|[ResultDictType](#schemaresultdicttype)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤å­å¸ç±»å
+## 删除字典类型
 
 <a id="opIddeleteType"></a>
 
@@ -5395,31 +5395,31 @@ fetch('http://localhost:8080/api/dicts/types/{id}',
 
 `DELETE /api/dicts/types/{id}`
 
-éæé dict:delete
+需权限 dict:delete
 
-<h3 id="å é¤å­å¸ç±»å-parameters">Parameters</h3>
+<h3 id="删除字典类型-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|å­å¸ç±»å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|字典类型 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="å é¤å­å¸ç±»å-responses">Responses</h3>
+<h3 id="删除字典类型-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|å­å¸ç±»åä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|字典类型不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ´æ°å­å¸æ°æ®
+## 更新字典数据
 
 <a id="opIdupdateData"></a>
 
@@ -5441,7 +5441,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "dictType": "lead_status",
-  "label": "å·²åé",
+  "label": "已分配",
   "value": "1",
   "sort": 0,
   "status": 1,
@@ -5470,7 +5470,7 @@ fetch('http://localhost:8080/api/dicts/data/{id}',
 
 `PUT /api/dicts/data/{id}`
 
-éæé dict:edit
+需权限 dict:edit
 
 > Body parameter
 
@@ -5480,7 +5480,7 @@ fetch('http://localhost:8080/api/dicts/data/{id}',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "dictType": "lead_status",
-  "label": "å·²åé",
+  "label": "已分配",
   "value": "1",
   "sort": 0,
   "status": 1,
@@ -5488,30 +5488,30 @@ fetch('http://localhost:8080/api/dicts/data/{id}',
 }
 ```
 
-<h3 id="æ´æ°å­å¸æ°æ®-parameters">Parameters</h3>
+<h3 id="更新字典数据-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|å­å¸æ°æ® ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|字典数据 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[DictData](#schemadictdata)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æ´æ°å­å¸æ°æ®-responses">Responses</h3>
+<h3 id="更新字典数据-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|å­å¸æ°æ®ä¸å­å¨|[ResultDictData](#schemaresultdictdata)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|字典数据不存在|[ResultDictData](#schemaresultdictdata)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤å­å¸æ°æ®
+## 删除字典数据
 
 <a id="opIddeleteData"></a>
 
@@ -5550,31 +5550,31 @@ fetch('http://localhost:8080/api/dicts/data/{id}',
 
 `DELETE /api/dicts/data/{id}`
 
-éæé dict:delete
+需权限 dict:delete
 
-<h3 id="å é¤å­å¸æ°æ®-parameters">Parameters</h3>
+<h3 id="删除字典数据-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|å­å¸æ°æ® ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|字典数据 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="å é¤å­å¸æ°æ®-responses">Responses</h3>
+<h3 id="删除字典数据-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|å­å¸æ°æ®ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|字典数据不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å­å¸ç±»ååé¡µ
+## 字典类型分页
 
 <a id="opIdpageTypes"></a>
 
@@ -5613,22 +5613,22 @@ fetch('http://localhost:8080/api/dicts/types',
 
 `GET /api/dicts/types`
 
-éæé dict:list
+需权限 dict:list
 
-<h3 id="å­å¸ç±»ååé¡µ-parameters">Parameters</h3>
+<h3 id="字典类型分页-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|å³é®å­ï¼å­å¸åç§°/ç¼ç æ¨¡ç³å¹éï¼|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|关键字（字典名称/编码模糊匹配）|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="å­å¸ç±»ååé¡µ-responses">Responses</h3>
+<h3 id="字典类型分页-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -5639,7 +5639,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºå­å¸ç±»å
+## 创建字典类型
 
 <a id="opIdcreateType"></a>
 
@@ -5661,7 +5661,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "dictType": "lead_status",
-  "dictName": "çº¿ç´¢ç¶æ",
+  "dictName": "线索状态",
   "status": 1,
   "remark": "string"
 }';
@@ -5688,7 +5688,7 @@ fetch('http://localhost:8080/api/dicts/types',
 
 `POST /api/dicts/types`
 
-éæé dict:add
+需权限 dict:add
 
 > Body parameter
 
@@ -5698,35 +5698,35 @@ fetch('http://localhost:8080/api/dicts/types',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "dictType": "lead_status",
-  "dictName": "çº¿ç´¢ç¶æ",
+  "dictName": "线索状态",
   "status": 1,
   "remark": "string"
 }
 ```
 
-<h3 id="åå»ºå­å¸ç±»å-parameters">Parameters</h3>
+<h3 id="创建字典类型-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[DictType](#schemadicttype)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºå­å¸ç±»å-responses">Responses</h3>
+<h3 id="创建字典类型-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|å­å¸ç±»åç¼ç å·²å­å¨/ç¼ç ä¸åç§°ä¸è½ä¸ºç©º|[ResultDictType](#schemaresultdicttype)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|字典类型编码已存在/编码与名称不能为空|[ResultDictType](#schemaresultdicttype)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å­å¸æ°æ®åé¡µ
+## 字典数据分页
 
 <a id="opIdpageData"></a>
 
@@ -5765,22 +5765,22 @@ fetch('http://localhost:8080/api/dicts/data',
 
 `GET /api/dicts/data`
 
-éæé dict:list
+需权限 dict:list
 
-<h3 id="å­å¸æ°æ®åé¡µ-parameters">Parameters</h3>
+<h3 id="字典数据分页-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|dictType|query|string|false|å­å¸ç±»åç¼ç |
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|dictType|query|string|false|字典类型编码|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="å­å¸æ°æ®åé¡µ-responses">Responses</h3>
+<h3 id="字典数据分页-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -5791,7 +5791,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºå­å¸æ°æ®
+## 创建字典数据
 
 <a id="opIdcreateData"></a>
 
@@ -5813,7 +5813,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "dictType": "lead_status",
-  "label": "å·²åé",
+  "label": "已分配",
   "value": "1",
   "sort": 0,
   "status": 1,
@@ -5842,7 +5842,7 @@ fetch('http://localhost:8080/api/dicts/data',
 
 `POST /api/dicts/data`
 
-éæé dict:add
+需权限 dict:add
 
 > Body parameter
 
@@ -5852,7 +5852,7 @@ fetch('http://localhost:8080/api/dicts/data',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "dictType": "lead_status",
-  "label": "å·²åé",
+  "label": "已分配",
   "value": "1",
   "sort": 0,
   "status": 1,
@@ -5860,29 +5860,29 @@ fetch('http://localhost:8080/api/dicts/data',
 }
 ```
 
-<h3 id="åå»ºå­å¸æ°æ®-parameters">Parameters</h3>
+<h3 id="创建字典数据-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[DictData](#schemadictdata)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºå­å¸æ°æ®-responses">Responses</h3>
+<h3 id="创建字典数据-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|å­å¸ç±»åãæ ç­¾ãå¼ä¸è½ä¸ºç©º|[ResultDictData](#schemaresultdictdata)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|字典类型、标签、值不能为空|[ResultDictData](#schemaresultdictdata)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å¯ç¨å­å¸ç±»ååè¡¨
+## 启用字典类型列表
 
 <a id="opIdlistTypes"></a>
 
@@ -5921,19 +5921,19 @@ fetch('http://localhost:8080/api/dicts/types/enabled',
 
 `GET /api/dicts/types/enabled`
 
-åç«¯ä¸ææ¡ç´æ¥è°ç¨ï¼ä»è¿åå¯ç¨ç¶æå­å¸ç±»åï¼æ éç»å½æé
+前端下拉框直接调用，仅返回启用状态字典类型，无需登录权限
 
-<h3 id="å¯ç¨å­å¸ç±»ååè¡¨-parameters">Parameters</h3>
+<h3 id="启用字典类型列表-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="å¯ç¨å­å¸ç±»ååè¡¨-responses">Responses</h3>
+<h3 id="启用字典类型列表-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -5944,7 +5944,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æç±»åæ¥è¯¢å¯ç¨å­å¸æ°æ®ï¼åç«¯ä¸æï¼
+## 按类型查询启用字典数据（前端下拉）
 
 <a id="opIdlistDataByType"></a>
 
@@ -5983,20 +5983,20 @@ fetch('http://localhost:8080/api/dicts/data/type/{dictType}',
 
 `GET /api/dicts/data/type/{dictType}`
 
-åç«¯ä¸ææ¡ç´æ¥è°ç¨ï¼ä»è¿åå¯ç¨ç¶æå­å¸æ°æ®ï¼æ éç»å½æé
+前端下拉框直接调用，仅返回启用状态字典数据，无需登录权限
 
-<h3 id="æç±»åæ¥è¯¢å¯ç¨å­å¸æ°æ®ï¼åç«¯ä¸æï¼-parameters">Parameters</h3>
+<h3 id="按类型查询启用字典数据（前端下拉）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|dictType|path|string|true|å­å¸ç±»åç¼ç |
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|dictType|path|string|true|字典类型编码|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æç±»åæ¥è¯¢å¯ç¨å­å¸æ°æ®ï¼åç«¯ä¸æï¼-responses">Responses</h3>
+<h3 id="按类型查询启用字典数据（前端下拉）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -6007,9 +6007,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">å®¢æ·ç®¡ç</h1>
+<h1 id="aicrm---">客户管理</h1>
 
-## å®¢æ·è¯¦æ
+## 客户详情
 
 <a id="opIddetail_8"></a>
 
@@ -6048,20 +6048,20 @@ fetch('http://localhost:8080/api/customers/{id}',
 
 `GET /api/customers/{id}`
 
-æéï¼customer:listãæ ID æ¥è¯¢å®¢æ·è¯¦æï¼å«äººåæ¶æ org_structureï¼ã
+权限：customer:list。按 ID 查询客户详情（含人员架构 org_structure）。
 
-<h3 id="å®¢æ·è¯¦æ-parameters">Parameters</h3>
+<h3 id="客户详情-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|å®¢æ· ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|客户 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="å®¢æ·è¯¦æ-responses">Responses</h3>
+<h3 id="客户详情-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -6072,7 +6072,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ´æ°å®¢æ·
+## 更新客户
 
 <a id="opIdupdate_6"></a>
 
@@ -6094,10 +6094,10 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "ææç§ææéå¬å¸",
-  "industry": "è½¯ä»¶æå¡",
-  "scale": "100-499äºº",
-  "region": "ä¸æµ·",
+  "name": "某某科技有限公司",
+  "industry": "软件服务",
+  "scale": "100-499人",
+  "region": "上海",
   "orgStructure": "string",
   "source": "public_data",
   "enrichmentStatus": 0,
@@ -6128,7 +6128,7 @@ fetch('http://localhost:8080/api/customers/{id}',
 
 `PUT /api/customers/{id}`
 
-æéï¼customer:editãæ ID æ´æ°å®¢æ·åºæ¬ä¿¡æ¯ï¼åç§°/è¡ä¸/è§æ¨¡/å°åºç­ï¼ã
+权限：customer:edit。按 ID 更新客户基本信息（名称/行业/规模/地区等）。
 
 > Body parameter
 
@@ -6138,10 +6138,10 @@ fetch('http://localhost:8080/api/customers/{id}',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "ææç§ææéå¬å¸",
-  "industry": "è½¯ä»¶æå¡",
-  "scale": "100-499äºº",
-  "region": "ä¸æµ·",
+  "name": "某某科技有限公司",
+  "industry": "软件服务",
+  "scale": "100-499人",
+  "region": "上海",
   "orgStructure": "string",
   "source": "public_data",
   "enrichmentStatus": 0,
@@ -6151,30 +6151,30 @@ fetch('http://localhost:8080/api/customers/{id}',
 }
 ```
 
-<h3 id="æ´æ°å®¢æ·-parameters">Parameters</h3>
+<h3 id="更新客户-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|å®¢æ· ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|客户 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Customer](#schemacustomer)|true|none|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="æ´æ°å®¢æ·-responses">Responses</h3>
+<h3 id="更新客户-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|å®¢æ·ä¸å­å¨|[ResultCustomer](#schemaresultcustomer)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|客户不存在|[ResultCustomer](#schemaresultcustomer)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤å®¢æ·
+## 删除客户
 
 <a id="opIddelete_7"></a>
 
@@ -6213,31 +6213,31 @@ fetch('http://localhost:8080/api/customers/{id}',
 
 `DELETE /api/customers/{id}`
 
-æéï¼customer:deleteãæ ID é»è¾å é¤å®¢æ·ã
+权限：customer:delete。按 ID 逻辑删除客户。
 
-<h3 id="å é¤å®¢æ·-parameters">Parameters</h3>
+<h3 id="删除客户-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|å®¢æ· ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|客户 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤å®¢æ·-responses">Responses</h3>
+<h3 id="删除客户-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|å®¢æ·ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|客户不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å®¢æ·é¶æ®µæµè½¬
+## 客户阶段流转
 
 <a id="opIdupdateStage"></a>
 
@@ -6276,33 +6276,33 @@ fetch('http://localhost:8080/api/customers/{id}/stage?stage=string',
 
 `PUT /api/customers/{id}/stage`
 
-æéï¼customer:editãæ¨è¿/åéå®¢æ·é¶æ®µï¼stage åå¼ï¼newæ½å¨/potentialææå/intentionæ¥ä»·/negotiatingè°å¤/wonæäº¤/lostæµå¤±ã
+权限：customer:edit。推进/回退客户阶段；stage 取值：new潜在/potential有意向/intention报价/negotiating谈判/won成交/lost流失。
 
-<h3 id="å®¢æ·é¶æ®µæµè½¬-parameters">Parameters</h3>
+<h3 id="客户阶段流转-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|å®¢æ· ID|
-|stage|query|string|true|å®¢æ·é¶æ®µï¼newæ½å¨/potentialææå/intentionæ¥ä»·/negotiatingè°å¤/wonæäº¤/lostæµå¤±|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|客户 ID|
+|stage|query|string|true|客户阶段：new潜在/potential有意向/intention报价/negotiating谈判/won成交/lost流失|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="å®¢æ·é¶æ®µæµè½¬-responses">Responses</h3>
+<h3 id="客户阶段流转-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|éæ³å®¢æ·é¶æ®µ|[ResultCustomer](#schemaresultcustomer)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|å®¢æ·ä¸å­å¨|[ResultCustomer](#schemaresultcustomer)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|非法客户阶段|[ResultCustomer](#schemaresultcustomer)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|客户不存在|[ResultCustomer](#schemaresultcustomer)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æåç­çº§/è¯åç»´æ¤
+## 意向等级/评分维护
 
 <a id="opIdupdateScore"></a>
 
@@ -6341,33 +6341,33 @@ fetch('http://localhost:8080/api/customers/{id}/score',
 
 `PUT /api/customers/{id}/score`
 
-æéï¼customer:editãç»´æ¤å®¢æ·æåç­çº§ä¸ç»¼åè¯åï¼intentLevel åå¼ 0-5ï¼score åå¼ 0-100ã
+权限：customer:edit。维护客户意向等级与综合评分；intentLevel 取值 0-5，score 取值 0-100。
 
-<h3 id="æåç­çº§/è¯åç»´æ¤-parameters">Parameters</h3>
+<h3 id="意向等级/评分维护-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|å®¢æ· ID|
-|intentLevel|query|integer(int32)|false|æåç­çº§ï¼0-5|
-|score|query|integer(int32)|false|ç»¼åè¯åï¼0-100|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|客户 ID|
+|intentLevel|query|integer(int32)|false|意向等级：0-5|
+|score|query|integer(int32)|false|综合评分：0-100|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æåç­çº§/è¯åç»´æ¤-responses">Responses</h3>
+<h3 id="意向等级/评分维护-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|æåç­çº§éå¨ 0-5 ä¹é´/è¯åéå¨ 0-100 ä¹é´|[ResultCustomer](#schemaresultcustomer)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|意向等级需在 0-5 之间/评分需在 0-100 之间|[ResultCustomer](#schemaresultcustomer)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å®¢æ·åé¡µæ¥è¯¢
+## 客户分页查询
 
 <a id="opIdpage_9"></a>
 
@@ -6406,25 +6406,25 @@ fetch('http://localhost:8080/api/customers',
 
 `GET /api/customers`
 
-æéï¼customer:listãæå³é®å­/è¡ä¸/å°åº/å®¢æ·é¶æ®µåé¡µæ¥è¯¢å®¢æ·ï¼stage åå¼ï¼newæ½å¨/potentialææå/intentionæ¥ä»·/negotiatingè°å¤/wonæäº¤/lostæµå¤±ï¼ç»ææç»¼åè¯åååºã
+权限：customer:list。按关键字/行业/地区/客户阶段分页查询客户；stage 取值：new潜在/potential有意向/intention报价/negotiating谈判/won成交/lost流失，结果按综合评分倒序。
 
-<h3 id="å®¢æ·åé¡µæ¥è¯¢-parameters">Parameters</h3>
+<h3 id="客户分页查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|å³é®å­ï¼å¬å¸åç§°æ¨¡ç³å¹éï¼|
-|industry|query|string|false|è¡ä¸ï¼æ¨¡ç³å¹éï¼|
-|region|query|string|false|å°åºï¼æ¨¡ç³å¹éï¼|
-|stage|query|string|false|å®¢æ·é¶æ®µï¼newæ½å¨/potentialææå/intentionæ¥ä»·/negotiatingè°å¤/wonæäº¤/lostæµå¤±|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|关键字（公司名称模糊匹配）|
+|industry|query|string|false|行业（模糊匹配）|
+|region|query|string|false|地区（模糊匹配）|
+|stage|query|string|false|客户阶段：new潜在/potential有意向/intention报价/negotiating谈判/won成交/lost流失|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="å®¢æ·åé¡µæ¥è¯¢-responses">Responses</h3>
+<h3 id="客户分页查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -6435,7 +6435,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºå®¢æ·
+## 创建客户
 
 <a id="opIdcreate_9"></a>
 
@@ -6457,10 +6457,10 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "ææç§ææéå¬å¸",
-  "industry": "è½¯ä»¶æå¡",
-  "scale": "100-499äºº",
-  "region": "ä¸æµ·",
+  "name": "某某科技有限公司",
+  "industry": "软件服务",
+  "scale": "100-499人",
+  "region": "上海",
   "orgStructure": "string",
   "source": "public_data",
   "enrichmentStatus": 0,
@@ -6491,7 +6491,7 @@ fetch('http://localhost:8080/api/customers',
 
 `POST /api/customers`
 
-æéï¼customer:addãæ°å»ºå®¢æ·å¬å¸ï¼å®¢æ·åç§°å¿å¡«ï¼stage é»è®¤ newæ½å¨ã
+权限：customer:add。新建客户公司，客户名称必填；stage 默认 new潜在。
 
 > Body parameter
 
@@ -6501,10 +6501,10 @@ fetch('http://localhost:8080/api/customers',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "ææç§ææéå¬å¸",
-  "industry": "è½¯ä»¶æå¡",
-  "scale": "100-499äºº",
-  "region": "ä¸æµ·",
+  "name": "某某科技有限公司",
+  "industry": "软件服务",
+  "scale": "100-499人",
+  "region": "上海",
   "orgStructure": "string",
   "source": "public_data",
   "enrichmentStatus": 0,
@@ -6514,29 +6514,29 @@ fetch('http://localhost:8080/api/customers',
 }
 ```
 
-<h3 id="åå»ºå®¢æ·-parameters">Parameters</h3>
+<h3 id="创建客户-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Customer](#schemacustomer)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºå®¢æ·-responses">Responses</h3>
+<h3 id="创建客户-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|å®¢æ·åç§°ä¸è½ä¸ºç©º|[ResultCustomer](#schemaresultcustomer)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|客户名称不能为空|[ResultCustomer](#schemaresultcustomer)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## ä¼ä¸ä¿¡æ¯åå¡«ï¼ç¬¬ä¸æ¹æ¥è¯¢ï¼
+## 企业信息回填（第三方查询）
 
 <a id="opIdenrich"></a>
 
@@ -6577,7 +6577,7 @@ fetch('http://localhost:8080/api/customers/{id}/enrich',
 
 `POST /api/customers/{id}/enrich`
 
-æéï¼customer:editãç¬¬ä¸æ¹ä¼ä¸ä¿¡æ¯æ¥è¯¢æ¥å£ï¼æè°ç¨é¢çéå¶ï¼è¯·å¿é«é¢è°ç¨ï¼è¿åå­æ®µä»¥ç¬¬ä¸æ¹ååºä¸ºåãè¯·æ±ä½ä¸ºäººåæ¶æ org_structure åå§ JSON å­ç¬¦ä¸²ï¼å¯ç©ºï¼ï¼ä¾å¦ {"executives":[{"name":"å¼ ä¸","title":"CEO","phone":"13800138000","email":"zhangsan@corp.com"}],"departments":["éå®é¨","ææ¯é¨"]}ï¼æ¥å£ä¼å° org_structure ä¸ source åå¥å®¢æ·å¹¶ç½® enrichment_status=1ï¼è¿ååå¡«åçå®¢æ·è¯¦æï¼å« org_structureï¼ã
+权限：customer:edit。第三方企业信息查询接口，有调用频率限制，请勿高频调用；返回字段以第三方响应为准。请求体为人员架构 org_structure 原始 JSON 字符串（可空），例如 {"executives":[{"name":"张三","title":"CEO","phone":"13800138000","email":"zhangsan@corp.com"}],"departments":["销售部","技术部"]}；接口会将 org_structure 与 source 写入客户并置 enrichment_status=1，返回回填后的客户详情（含 org_structure）。
 
 > Body parameter
 
@@ -6585,33 +6585,33 @@ fetch('http://localhost:8080/api/customers/{id}/enrich',
 "string"
 ```
 
-<h3 id="ä¼ä¸ä¿¡æ¯åå¡«ï¼ç¬¬ä¸æ¹æ¥è¯¢ï¼-parameters">Parameters</h3>
+<h3 id="企业信息回填（第三方查询）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|å®¢æ· ID|
-|source|query|string|false|æ°æ®æ¥æºæ è¯ï¼å¦ public_dataå¬å¼æ°æ®/customer_providedå®¢æ·æä¾ï¼|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|客户 ID|
+|source|query|string|false|数据来源标识（如 public_data公开数据/customer_provided客户提供）|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|string|false|none|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="ä¼ä¸ä¿¡æ¯åå¡«ï¼ç¬¬ä¸æ¹æ¥è¯¢ï¼-responses">Responses</h3>
+<h3 id="企业信息回填（第三方查询）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|å®¢æ·ä¸å­å¨|[ResultCustomer](#schemaresultcustomer)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|客户不存在|[ResultCustomer](#schemaresultcustomer)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">ç³»ç»åæ°</h1>
+<h1 id="aicrm---">系统参数</h1>
 
-## æ´æ°åæ°
+## 更新参数
 
 <a id="opIdupdate_7"></a>
 
@@ -6633,8 +6633,8 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "configKey": "system.siteName",
-  "configValue": "AI éå®çº¿ç´¢ç³»ç»",
-  "configName": "ç«ç¹åç§°",
+  "configValue": "AI 销售线索系统",
+  "configName": "站点名称",
   "configType": 2,
   "remark": "string"
 }';
@@ -6661,7 +6661,7 @@ fetch('http://localhost:8080/api/configs/{id}',
 
 `PUT /api/configs/{id}`
 
-éæé config:edit
+需权限 config:edit
 
 > Body parameter
 
@@ -6671,26 +6671,26 @@ fetch('http://localhost:8080/api/configs/{id}',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "configKey": "system.siteName",
-  "configValue": "AI éå®çº¿ç´¢ç³»ç»",
-  "configName": "ç«ç¹åç§°",
+  "configValue": "AI 销售线索系统",
+  "configName": "站点名称",
   "configType": 2,
   "remark": "string"
 }
 ```
 
-<h3 id="æ´æ°åæ°-parameters">Parameters</h3>
+<h3 id="更新参数-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åæ° ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|参数 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Config](#schemaconfig)|true|none|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ´æ°åæ°-responses">Responses</h3>
+<h3 id="更新参数-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -6701,7 +6701,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## å é¤åæ°ï¼åç½®åæ°ä¸å¯å é¤ï¼
+## 删除参数（内置参数不可删除）
 
 <a id="opIddelete_8"></a>
 
@@ -6740,31 +6740,31 @@ fetch('http://localhost:8080/api/configs/{id}',
 
 `DELETE /api/configs/{id}`
 
-éæé config:editï¼åç½®åæ°ï¼configType=1ï¼å é¤å°è¿åä¸å¡éè¯¯
+需权限 config:edit，内置参数（configType=1）删除将返回业务错误
 
-<h3 id="å é¤åæ°ï¼åç½®åæ°ä¸å¯å é¤ï¼-parameters">Parameters</h3>
+<h3 id="删除参数（内置参数不可删除）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|åæ° ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|参数 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="å é¤åæ°ï¼åç½®åæ°ä¸å¯å é¤ï¼-responses">Responses</h3>
+<h3 id="删除参数（内置参数不可删除）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|åç½®åæ°ä¸åè®¸å é¤|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|内置参数不允许删除|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## åæ°åé¡µ
+## 参数分页
 
 <a id="opIdpage_11"></a>
 
@@ -6803,22 +6803,22 @@ fetch('http://localhost:8080/api/configs',
 
 `GET /api/configs`
 
-éæé config:list
+需权限 config:list
 
-<h3 id="åæ°åé¡µ-parameters">Parameters</h3>
+<h3 id="参数分页-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|å³é®å­ï¼åæ°åç§°/åæ°é®æ¨¡ç³å¹éï¼|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|关键字（参数名称/参数键模糊匹配）|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="åæ°åé¡µ-responses">Responses</h3>
+<h3 id="参数分页-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -6829,7 +6829,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºåæ°
+## 创建参数
 
 <a id="opIdcreate_11"></a>
 
@@ -6851,8 +6851,8 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "configKey": "system.siteName",
-  "configValue": "AI éå®çº¿ç´¢ç³»ç»",
-  "configName": "ç«ç¹åç§°",
+  "configValue": "AI 销售线索系统",
+  "configName": "站点名称",
   "configType": 2,
   "remark": "string"
 }';
@@ -6879,7 +6879,7 @@ fetch('http://localhost:8080/api/configs',
 
 `POST /api/configs`
 
-éæé config:edit
+需权限 config:edit
 
 > Body parameter
 
@@ -6889,25 +6889,25 @@ fetch('http://localhost:8080/api/configs',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "configKey": "system.siteName",
-  "configValue": "AI éå®çº¿ç´¢ç³»ç»",
-  "configName": "ç«ç¹åç§°",
+  "configValue": "AI 销售线索系统",
+  "configName": "站点名称",
   "configType": 2,
   "remark": "string"
 }
 ```
 
-<h3 id="åå»ºåæ°-parameters">Parameters</h3>
+<h3 id="创建参数-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Config](#schemaconfig)|true|none|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="åå»ºåæ°-responses">Responses</h3>
+<h3 id="创建参数-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -6918,7 +6918,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ key æ¥è¯¢åæ°ï¼ä¸å¡æ¹è°ç¨ï¼
+## 按 key 查询参数（业务方调用）
 
 <a id="opIdgetByKey"></a>
 
@@ -6957,20 +6957,20 @@ fetch('http://localhost:8080/api/configs/key/{key}',
 
 `GET /api/configs/key/{key}`
 
-ä¸å¡æ¹ç´æ¥è°ç¨ï¼æ éç»å½æéï¼ä¸å­å¨æ¶è¿å null
+业务方直接调用，无需登录权限，不存在时返回 null
 
-<h3 id="æ-key-æ¥è¯¢åæ°ï¼ä¸å¡æ¹è°ç¨ï¼-parameters">Parameters</h3>
+<h3 id="按-key-查询参数（业务方调用）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|key|path|string|true|åæ°é®|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|key|path|string|true|参数键|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ-key-æ¥è¯¢åæ°ï¼ä¸å¡æ¹è°ç¨ï¼-responses">Responses</h3>
+<h3 id="按-key-查询参数（业务方调用）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -6981,9 +6981,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">ç«ååº</h1>
+<h1 id="aicrm---">竞品库</h1>
 
-## ç«åè¯¦æ
+## 竞品详情
 
 <a id="opIddetail_10"></a>
 
@@ -7022,20 +7022,20 @@ fetch('http://localhost:8080/api/competitors/{id}',
 
 `GET /api/competitors/{id}`
 
-æ ID æ¥è¯¢ç«åå®æ´æ¡£æ¡ï¼å«ä¼å£å¿/æ»é²è¯æ¯ï¼ï¼åºæ¯ï¼ç«ååºç®¡çãç¥è¯æ£ç´¢ï¼æéï¼competitor:list
+按 ID 查询竞品完整档案（含优劣势/攻防话术），场景：竞品库管理、知识检索；权限：competitor:list
 
-<h3 id="ç«åè¯¦æ-parameters">Parameters</h3>
+<h3 id="竞品详情-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ç«å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|竞品 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="ç«åè¯¦æ-responses">Responses</h3>
+<h3 id="竞品详情-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -7046,7 +7046,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ´æ°ç«åï¼ä¼å£å¿/æ»é²è¯æ¯ï¼
+## 更新竞品（优劣势/攻防话术）
 
 <a id="opIdupdate_8"></a>
 
@@ -7068,13 +7068,13 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "ææäº CRM",
+  "name": "某某云 CRM",
   "category": "CRM",
   "officialUrl": "https://www.example.com",
   "description": "string",
-  "strengths": "[\"åè½å¨é¢\",\"ä»·æ ¼ä½\"]",
-  "weaknesses": "[\"å®æ½å¤æ\",\"å®åå·®\"]",
-  "defenseTactics": "[{\"scenario\":\"æ¯ä»·æ ¼\",\"tactic\":\"å¼ºè°æ»æ¥æææ¬\"}]",
+  "strengths": "[\"功能全面\",\"价格低\"]",
+  "weaknesses": "[\"实施复杂\",\"售后差\"]",
+  "defenseTactics": "[{\"scenario\":\"比价格\",\"tactic\":\"强调总拥有成本\"}]",
   "status": 1
 }';
 const headers = {
@@ -7100,7 +7100,7 @@ fetch('http://localhost:8080/api/competitors/{id}',
 
 `PUT /api/competitors/{id}`
 
-ä¿®æ¹ç«åæ¡£æ¡ï¼å«ä¼å£å¿/æ»é²è¯æ¯ï¼ï¼åºæ¯ï¼ç«ååºç®¡çç»´æ¤ï¼æéï¼competitor:editãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+修改竞品档案（含优劣势/攻防话术），场景：竞品库管理维护；权限：competitor:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
 > Body parameter
 
@@ -7110,41 +7110,41 @@ fetch('http://localhost:8080/api/competitors/{id}',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "ææäº CRM",
+  "name": "某某云 CRM",
   "category": "CRM",
   "officialUrl": "https://www.example.com",
   "description": "string",
-  "strengths": "[\"åè½å¨é¢\",\"ä»·æ ¼ä½\"]",
-  "weaknesses": "[\"å®æ½å¤æ\",\"å®åå·®\"]",
-  "defenseTactics": "[{\"scenario\":\"æ¯ä»·æ ¼\",\"tactic\":\"å¼ºè°æ»æ¥æææ¬\"}]",
+  "strengths": "[\"功能全面\",\"价格低\"]",
+  "weaknesses": "[\"实施复杂\",\"售后差\"]",
+  "defenseTactics": "[{\"scenario\":\"比价格\",\"tactic\":\"强调总拥有成本\"}]",
   "status": 1
 }
 ```
 
-<h3 id="æ´æ°ç«åï¼ä¼å£å¿/æ»é²è¯æ¯ï¼-parameters">Parameters</h3>
+<h3 id="更新竞品（优劣势/攻防话术）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ç«å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|竞品 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Competitor](#schemacompetitor)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æ´æ°ç«åï¼ä¼å£å¿/æ»é²è¯æ¯ï¼-responses">Responses</h3>
+<h3 id="更新竞品（优劣势/攻防话术）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|ç«ååç§°ä¸è½ä¸ºç©º/ç«åä¸å­å¨|[ResultCompetitor](#schemaresultcompetitor)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|竞品名称不能为空/竞品不存在|[ResultCompetitor](#schemaresultcompetitor)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤ç«å
+## 删除竞品
 
 <a id="opIddelete_9"></a>
 
@@ -7183,31 +7183,31 @@ fetch('http://localhost:8080/api/competitors/{id}',
 
 `DELETE /api/competitors/{id}`
 
-å é¤ç«åæ¡£æ¡ï¼å«å³èç«åäº§åï¼ï¼åºæ¯ï¼ç«ååºç®¡çç»´æ¤ï¼æéï¼competitor:deleteãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+删除竞品档案（含关联竞品产品），场景：竞品库管理维护；权限：competitor:delete。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
-<h3 id="å é¤ç«å-parameters">Parameters</h3>
+<h3 id="删除竞品-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ç«å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|竞品 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤ç«å-responses">Responses</h3>
+<h3 id="删除竞品-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç«åä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|竞品不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## ç«åå¯å
+## 竞品启停
 
 <a id="opIdupdateStatus_5"></a>
 
@@ -7246,32 +7246,32 @@ fetch('http://localhost:8080/api/competitors/{id}/status?status=0',
 
 `PUT /api/competitors/{id}/status`
 
-å¯ç¨/åç¨ç«åï¼åç¨åä¸å¯è¢«ç¥è¯æ£ç´¢ï¼åºæ¯ï¼ç«ååºä¸ä¸æ¶ç®¡çï¼æéï¼competitor:editãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+启用/停用竞品，停用后不可被知识检索，场景：竞品库上下架管理；权限：competitor:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
-<h3 id="ç«åå¯å-parameters">Parameters</h3>
+<h3 id="竞品启停-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ç«å ID|
-|status|query|integer(int32)|true|ç¶æï¼1 å¯ç¨ / 0 åç¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|竞品 ID|
+|status|query|integer(int32)|true|状态：1 启用 / 0 停用|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="ç«åå¯å-responses">Responses</h3>
+<h3 id="竞品启停-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç«åä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|竞品不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ´æ°ç«åäº§ååæ°
+## 更新竞品产品参数
 
 <a id="opIdupdateProduct"></a>
 
@@ -7294,10 +7294,10 @@ const inputBody = '{
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
   "competitorId": 0,
-  "productName": "ç«åäºç",
-  "spec": "æè°ç",
+  "productName": "竞品云版",
+  "spec": "旗舰版",
   "price": 2999,
-  "params": "{\"å¹¶åæ°\":\"300\",\"å­å¨\":\"50GB\"}"
+  "params": "{\"并发数\":\"300\",\"存储\":\"50GB\"}"
 }';
 const headers = {
   'Content-Type':'application/json',
@@ -7322,7 +7322,7 @@ fetch('http://localhost:8080/api/competitors/products/{productId}',
 
 `PUT /api/competitors/products/{productId}`
 
-ä¿®æ¹ç«åäº§ååæ°ï¼åºæ¯ï¼ç«ååºç®¡çç»´æ¤ï¼æéï¼competitor:editãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+修改竞品产品参数，场景：竞品库管理维护；权限：competitor:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
 > Body parameter
 
@@ -7333,38 +7333,38 @@ fetch('http://localhost:8080/api/competitors/products/{productId}',
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
   "competitorId": 0,
-  "productName": "ç«åäºç",
-  "spec": "æè°ç",
+  "productName": "竞品云版",
+  "spec": "旗舰版",
   "price": 2999,
-  "params": "{\"å¹¶åæ°\":\"300\",\"å­å¨\":\"50GB\"}"
+  "params": "{\"并发数\":\"300\",\"存储\":\"50GB\"}"
 }
 ```
 
-<h3 id="æ´æ°ç«åäº§ååæ°-parameters">Parameters</h3>
+<h3 id="更新竞品产品参数-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|productId|path|integer(int64)|true|ç«åäº§å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|productId|path|integer(int64)|true|竞品产品 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[CompetitorProduct](#schemacompetitorproduct)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æ´æ°ç«åäº§ååæ°-responses">Responses</h3>
+<h3 id="更新竞品产品参数-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|ç«åäº§ååç§°ä¸è½ä¸ºç©º|[ResultCompetitorProduct](#schemaresultcompetitorproduct)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç«åäº§åä¸å­å¨|[ResultCompetitorProduct](#schemaresultcompetitorproduct)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|竞品产品名称不能为空|[ResultCompetitorProduct](#schemaresultcompetitorproduct)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|竞品产品不存在|[ResultCompetitorProduct](#schemaresultcompetitorproduct)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤ç«åäº§å
+## 删除竞品产品
 
 <a id="opIddeleteProduct"></a>
 
@@ -7403,31 +7403,31 @@ fetch('http://localhost:8080/api/competitors/products/{productId}',
 
 `DELETE /api/competitors/products/{productId}`
 
-å é¤ç«åäº§ååæ°ï¼åºæ¯ï¼ç«ååºç®¡çç»´æ¤ï¼æéï¼competitor:deleteãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+删除竞品产品参数，场景：竞品库管理维护；权限：competitor:delete。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
-<h3 id="å é¤ç«åäº§å-parameters">Parameters</h3>
+<h3 id="删除竞品产品-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|productId|path|integer(int64)|true|ç«åäº§å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|productId|path|integer(int64)|true|竞品产品 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤ç«åäº§å-responses">Responses</h3>
+<h3 id="删除竞品产品-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç«åäº§åä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|竞品产品不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## ç«ååé¡µæ¥è¯¢
+## 竞品分页查询
 
 <a id="opIdpage_12"></a>
 
@@ -7466,23 +7466,23 @@ fetch('http://localhost:8080/api/competitors',
 
 `GET /api/competitors`
 
-ç«ååè¡¨æ£ç´¢ï¼æ¯æå³é®å­/åç±»è¿æ»¤ï¼åºæ¯ï¼ç«ååºç®¡çãç¥è¯æ£ç´¢ï¼æéï¼competitor:list
+竞品列表检索，支持关键字/品类过滤，场景：竞品库管理、知识检索；权限：competitor:list
 
-<h3 id="ç«ååé¡µæ¥è¯¢-parameters">Parameters</h3>
+<h3 id="竞品分页查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|å³é®å­ï¼ç«ååç§°/ä¸»ä½æè¿°æ¨¡ç³å¹éï¼|
-|category|query|string|false|ç«ååç±»|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|关键字（竞品名称/主体描述模糊匹配）|
+|category|query|string|false|竞品品类|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="ç«ååé¡µæ¥è¯¢-responses">Responses</h3>
+<h3 id="竞品分页查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -7493,7 +7493,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºç«å
+## 创建竞品
 
 <a id="opIdcreate_12"></a>
 
@@ -7515,13 +7515,13 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "ææäº CRM",
+  "name": "某某云 CRM",
   "category": "CRM",
   "officialUrl": "https://www.example.com",
   "description": "string",
-  "strengths": "[\"åè½å¨é¢\",\"ä»·æ ¼ä½\"]",
-  "weaknesses": "[\"å®æ½å¤æ\",\"å®åå·®\"]",
-  "defenseTactics": "[{\"scenario\":\"æ¯ä»·æ ¼\",\"tactic\":\"å¼ºè°æ»æ¥æææ¬\"}]",
+  "strengths": "[\"功能全面\",\"价格低\"]",
+  "weaknesses": "[\"实施复杂\",\"售后差\"]",
+  "defenseTactics": "[{\"scenario\":\"比价格\",\"tactic\":\"强调总拥有成本\"}]",
   "status": 1
 }';
 const headers = {
@@ -7547,7 +7547,7 @@ fetch('http://localhost:8080/api/competitors',
 
 `POST /api/competitors`
 
-æ°å¢ç«åä¸»ä½æ¡£æ¡ï¼åºæ¯ï¼ç«ååºç®¡çç»´æ¤ï¼æéï¼competitor:addãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+新增竞品主体档案，场景：竞品库管理维护；权限：competitor:add。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
 > Body parameter
 
@@ -7557,29 +7557,29 @@ fetch('http://localhost:8080/api/competitors',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "ææäº CRM",
+  "name": "某某云 CRM",
   "category": "CRM",
   "officialUrl": "https://www.example.com",
   "description": "string",
-  "strengths": "[\"åè½å¨é¢\",\"ä»·æ ¼ä½\"]",
-  "weaknesses": "[\"å®æ½å¤æ\",\"å®åå·®\"]",
-  "defenseTactics": "[{\"scenario\":\"æ¯ä»·æ ¼\",\"tactic\":\"å¼ºè°æ»æ¥æææ¬\"}]",
+  "strengths": "[\"功能全面\",\"价格低\"]",
+  "weaknesses": "[\"实施复杂\",\"售后差\"]",
+  "defenseTactics": "[{\"scenario\":\"比价格\",\"tactic\":\"强调总拥有成本\"}]",
   "status": 1
 }
 ```
 
-<h3 id="åå»ºç«å-parameters">Parameters</h3>
+<h3 id="创建竞品-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Competitor](#schemacompetitor)|true|none|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="åå»ºç«å-responses">Responses</h3>
+<h3 id="创建竞品-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -7590,7 +7590,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## ç«åäº§ååè¡¨
+## 竞品产品列表
 
 <a id="opIdlistProducts"></a>
 
@@ -7629,20 +7629,20 @@ fetch('http://localhost:8080/api/competitors/{id}/products',
 
 `GET /api/competitors/{id}/products`
 
-æ¥è¯¢æå®ç«åä¸çäº§ååæ°åè¡¨ï¼åºæ¯ï¼ç«ååºç®¡çãç¥è¯æ£ç´¢ï¼æéï¼competitor:list
+查询指定竞品下的产品参数列表，场景：竞品库管理、知识检索；权限：competitor:list
 
-<h3 id="ç«åäº§ååè¡¨-parameters">Parameters</h3>
+<h3 id="竞品产品列表-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ç«å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|竞品 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="ç«åäº§ååè¡¨-responses">Responses</h3>
+<h3 id="竞品产品列表-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -7653,7 +7653,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ°å¢ç«åäº§ååæ°
+## 新增竞品产品参数
 
 <a id="opIdcreateProduct"></a>
 
@@ -7676,10 +7676,10 @@ const inputBody = '{
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
   "competitorId": 0,
-  "productName": "ç«åäºç",
-  "spec": "æè°ç",
+  "productName": "竞品云版",
+  "spec": "旗舰版",
   "price": 2999,
-  "params": "{\"å¹¶åæ°\":\"300\",\"å­å¨\":\"50GB\"}"
+  "params": "{\"并发数\":\"300\",\"存储\":\"50GB\"}"
 }';
 const headers = {
   'Content-Type':'application/json',
@@ -7704,7 +7704,7 @@ fetch('http://localhost:8080/api/competitors/{id}/products',
 
 `POST /api/competitors/{id}/products`
 
-ä¸ºæå®ç«åæ°å¢äº§ååæ°ï¼åºæ¯ï¼ç«ååºç®¡çç»´æ¤ï¼æéï¼competitor:addãâ ï¸ å¼æ­¥èå¨ï¼æ¬æä½ä¼è§¦å RabbitMQ éç¥ï¼exchange=aicrm.eventsï¼routingKey=knowledge.syncï¼ï¼Python ä¾§æ¶è´¹åæ´æ°åéæ°æ®ï¼MQ ä¸å¯ç¨æ¶ä»è®°å½æ¥å¿éçº§ï¼ä¸å½±åæ¬æ¥å£è¿å
+为指定竞品新增产品参数，场景：竞品库管理维护；权限：competitor:add。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回
 
 > Body parameter
 
@@ -7715,26 +7715,26 @@ fetch('http://localhost:8080/api/competitors/{id}/products',
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
   "competitorId": 0,
-  "productName": "ç«åäºç",
-  "spec": "æè°ç",
+  "productName": "竞品云版",
+  "spec": "旗舰版",
   "price": 2999,
-  "params": "{\"å¹¶åæ°\":\"300\",\"å­å¨\":\"50GB\"}"
+  "params": "{\"并发数\":\"300\",\"存储\":\"50GB\"}"
 }
 ```
 
-<h3 id="æ°å¢ç«åäº§ååæ°-parameters">Parameters</h3>
+<h3 id="新增竞品产品参数-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ç«å ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|竞品 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[CompetitorProduct](#schemacompetitorproduct)|true|none|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ°å¢ç«åäº§ååæ°-responses">Responses</h3>
+<h3 id="新增竞品产品参数-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -7745,9 +7745,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">æ¸ éæ´»ç </h1>
+<h1 id="aicrm---">渠道活码</h1>
 
-## æ´æ°æ´»ç 
+## 更新活码
 
 <a id="opIdupdate_9"></a>
 
@@ -7769,7 +7769,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 1,
-  "name": "æé³å¼æµæ´»ç ",
+  "name": "抖音引流活码",
   "channelAccountId": 1,
   "scene": "1:1",
   "qrUrl": "https://example.com/landing?from=qr",
@@ -7800,7 +7800,7 @@ fetch('http://localhost:8080/api/channel/qr-codes/{id}',
 
 `PUT /api/channel/qr-codes/{id}`
 
-æ´æ°æ¸ éæ´»ç ä¿¡æ¯ï¼æ´ä½è¦çæäº¤å­æ®µï¼æªæäº¤å­æ®µä¿æåå¼ï¼ãéæé channel:editã
+更新渠道活码信息（整体覆盖提交字段，未提交字段保持原值）。需权限 channel:edit。
 
 > Body parameter
 
@@ -7810,7 +7810,7 @@ fetch('http://localhost:8080/api/channel/qr-codes/{id}',
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 1,
-  "name": "æé³å¼æµæ´»ç ",
+  "name": "抖音引流活码",
   "channelAccountId": 1,
   "scene": "1:1",
   "qrUrl": "https://example.com/landing?from=qr",
@@ -7820,30 +7820,30 @@ fetch('http://localhost:8080/api/channel/qr-codes/{id}',
 }
 ```
 
-<h3 id="æ´æ°æ´»ç -parameters">Parameters</h3>
+<h3 id="更新活码-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æ´»ç  ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|活码 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[ChannelQrCode](#schemachannelqrcode)|true|none|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="æ´æ°æ´»ç -responses">Responses</h3>
+<h3 id="更新活码-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ´»ç ä¸å­å¨|[ResultChannelQrCode](#schemaresultchannelqrcode)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|活码不存在|[ResultChannelQrCode](#schemaresultchannelqrcode)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤æ´»ç 
+## 删除活码
 
 <a id="opIddelete_10"></a>
 
@@ -7882,31 +7882,31 @@ fetch('http://localhost:8080/api/channel/qr-codes/{id}',
 
 `DELETE /api/channel/qr-codes/{id}`
 
-å é¤æ¸ éæ´»ç ï¼é»è¾å é¤ï¼ï¼å·²äº§ççæ«ç äºä»¶æ°æ®ä¿çãéæé channel:deleteã
+删除渠道活码（逻辑删除），已产生的扫码事件数据保留。需权限 channel:delete。
 
-<h3 id="å é¤æ´»ç -parameters">Parameters</h3>
+<h3 id="删除活码-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æ´»ç  ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|活码 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤æ´»ç -responses">Responses</h3>
+<h3 id="删除活码-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ´»ç ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|活码不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ´»ç åé¡µæ¥è¯¢
+## 活码分页查询
 
 <a id="opIdpage_13"></a>
 
@@ -7945,23 +7945,23 @@ fetch('http://localhost:8080/api/channel/qr-codes',
 
 `GET /api/channel/qr-codes`
 
-æ¸ éæ´»ç åé¡µæ¥è¯¢ï¼æ¯ææåç§°å³é®å­/å¼æµæ¸ éè´¦å·è¿æ»¤ãéæé channel:listã
+渠道活码分页查询，支持按名称关键字/引流渠道账号过滤。需权限 channel:list。
 
-<h3 id="æ´»ç åé¡µæ¥è¯¢-parameters">Parameters</h3>
+<h3 id="活码分页查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|æ´»ç åç§°å³é®å­ï¼æ¨¡ç³å¹éï¼|
-|channelAccountId|query|integer(int64)|false|å¼æµæ¸ éè´¦å· IDï¼å¯¹åº channel_account.idï¼|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|活码名称关键字（模糊匹配）|
+|channelAccountId|query|integer(int64)|false|引流渠道账号 ID（对应 channel_account.id）|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ´»ç åé¡µæ¥è¯¢-responses">Responses</h3>
+<h3 id="活码分页查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -7972,7 +7972,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## çææ´»ç 
+## 生成活码
 
 <a id="opIdcreate_13"></a>
 
@@ -7994,7 +7994,7 @@ const inputBody = '{
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 1,
-  "name": "æé³å¼æµæ´»ç ",
+  "name": "抖音引流活码",
   "channelAccountId": 1,
   "scene": "1:1",
   "qrUrl": "https://example.com/landing?from=qr",
@@ -8025,28 +8025,28 @@ fetch('http://localhost:8080/api/channel/qr-codes',
 
 `POST /api/channel/qr-codes`
 
-çææ¸ éæ´»ç ï¼æå®å¼æµæ¸ éè´¦å·ä¸è½å°å°åï¼çæçäºç»´ç åå®¹æå /{id}/scan æ«ç å¥å£ï¼ç¨äºæ¸ éæ¥æºæ è®°ä¸å¼æµå½å ãéæé channel:addã
-scene ä¸å¡«æ¶é»è®¤å æ¸ éID:è´¦å·IDï¼scanCount/convertedCount ä¸å¡«é»è®¤ 0ï¼status ä¸å¡«é»è®¤ 1 å¯ç¨ã
+生成渠道活码：指定引流渠道账号与落地地址，生成的二维码内容指向 /{id}/scan 扫码入口，用于渠道来源标记与引流归因。需权限 channel:add。
+scene 不填时默认取 渠道ID:账号ID；scanCount/convertedCount 不填默认 0；status 不填默认 1 启用。
 
-è¯·æ±ç¤ºä¾ï¼
+请求示例：
 ```json
 {
-  "name": "æé³å¼æµæ´»ç ",
+  "name": "抖音引流活码",
   "channelAccountId": 1,
   "scene": "douyin:1",
   "qrUrl": "https://example.com/landing?from=qr",
   "status": 1
 }
 ```
-è¿åç¤ºä¾ï¼
+返回示例：
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "tenantId": 1,
-    "name": "æé³å¼æµæ´»ç ",
+    "name": "抖音引流活码",
     "channelAccountId": 1,
     "scene": "douyin:1",
     "qrUrl": "https://example.com/landing?from=qr",
@@ -8067,7 +8067,7 @@ scene ä¸å¡«æ¶é»è®¤å æ¸ éID:è´¦å·IDï¼sc
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 1,
-  "name": "æé³å¼æµæ´»ç ",
+  "name": "抖音引流活码",
   "channelAccountId": 1,
   "scene": "1:1",
   "qrUrl": "https://example.com/landing?from=qr",
@@ -8077,30 +8077,30 @@ scene ä¸å¡«æ¶é»è®¤å æ¸ éID:è´¦å·IDï¼sc
 }
 ```
 
-<h3 id="çææ´»ç -parameters">Parameters</h3>
+<h3 id="生成活码-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[ChannelQrCode](#schemachannelqrcode)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="çææ´»ç -responses">Responses</h3>
+<h3 id="生成活码-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|æ´»ç åç§°/å¼æµæ¸ éè´¦å·ä¸è½ä¸ºç©º|[ResultChannelQrCode](#schemaresultchannelqrcode)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|å¼æµæ¸ éè´¦å·ä¸å­å¨ï¼ä¸å¡ç  1302ï¼|[ResultChannelQrCode](#schemaresultchannelqrcode)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|活码名称/引流渠道账号不能为空|[ResultChannelQrCode](#schemaresultchannelqrcode)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|引流渠道账号不存在（业务码 1302）|[ResultChannelQrCode](#schemaresultchannelqrcode)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å¯åæ´»ç 
+## 启停活码
 
 <a id="opIdupdateStatus_6"></a>
 
@@ -8139,32 +8139,32 @@ fetch('http://localhost:8080/api/channel/qr-codes/{id}/status?status=0',
 
 `POST /api/channel/qr-codes/{id}/status`
 
-å¯ç¨/åç¨æ¸ éæ´»ç ï¼åç¨åæ«ç å¥å£è¿å 400 ä¸å¡éè¯¯âæ´»ç å·²åç¨âãéæé channel:editã
+启用/停用渠道活码：停用后扫码入口返回 400 业务错误“活码已停用”。需权限 channel:edit。
 
-<h3 id="å¯åæ´»ç -parameters">Parameters</h3>
+<h3 id="启停活码-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æ´»ç  ID|
-|status|query|integer(int32)|true|ç¶æï¼1å¯ç¨/0åç¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|活码 ID|
+|status|query|integer(int32)|true|状态：1启用/0停用|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å¯åæ´»ç -responses">Responses</h3>
+<h3 id="启停活码-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ´»ç ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|活码不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ«ç è·³è½¬å¥å£
+## 扫码跳转入口
 
 <a id="opIdscan"></a>
 
@@ -8201,31 +8201,31 @@ fetch('http://localhost:8080/api/channel/qr-codes/{id}/scan',
 
 `GET /api/channel/qr-codes/{id}/scan`
 
-æ«ç è·³è½¬å¥å£ï¼äºç»´ç åå®¹æåæ­¤å°åï¼ï¼è®°å½æ«ç æ¬¡æ°å¹¶ä¸æ¥æ«ç äºä»¶ï¼event_type=qrï¼æºå¸¦ scene æ¥æºæ è®°ç¨äºçº¿ç´¢å½å ï¼ï¼éå 302 è·³è½¬å°è½å°å°å qrUrlï¼æ´»ç åç¨æ¶è¿å 400 ä¸å¡éè¯¯âæ´»ç å·²åç¨âãå¬å¼æ¥å£ï¼æ ç»å½ä¸æéæ ¡éªã
+扫码跳转入口（二维码内容指向此地址）：记录扫码次数并上报扫码事件（event_type=qr，携带 scene 来源标记用于线索归因），随后 302 跳转到落地地址 qrUrl；活码停用时返回 400 业务错误“活码已停用”。公开接口，无登录与权限校验。
 
-<h3 id="æ«ç è·³è½¬å¥å£-parameters">Parameters</h3>
+<h3 id="扫码跳转入口-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æ´»ç  ID|
-|scene|query|string|false|æ¸ éæ¥æºæ è®°ï¼æ«ç åºæ¯ï¼ï¼ä¸ä¼ ååæ´»ç èªå¸¦ scene|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|活码 ID|
+|scene|query|string|false|渠道来源标记（扫码场景），不传则取活码自带 scene|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
-<h3 id="æ«ç è·³è½¬å¥å£-responses">Responses</h3>
+<h3 id="扫码跳转入口-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|æ´»ç å·²åç¨|None|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ´»ç ä¸å­å¨|None|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|活码已停用|None|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|活码不存在|None|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">æ¸ éè´¦å·</h1>
+<h1 id="aicrm---">渠道账号</h1>
 
-## æ´æ°è´¦å·ä¿¡æ¯/ææéç½®
+## 更新账号信息/授权配置
 
 <a id="opIdupdate_10"></a>
 
@@ -8248,7 +8248,7 @@ const inputBody = '{
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 1,
   "channelId": 1,
-  "accountName": "åçå®æ¹å·",
+  "accountName": "品牌官方号",
   "externalId": "douyin_open_id_xxx",
   "authConfig": "string",
   "healthStatus": 1,
@@ -8277,7 +8277,7 @@ fetch('http://localhost:8080/api/channel/accounts/{id}',
 
 `PUT /api/channel/accounts/{id}`
 
-æ´æ°æ¸ éè´¦å·ä¿¡æ¯æææéç½®ï¼æ´ä½è¦çæäº¤å­æ®µï¼æªæäº¤å­æ®µä¿æåå¼ï¼ãéæé channel:editã
+更新渠道账号信息或授权配置（整体覆盖提交字段，未提交字段保持原值）。需权限 channel:edit。
 
 > Body parameter
 
@@ -8288,7 +8288,7 @@ fetch('http://localhost:8080/api/channel/accounts/{id}',
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 1,
   "channelId": 1,
-  "accountName": "åçå®æ¹å·",
+  "accountName": "品牌官方号",
   "externalId": "douyin_open_id_xxx",
   "authConfig": "string",
   "healthStatus": 1,
@@ -8296,30 +8296,30 @@ fetch('http://localhost:8080/api/channel/accounts/{id}',
 }
 ```
 
-<h3 id="æ´æ°è´¦å·ä¿¡æ¯/ææéç½®-parameters">Parameters</h3>
+<h3 id="更新账号信息/授权配置-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æ¸ éè´¦å· ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|渠道账号 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[ChannelAccount](#schemachannelaccount)|true|none|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="æ´æ°è´¦å·ä¿¡æ¯/ææéç½®-responses">Responses</h3>
+<h3 id="更新账号信息/授权配置-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ¸ éè´¦å·ä¸å­å¨ï¼ä¸å¡ç  1302ï¼|[ResultChannelAccount](#schemaresultchannelaccount)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|渠道账号不存在（业务码 1302）|[ResultChannelAccount](#schemaresultchannelaccount)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å é¤æ¸ éè´¦å·
+## 删除渠道账号
 
 <a id="opIddelete_11"></a>
 
@@ -8358,31 +8358,31 @@ fetch('http://localhost:8080/api/channel/accounts/{id}',
 
 `DELETE /api/channel/accounts/{id}`
 
-å é¤æ¸ éè´¦å·ï¼é»è¾å é¤ï¼ãéæé channel:deleteã
+删除渠道账号（逻辑删除）。需权限 channel:delete。
 
-<h3 id="å é¤æ¸ éè´¦å·-parameters">Parameters</h3>
+<h3 id="删除渠道账号-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æ¸ éè´¦å· ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|渠道账号 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤æ¸ éè´¦å·-responses">Responses</h3>
+<h3 id="删除渠道账号-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ¸ éè´¦å·ä¸å­å¨ï¼ä¸å¡ç  1302ï¼|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|渠道账号不存在（业务码 1302）|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## è´¦å·åé¡µæ¥è¯¢
+## 账号分页查询
 
 <a id="opIdpage_14"></a>
 
@@ -8421,24 +8421,24 @@ fetch('http://localhost:8080/api/channel/accounts',
 
 `GET /api/channel/accounts`
 
-æ¸ éè´¦å·åé¡µæ¥è¯¢ï¼æ¯ææè´¦å·åç§°å³é®å­/æ¸ é/å¥åº·ç¶æè¿æ»¤ãéæé channel:listã
+渠道账号分页查询，支持按账号名称关键字/渠道/健康状态过滤。需权限 channel:list。
 
-<h3 id="è´¦å·åé¡µæ¥è¯¢-parameters">Parameters</h3>
+<h3 id="账号分页查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|è´¦å·åç§°å³é®å­ï¼æ¨¡ç³å¹éï¼|
-|channelId|query|integer(int64)|false|æ¸ é IDï¼å¯¹åº channel.idï¼|
-|healthStatus|query|integer(int32)|false|å¥åº·ç¶æï¼1æ­£å¸¸/2åé/3å°ç¦|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|账号名称关键字（模糊匹配）|
+|channelId|query|integer(int64)|false|渠道 ID（对应 channel.id）|
+|healthStatus|query|integer(int32)|false|健康状态：1正常/2受限/3封禁|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="è´¦å·åé¡µæ¥è¯¢-responses">Responses</h3>
+<h3 id="账号分页查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -8449,7 +8449,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## ç»å®æ¸ éè´¦å·
+## 绑定渠道账号
 
 <a id="opIdcreate_14"></a>
 
@@ -8472,7 +8472,7 @@ const inputBody = '{
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 1,
   "channelId": 1,
-  "accountName": "åçå®æ¹å·",
+  "accountName": "品牌官方号",
   "externalId": "douyin_open_id_xxx",
   "authConfig": "string",
   "healthStatus": 1,
@@ -8501,30 +8501,30 @@ fetch('http://localhost:8080/api/channel/accounts',
 
 `POST /api/channel/accounts`
 
-ç»å®æ¸ éè´¦å·ï¼å½å¥è´¦å·åºç¡ä¿¡æ¯ä¸ææéç½® auth_configï¼ç»å®åå¯ç¨äºè¯¥æ¸ éçæ¶æ¯æ¶åä¸äºä»¶æ¥æ¶ãéæé channel:addã
-auth_configï¼JSONB å­ç¬¦ä¸²ï¼å­å¨ç»æï¼{"accessToken":"è®¿é®ä»¤ç","refreshToken":"å·æ°ä»¤ç","expireAt":"è¿ææ¶é´epochæ¯«ç§"}ï¼æé³å¦å« appId/secretï¼ä¼ä¸å¾®ä¿¡å¦å« corpId/corpSecretï¼ææ¸ éå¯æ©å±ã
+绑定渠道账号：录入账号基础信息与授权配置 auth_config，绑定后可用于该渠道的消息收发与事件接收。需权限 channel:add。
+auth_config（JSONB 字符串）存储结构：{"accessToken":"访问令牌","refreshToken":"刷新令牌","expireAt":"过期时间epoch毫秒"}，抖音另含 appId/secret，企业微信另含 corpId/corpSecret，按渠道可扩展。
 
-è¯·æ±ç¤ºä¾ï¼
+请求示例：
 ```json
 {
   "channelId": 1,
-  "accountName": "åçå®æ¹å·",
+  "accountName": "品牌官方号",
   "externalId": "douyin_open_id_123",
   "authConfig": "{\"accessToken\":\"at_xxx\",\"refreshToken\":\"rt_xxx\",\"expireAt\":\"1780000000000\",\"appId\":\"appid\",\"secret\":\"secret\"}",
   "healthStatus": 1,
   "riskLevel": 0
 }
 ```
-è¿åç¤ºä¾ï¼
+返回示例：
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "tenantId": 1,
     "channelId": 1,
-    "accountName": "åçå®æ¹å·",
+    "accountName": "品牌官方号",
     "externalId": "douyin_open_id_123",
     "authConfig": "{\"accessToken\":\"at_xxx\",...}",
     "healthStatus": 1,
@@ -8544,7 +8544,7 @@ auth_configï¼JSONB å­ç¬¦ä¸²ï¼å­å¨ç»æï¼{"a
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 1,
   "channelId": 1,
-  "accountName": "åçå®æ¹å·",
+  "accountName": "品牌官方号",
   "externalId": "douyin_open_id_xxx",
   "authConfig": "string",
   "healthStatus": 1,
@@ -8552,29 +8552,29 @@ auth_configï¼JSONB å­ç¬¦ä¸²ï¼å­å¨ç»æï¼{"a
 }
 ```
 
-<h3 id="ç»å®æ¸ éè´¦å·-parameters">Parameters</h3>
+<h3 id="绑定渠道账号-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[ChannelAccount](#schemachannelaccount)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="ç»å®æ¸ éè´¦å·-responses">Responses</h3>
+<h3 id="绑定渠道账号-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è´¦å·åç§°/æ¸ éä¸è½ä¸ºç©º|[ResultChannelAccount](#schemaresultchannelaccount)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|账号名称/渠道不能为空|[ResultChannelAccount](#schemaresultchannelaccount)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å·æ°ææä»¤ç
+## 刷新授权令牌
 
 <a id="opIdrefreshToken"></a>
 
@@ -8613,32 +8613,32 @@ fetch('http://localhost:8080/api/channel/accounts/{id}/refresh-token',
 
 `POST /api/channel/accounts/{id}/refresh-token`
 
-æå¨å·æ°æ¸ éè´¦å·ç access_tokenï¼token è¿æææå¨è§¦ååºæ¯ï¼ãå·æ°æåè¿å trueï¼å¤±è´¥è¿å falseï¼å¦å¯é¥éè¯¯/æ¥å£å¼å¸¸ï¼ãéæé channel:tokenã
+手动刷新渠道账号的 access_token（token 过期或手动触发场景）。刷新成功返回 true，失败返回 false（如密钥错误/接口异常）。需权限 channel:token。
 
-<h3 id="å·æ°ææä»¤ç-parameters">Parameters</h3>
+<h3 id="刷新授权令牌-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æ¸ éè´¦å· ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|渠道账号 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å·æ°ææä»¤ç-responses">Responses</h3>
+<h3 id="刷新授权令牌-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ¸ éè´¦å·ä¸å­å¨ï¼ä¸å¡ç  1302ï¼|[ResultBoolean](#schemaresultboolean)|
-|502|[Bad Gateway](https://tools.ietf.org/html/rfc7231#section-6.6.3)|æ¸ éå¼æ¾å¹³å° API è°ç¨å¤±è´¥ï¼ä¸å¡ç  1304ï¼|[ResultBoolean](#schemaresultboolean)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|渠道账号不存在（业务码 1302）|[ResultBoolean](#schemaresultboolean)|
+|502|[Bad Gateway](https://tools.ietf.org/html/rfc7231#section-6.6.3)|渠道开放平台 API 调用失败（业务码 1304）|[ResultBoolean](#schemaresultboolean)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ´æ°å¥åº·ç¶æï¼ç¶æçæ§åè°ï¼
+## 更新健康状态（状态监控回调）
 
 <a id="opIdupdateHealth"></a>
 
@@ -8677,35 +8677,35 @@ fetch('http://localhost:8080/api/channel/accounts/{id}/health?healthStatus=0',
 
 `POST /api/channel/accounts/{id}/health`
 
-æ´æ°æ¸ éè´¦å·å¥åº·ç¶æ/é£æ§ç­çº§ï¼ä¾å®æ¶å·¡æ£æäººå·¥æ è®°è°ç¨ï¼ãéæé channel:tokenã
+更新渠道账号健康状态/风控等级（供定时巡检或人工标记调用）。需权限 channel:token。
 
-<h3 id="æ´æ°å¥åº·ç¶æï¼ç¶æçæ§åè°ï¼-parameters">Parameters</h3>
+<h3 id="更新健康状态（状态监控回调）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æ¸ éè´¦å· ID|
-|healthStatus|query|integer(int32)|true|å¥åº·ç¶æï¼1æ­£å¸¸/2åé/3å°ç¦|
-|riskLevel|query|integer(int32)|false|é£æ§ç­çº§ï¼0ä½/1ä¸­/2é«ï¼å¯ç©ºï¼ä¼ ç©ºåä¸æ´æ°ï¼|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|渠道账号 ID|
+|healthStatus|query|integer(int32)|true|健康状态：1正常/2受限/3封禁|
+|riskLevel|query|integer(int32)|false|风控等级：0低/1中/2高（可空，传空则不更新）|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="æ´æ°å¥åº·ç¶æï¼ç¶æçæ§åè°ï¼-responses">Responses</h3>
+<h3 id="更新健康状态（状态监控回调）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|æ¸ éè´¦å·ä¸å­å¨ï¼ä¸å¡ç  1302ï¼|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|渠道账号不存在（业务码 1302）|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">çº¿ç´¢ç®¡ç</h1>
+<h1 id="aicrm---">线索管理</h1>
 
-## åé¡µæ¥è¯¢çº¿ç´¢
+## 分页查询线索
 
 <a id="opIdpage_5"></a>
 
@@ -8744,24 +8744,24 @@ fetch('http://localhost:8080/api/leads',
 
 `GET /api/leads`
 
-æéï¼lead:listãæç§æ·/ç¶æ/æåç»´åº¦åé¡µæ¥è¯¢çº¿ç´¢ï¼status åå¼ï¼newæ°çº¿ç´¢/assignedå·²åé/contactingè·è¿ä¸­/effectiveææ/quotedå·²æ¥ä»·/opportunityåæº/lostæµå¤±ï¼intent åå¼ï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»ã
+权限：lead:list。按租户/状态/意向维度分页查询线索；status 取值：new新线索/assigned已分配/contacting跟进中/effective有效/quoted已报价/opportunity商机/lost流失；intent 取值：quote报价/sample样品/selection选型/other其他。
 
-<h3 id="åé¡µæ¥è¯¢çº¿ç´¢-parameters">Parameters</h3>
+<h3 id="分页查询线索-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|tenantId|query|integer(int64)|false|ç§æ· IDï¼å¹³å°ç®¡çåå¯æå®ï¼ä¸ºç©ºé»è®¤å½åç§æ·ï¼|
-|status|query|string|false|çº¿ç´¢ç¶æï¼newæ°çº¿ç´¢/assignedå·²åé/contactingè·è¿ä¸­/effectiveææ/quotedå·²æ¥ä»·/opportunityåæº/lostæµå¤±|
-|intent|query|string|false|å®¢æ·æåï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|tenantId|query|integer(int64)|false|租户 ID（平台管理员可指定，为空默认当前租户）|
+|status|query|string|false|线索状态：new新线索/assigned已分配/contacting跟进中/effective有效/quoted已报价/opportunity商机/lost流失|
+|intent|query|string|false|客户意向：quote报价/sample样品/selection选型/other其他|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="åé¡µæ¥è¯¢çº¿ç´¢-responses">Responses</h3>
+<h3 id="分页查询线索-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -8772,7 +8772,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºçº¿ç´¢
+## 创建线索
 
 <a id="opIdcreate_6"></a>
 
@@ -8829,7 +8829,7 @@ fetch('http://localhost:8080/api/leads',
 
 `POST /api/leads`
 
-æéï¼lead:listãåå»ºçº¿ç´¢ï¼æ¸ éæ¥å¥/åå¸­æå¨å½å¥ï¼ï¼intent åå¼ï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»ï¼status é»è®¤ newæ°çº¿ç´¢ã
+权限：lead:list。创建线索（渠道接入/坐席手动录入）；intent 取值：quote报价/sample样品/selection选型/other其他，status 默认 new新线索。
 
 > Body parameter
 
@@ -8853,29 +8853,29 @@ fetch('http://localhost:8080/api/leads',
 }
 ```
 
-<h3 id="åå»ºçº¿ç´¢-parameters">Parameters</h3>
+<h3 id="创建线索-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Lead](#schemalead)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºçº¿ç´¢-responses">Responses</h3>
+<h3 id="创建线索-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|tenantId ä¸è½ä¸ºç©º|[ResultLead](#schemaresultlead)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|tenantId 不能为空|[ResultLead](#schemaresultlead)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ¥è¯¢çº¿ç´¢è¯¦æ
+## 查询线索详情
 
 <a id="opIddetail_6"></a>
 
@@ -8914,20 +8914,20 @@ fetch('http://localhost:8080/api/leads/{id}',
 
 `GET /api/leads/{id}`
 
-æéï¼lead:listãæ ID æ¥è¯¢çº¿ç´¢è¯¦æï¼å«æ½åå³é®å­æ®µï¼extraï¼ã
+权限：lead:list。按 ID 查询线索详情，含抽取关键字段（extra）。
 
-<h3 id="æ¥è¯¢çº¿ç´¢è¯¦æ-parameters">Parameters</h3>
+<h3 id="查询线索详情-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|çº¿ç´¢ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|线索 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ¥è¯¢çº¿ç´¢è¯¦æ-responses">Responses</h3>
+<h3 id="查询线索详情-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -8938,9 +8938,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">å®æ¶ä»»å¡</h1>
+<h1 id="aicrm---">定时任务</h1>
 
-## æå¨è§¦åä»»å¡
+## 手动触发任务
 
 <a id="opIdrun"></a>
 
@@ -8979,31 +8979,31 @@ fetch('http://localhost:8080/api/jobs/{code}/run',
 
 `POST /api/jobs/{code}/run`
 
-éæé job:runï¼ç«å³æ§è¡ä¸æ¬¡æå®ä»»å¡
+需权限 job:run，立即执行一次指定任务
 
-<h3 id="æå¨è§¦åä»»å¡-parameters">Parameters</h3>
+<h3 id="手动触发任务-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|code|path|string|true|ä»»å¡ç¼ç |
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|code|path|string|true|任务编码|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="æå¨è§¦åä»»å¡-responses">Responses</h3>
+<h3 id="手动触发任务-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ä»»å¡ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|任务不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## ä»»å¡åè¡¨ï¼å«è¿è¡ç¶æï¼
+## 任务列表（含运行状态）
 
 <a id="opIdlist_1"></a>
 
@@ -9042,19 +9042,19 @@ fetch('http://localhost:8080/api/jobs',
 
 `GET /api/jobs`
 
-éæé job:listï¼è¿åå¨é¨å·²æ³¨åå®æ¶ä»»å¡åå¶å½åè¿è¡ç¶æ
+需权限 job:list，返回全部已注册定时任务及其当前运行状态
 
-<h3 id="ä»»å¡åè¡¨ï¼å«è¿è¡ç¶æï¼-parameters">Parameters</h3>
+<h3 id="任务列表（含运行状态）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="ä»»å¡åè¡¨ï¼å«è¿è¡ç¶æï¼-responses">Responses</h3>
+<h3 id="任务列表（含运行状态）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -9065,7 +9065,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## ä»»å¡æ§è¡è®°å½åé¡µæ¥è¯¢
+## 任务执行记录分页查询
 
 <a id="opIdlogs"></a>
 
@@ -9104,23 +9104,23 @@ fetch('http://localhost:8080/api/jobs/logs',
 
 `GET /api/jobs/logs`
 
-éæé job:list
+需权限 job:list
 
-<h3 id="ä»»å¡æ§è¡è®°å½åé¡µæ¥è¯¢-parameters">Parameters</h3>
+<h3 id="任务执行记录分页查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|jobCode|query|string|false|ä»»å¡ç¼ç |
-|result|query|integer(int32)|false|æ§è¡ç»æï¼1 æå / 0 å¤±è´¥|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|jobCode|query|string|false|任务编码|
+|result|query|integer(int32)|false|执行结果：1 成功 / 0 失败|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="ä»»å¡æ§è¡è®°å½åé¡µæ¥è¯¢-responses">Responses</h3>
+<h3 id="任务执行记录分页查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -9131,9 +9131,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">èº«ä»½å½ä¸</h1>
+<h1 id="aicrm---">身份归一</h1>
 
-## çº¿ç´¢åå¹¶ï¼æ¬¡è¦çº¿ç´¢å½å¹¶å°ä¸»çº¿ç´¢ï¼
+## 线索合并（次要线索归并到主线索）
 
 <a id="opIdmergeLeads"></a>
 
@@ -9172,33 +9172,33 @@ fetch('http://localhost:8080/api/identities/leads/{primaryId}/merge/{secondaryId
 
 `POST /api/identities/leads/{primaryId}/merge/{secondaryId}`
 
-æéï¼identity:mergeãå°æ¬¡è¦çº¿ç´¢çèº«ä»½æ å°ãè·è¿è®°å½ç­å½å¹¶å°ä¸»çº¿ç´¢ï¼å¹¶å é¤æ¬¡è¦çº¿ç´¢ï¼è¿ååå¹¶åçä¸»çº¿ç´¢ IDã
+权限：identity:merge。将次要线索的身份映射、跟进记录等归并到主线索，并删除次要线索；返回合并后的主线索 ID。
 
-<h3 id="çº¿ç´¢åå¹¶ï¼æ¬¡è¦çº¿ç´¢å½å¹¶å°ä¸»çº¿ç´¢ï¼-parameters">Parameters</h3>
+<h3 id="线索合并（次要线索归并到主线索）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|primaryId|path|integer(int64)|true|ä¸»çº¿ç´¢ IDï¼ä¿çï¼|
-|secondaryId|path|integer(int64)|true|æ¬¡è¦çº¿ç´¢ IDï¼è¢«åå¹¶ï¼|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|primaryId|path|integer(int64)|true|主线索 ID（保留）|
+|secondaryId|path|integer(int64)|true|次要线索 ID（被合并）|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="çº¿ç´¢åå¹¶ï¼æ¬¡è¦çº¿ç´¢å½å¹¶å°ä¸»çº¿ç´¢ï¼-responses">Responses</h3>
+<h3 id="线索合并（次要线索归并到主线索）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|ä¸è½åå¹¶èªèº«|[ResultLong](#schemaresultlong)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|çº¿ç´¢ä¸å­å¨ï¼ä¸å¡ç  1201ï¼|[ResultLong](#schemaresultlong)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|不能合并自身|[ResultLong](#schemaresultlong)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|线索不存在（业务码 1201）|[ResultLong](#schemaresultlong)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æå¨ç»å®èº«ä»½å°çº¿ç´¢
+## 手动绑定身份到线索
 
 <a id="opIdbind"></a>
 
@@ -9245,7 +9245,7 @@ fetch('http://localhost:8080/api/identities/bind',
 
 `POST /api/identities/bind`
 
-æéï¼identity:editãå°ä¸æ¡èº«ä»½ï¼ææºå·/é®ç®±/ç¤¾åªID/ä¼å¾®ID/WhatsApp/ä¼ä¸ååï¼æå¨ç»å®å°æå®çº¿ç´¢ï¼tenantId ä¸ºç©ºæ¶é»è®¤å½åç§æ·ã
+权限：identity:edit。将一条身份（手机号/邮箱/社媒ID/企微ID/WhatsApp/企业域名）手动绑定到指定线索；tenantId 为空时默认当前租户。
 
 > Body parameter
 
@@ -9259,30 +9259,30 @@ fetch('http://localhost:8080/api/identities/bind',
 }
 ```
 
-<h3 id="æå¨ç»å®èº«ä»½å°çº¿ç´¢-parameters">Parameters</h3>
+<h3 id="手动绑定身份到线索-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[BindRequest](#schemabindrequest)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æå¨ç»å®èº«ä»½å°çº¿ç´¢-responses">Responses</h3>
+<h3 id="手动绑定身份到线索-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|èº«ä»½ç±»åä¸å¼ä¸è½ä¸ºç©º|[ResultVoid](#schemaresultvoid)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|çº¿ç´¢ä¸å­å¨ï¼ä¸å¡ç  1201ï¼|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|身份类型与值不能为空|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|线索不存在（业务码 1201）|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æ¥è¯¢å®ä½çèº«ä»½æ å°åè¡¨
+## 查询实体的身份映射列表
 
 <a id="opIdmappings"></a>
 
@@ -9321,21 +9321,21 @@ fetch('http://localhost:8080/api/identities?entityType=string&entityId=0',
 
 `GET /api/identities`
 
-æéï¼identity:listãæå®ä½ç±»å+å®ä½ ID æ¥è¯¢å¶ä¸ç»å®çå¨é¨èº«ä»½æ å°ï¼å«å¹éç½®ä¿¡åº¦ï¼ã
+权限：identity:list。按实体类型+实体 ID 查询其下绑定的全部身份映射（含匹配置信度）。
 
-<h3 id="æ¥è¯¢å®ä½çèº«ä»½æ å°åè¡¨-parameters">Parameters</h3>
+<h3 id="查询实体的身份映射列表-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|entityType|query|string|true|å®ä½ç±»åï¼leadçº¿ç´¢/contactèç³»äºº/customerå®¢æ·|
-|entityId|query|integer(int64)|true|å®ä½ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|entityType|query|string|true|实体类型：lead线索/contact联系人/customer客户|
+|entityId|query|integer(int64)|true|实体 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ¥è¯¢å®ä½çèº«ä»½æ å°åè¡¨-responses">Responses</h3>
+<h3 id="查询实体的身份映射列表-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -9346,7 +9346,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## èº«ä»½è¯¦æ
+## 身份详情
 
 <a id="opIddetail_7"></a>
 
@@ -9385,20 +9385,20 @@ fetch('http://localhost:8080/api/identities/{id}',
 
 `GET /api/identities/{id}`
 
-æéï¼identity:listãæ ID æ¥è¯¢èº«ä»½è¯¦æï¼identity_type åå¼ï¼mobileææºå·/emailé®ç®±/socialç¤¾åªID/wecomä¼å¾®ID/whatsapp/domainä¼ä¸ååï¼ã
+权限：identity:list。按 ID 查询身份详情（identity_type 取值：mobile手机号/email邮箱/social社媒ID/wecom企微ID/whatsapp/domain企业域名）。
 
-<h3 id="èº«ä»½è¯¦æ-parameters">Parameters</h3>
+<h3 id="身份详情-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|èº«ä»½ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|身份 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="èº«ä»½è¯¦æ-responses">Responses</h3>
+<h3 id="身份详情-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -9409,7 +9409,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## å é¤èº«ä»½æ å°
+## 删除身份映射
 
 <a id="opIdremoveMapping"></a>
 
@@ -9448,33 +9448,33 @@ fetch('http://localhost:8080/api/identities/mappings/{id}',
 
 `DELETE /api/identities/mappings/{id}`
 
-æéï¼identity:deleteãææ å° ID å é¤èº«ä»½ä¸å®ä½ä¹é´çç»å®å³ç³»ã
+权限：identity:delete。按映射 ID 删除身份与实体之间的绑定关系。
 
-<h3 id="å é¤èº«ä»½æ å°-parameters">Parameters</h3>
+<h3 id="删除身份映射-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|èº«ä»½æ å° ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|身份映射 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å é¤èº«ä»½æ å°-responses">Responses</h3>
+<h3 id="删除身份映射-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|èº«ä»½æ å°ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|身份映射不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">è·è¿è®°å½</h1>
+<h1 id="aicrm---">跟进记录</h1>
 
-## è·è¿è®°å½åå²æ¥è¯¢
+## 跟进记录历史查询
 
 <a id="opIdpage_6"></a>
 
@@ -9513,23 +9513,23 @@ fetch('http://localhost:8080/api/follow-ups',
 
 `GET /api/follow-ups`
 
-æéï¼follow:listãæçº¿ç´¢æå®¢æ·ç»´åº¦åé¡µæ¥è¯¢è·è¿åå²ï¼ä¸¤ä¸ªç»´åº¦åå¯ä¸å¡«ï¼æ¥å¨é¨ï¼ã
+权限：follow:list。按线索或客户维度分页查询跟进历史，两个维度均可不填（查全部）。
 
-<h3 id="è·è¿è®°å½åå²æ¥è¯¢-parameters">Parameters</h3>
+<h3 id="跟进记录历史查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|leadId|query|integer(int64)|false|å³èçº¿ç´¢ IDï¼æçº¿ç´¢ç»´åº¦æ¥è·è¿è®°å½ï¼|
-|customerId|query|integer(int64)|false|å³èå®¢æ· IDï¼æå®¢æ·ç»´åº¦æ¥è·è¿è®°å½ï¼|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|leadId|query|integer(int64)|false|关联线索 ID（按线索维度查跟进记录）|
+|customerId|query|integer(int64)|false|关联客户 ID（按客户维度查跟进记录）|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="è·è¿è®°å½åå²æ¥è¯¢-responses">Responses</h3>
+<h3 id="跟进记录历史查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -9540,7 +9540,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ°å¢è·è¿è®°å½ï¼èªå¨åæ­¥çº¿ç´¢è·è¿ç¶æï¼
+## 新增跟进记录（自动同步线索跟进状态）
 
 <a id="opIdcreate_7"></a>
 
@@ -9565,7 +9565,7 @@ const inputBody = '{
   "leadId": 0,
   "customerId": 0,
   "userId": 0,
-  "content": "å®¢æ·å¯¹æ¥ä»·æ¹æ¡ææåï¼çº¦ä¸å¨é¢è°",
+  "content": "客户对报价方案有意向，约下周面谈",
   "method": "wechat",
   "nextTime": "2019-08-24T14:15:22Z"
 }';
@@ -9592,7 +9592,7 @@ fetch('http://localhost:8080/api/follow-ups',
 
 `POST /api/follow-ups`
 
-æéï¼follow:addãæ°å¢ä¸æ¡è·è¿è®°å½ï¼è¥å³èçº¿ç´¢ï¼åå»ºåèªå¨å°çº¿ç´¢ç¶æåæ­¥ä¸ºè·è¿ä¸­ï¼contactingï¼ã
+权限：follow:add。新增一条跟进记录；若关联线索，创建后自动将线索状态同步为跟进中（contacting）。
 
 > Body parameter
 
@@ -9605,37 +9605,37 @@ fetch('http://localhost:8080/api/follow-ups',
   "leadId": 0,
   "customerId": 0,
   "userId": 0,
-  "content": "å®¢æ·å¯¹æ¥ä»·æ¹æ¡ææåï¼çº¦ä¸å¨é¢è°",
+  "content": "客户对报价方案有意向，约下周面谈",
   "method": "wechat",
   "nextTime": "2019-08-24T14:15:22Z"
 }
 ```
 
-<h3 id="æ°å¢è·è¿è®°å½ï¼èªå¨åæ­¥çº¿ç´¢è·è¿ç¶æï¼-parameters">Parameters</h3>
+<h3 id="新增跟进记录（自动同步线索跟进状态）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[FollowUp](#schemafollowup)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="æ°å¢è·è¿è®°å½ï¼èªå¨åæ­¥çº¿ç´¢è·è¿ç¶æï¼-responses">Responses</h3>
+<h3 id="新增跟进记录（自动同步线索跟进状态）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è·è¿åå®¹ä¸è½ä¸ºç©º/çº¿ç´¢æå®¢æ·è³å°å³èä¸ä¸ª|[ResultFollowUp](#schemaresultfollowup)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|跟进内容不能为空/线索或客户至少关联一个|[ResultFollowUp](#schemaresultfollowup)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">æä»¶ç®¡ç</h1>
+<h1 id="aicrm---">文件管理</h1>
 
-## ä¸ä¼ æä»¶
+## 上传文件
 
 <a id="opIdupload"></a>
 
@@ -9678,7 +9678,7 @@ fetch('http://localhost:8080/api/files/upload',
 
 `POST /api/files/upload`
 
-multipart/form-data è¡¨åä¸ä¼ ï¼file å­æ®µä¸ºæä»¶æµï¼è¿åæä»¶è®°å½ä¸è®¿é®å°å
+multipart/form-data 表单上传，file 字段为文件流，返回文件记录与访问地址
 
 > Body parameter
 
@@ -9688,31 +9688,31 @@ multipart/form-data è¡¨åä¸ä¼ ï¼file å­æ®µä¸ºæ�
 }
 ```
 
-<h3 id="ä¸ä¼ æä»¶-parameters">Parameters</h3>
+<h3 id="上传文件-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|object|false|none|
-|» file|body|string(binary)|true|æä»¶|
+|» file|body|string(binary)|true|文件|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="ä¸ä¼ æä»¶-responses">Responses</h3>
+<h3 id="上传文件-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|ä¸ä¼ æä»¶ä¸è½ä¸ºç©º|[ResultFileUploadVO](#schemaresultfileuploadvo)|
-|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|æä»¶ä¸ä¼ å¤±è´¥ï¼ä¸å¡ç  1701ï¼|[ResultFileUploadVO](#schemaresultfileuploadvo)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|上传文件不能为空|[ResultFileUploadVO](#schemaresultfileuploadvo)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|文件上传失败（业务码 1701）|[ResultFileUploadVO](#schemaresultfileuploadvo)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## æä»¶åè¡¨åé¡µ
+## 文件列表分页
 
 <a id="opIdpage_7"></a>
 
@@ -9751,21 +9751,21 @@ fetch('http://localhost:8080/api/files',
 
 `GET /api/files`
 
-éæé file:list
+需权限 file:list
 
-<h3 id="æä»¶åè¡¨åé¡µ-parameters">Parameters</h3>
+<h3 id="文件列表分页-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æä»¶åè¡¨åé¡µ-responses">Responses</h3>
+<h3 id="文件列表分页-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -9776,7 +9776,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## ä¸è½½/é¢è§æä»¶
+## 下载/预览文件
 
 <a id="opIddownload"></a>
 
@@ -9815,20 +9815,20 @@ fetch('http://localhost:8080/api/files/{id}',
 
 `GET /api/files/{id}`
 
-ææä»¶ ID è¿åæä»¶åå®¹ï¼ååºå¤´å¸¦åå§æä»¶åä¸ Content-Typeï¼
+按文件 ID 返回文件内容（响应头带原始文件名与 Content-Type）
 
-<h3 id="ä¸è½½/é¢è§æä»¶-parameters">Parameters</h3>
+<h3 id="下载/预览文件-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æä»¶è®°å½ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|文件记录 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="ä¸è½½/é¢è§æä»¶-responses">Responses</h3>
+<h3 id="下载/预览文件-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -9839,7 +9839,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## å é¤æä»¶
+## 删除文件
 
 <a id="opIddelete_6"></a>
 
@@ -9878,33 +9878,33 @@ fetch('http://localhost:8080/api/files/{id}',
 
 `DELETE /api/files/{id}`
 
-éæé file:delete
+需权限 file:delete
 
-<h3 id="å é¤æä»¶-parameters">Parameters</h3>
+<h3 id="删除文件-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|æä»¶è®°å½ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|文件记录 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="å é¤æä»¶-responses">Responses</h3>
+<h3 id="删除文件-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|æä»¶ä¸å­å¨|[ResultVoid](#schemaresultvoid)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|文件不存在|[ResultVoid](#schemaresultvoid)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">ä¼è¯</h1>
+<h1 id="aicrm---">会话</h1>
 
-## ä¼è¯åé¡µæ¥è¯¢
+## 会话分页查询
 
 <a id="opIdpage_10"></a>
 
@@ -9943,26 +9943,26 @@ fetch('http://localhost:8080/api/conversations',
 
 `GET /api/conversations`
 
-ä¼è¯ç®¡ç - ä¼è¯åé¡µæ¥è¯¢ï¼æé conversation:listï¼ï¼æ¯æå³é®å­ï¼ä¼è¯ç±»å/IDï¼ãç¶æãå¤çäººè¿æ»¤ã
+会话管理 - 会话分页查询（权限 conversation:list），支持关键字（会话类型/ID）、状态、处理人过滤。
 
-status æä¸¾ï¼activeè¿è¡ä¸­/transferredå·²è½¬äººå·¥/closedå·²å³é­/archivedå·²å½æ¡£ã
+status 枚举：active进行中/transferred已转人工/closed已关闭/archived已归档。
 
-<h3 id="ä¼è¯åé¡µæ¥è¯¢-parameters">Parameters</h3>
+<h3 id="会话分页查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|å³é®å­ï¼æ¨¡ç³å¹éä¼è¯ç±»å/ä¼è¯ IDï¼|
-|status|query|string|false|ä¼è¯ç¶æï¼activeè¿è¡ä¸­/transferredå·²è½¬äººå·¥/closedå·²å³é­/archivedå·²å½æ¡£|
-|assignedTo|query|integer(int64)|false|å½åäººå·¥å¤çäºº ID|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|关键字（模糊匹配会话类型/会话 ID）|
+|status|query|string|false|会话状态：active进行中/transferred已转人工/closed已关闭/archived已归档|
+|assignedTo|query|integer(int64)|false|当前人工处理人 ID|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="ä¼è¯åé¡µæ¥è¯¢-responses">Responses</h3>
+<h3 id="会话分页查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -9973,7 +9973,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå»ºä¼è¯
+## 创建会话
 
 <a id="opIdcreate_10"></a>
 
@@ -10026,9 +10026,9 @@ fetch('http://localhost:8080/api/conversations',
 
 `POST /api/conversations`
 
-ä¼è¯ç®¡ç - åå»ºä¼è¯ï¼æé conversation:editï¼ï¼æ¿æ¥ä¼å¾®/WhatsApp/ç§ä¿¡å®¢æ·ï¼æ¯ä¼è¯çå½å¨æèµ·ç¹ã
+会话管理 - 创建会话（权限 conversation:edit），承接企微/WhatsApp/私信客户，是会话生命周期起点。
 
-å¿å¡«ï¼tenantIdãleadIdï¼status ä¸ä¼ æ¶é»è®¤ activeã
+必填：tenantId、leadId；status 不传时默认 active。
 
 > Body parameter
 
@@ -10048,29 +10048,29 @@ fetch('http://localhost:8080/api/conversations',
 }
 ```
 
-<h3 id="åå»ºä¼è¯-parameters">Parameters</h3>
+<h3 id="创建会话-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Conversation](#schemaconversation)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="åå»ºä¼è¯-responses">Responses</h3>
+<h3 id="创建会话-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|tenantId ä¸ leadId ä¸è½ä¸ºç©º|[ResultConversation](#schemaresultconversation)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|tenantId 与 leadId 不能为空|[ResultConversation](#schemaresultconversation)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## è½¬äººå·¥å¹¶çæäº¤æ¥åï¼ä¸ä¼  operatorId æ¶èªå¨åééå®ï¼
+## 转人工并生成交接包（不传 operatorId 时自动分配销售）
 
 <a id="opIdtransfer"></a>
 
@@ -10109,15 +10109,15 @@ fetch('http://localhost:8080/api/conversations/{id}/transfer',
 
 `POST /api/conversations/{id}/transfer`
 
-ä¼è¯ç®¡ç - è½¬äººå·¥å¹¶çæäº¤æ¥åï¼æé conversation:editï¼ï¼ä¼è¯ç¶æç½®ä¸º transferredãassignedTo æåæ¥æåå¸­ï¼è¿å AI æè¦ + æè¿æå + ç¼ºå¤±å­æ®µ + æ¨èè¯æ¯çäº¤æ¥åã
+会话管理 - 转人工并生成交接包（权限 conversation:edit）：会话状态置为 transferred、assignedTo 指向接手坐席，返回 AI 摘要 + 最近意向 + 缺失字段 + 推荐话术的交接包。
 
-operatorId ä¸ä¼ æ¶ä¼åçº¿ç´¢è´è´£äººï¼å¦åèµ°åéå¼æèªå¨åéï¼æ å¯ç¨åå¸­æ¶è¿å 400ã
+operatorId 不传时优先线索负责人，否则走分配引擎自动分配；无可用坐席时返回 400。
 
-è¯·æ±ç¤ºä¾ï¼
+请求示例：
 ```
 POST /api/conversations/100/transfer?operatorId=8
 ```
-è¿åç¤ºä¾ï¼
+返回示例：
 ```json
 {
   "code": 200,
@@ -10128,49 +10128,49 @@ POST /api/conversations/100/transfer?operatorId=8
     "leadId": 50,
     "conversationType": "wecom_chat",
     "operatorId": 8,
-    "summary": "å®¢æ·å¨è¯¢äº§åæ¥ä»·ï¼å·²ç¡®è®¤åºç¨åºæ¯ï¼éè´­æ°éä¸é¢ç®å¾è¡¥å",
+    "summary": "客户咨询产品报价，已确认应用场景，采购数量与预算待补充",
     "summarySource": "ai",
     "intent": "quote",
     "confidence": 0.82,
-    "evidence": "å®¢æ·æå°éè¦ 500 å°ï¼å¸ææ¬å¨åæ¿å°æ¥ä»·",
+    "evidence": "客户提到需要 500 台，希望本周内拿到报价",
     "missingFields": ["qty", "budget"],
-    "recommendedReply": "æ¨å¥½ï¼ææ¯äººå·¥é¡¾é®ï¼å·²ä¸ºæ¨æ´çæ¥ä»·éæ±ãä¸ºåç¡®æ¥ä»·ï¼è¯·è¡¥åï¼åºç¨åºæ¯ãéè´­æ°éãé¢ç®èå´ãææäº¤æï¼æå°½å¿«ç»æ¨æ­£å¼æ¥ä»·ã",
+    "recommendedReply": "您好，我是人工顾问，已为您整理报价需求。为准确报价，请补充：应用场景、采购数量、预算范围、期望交期，我尽快给您正式报价。",
     "nextSteps": [
-      "AI å·²çæå¯¹è¯æè¦ï¼åå¸­ç¡®è®¤ååå¤å®¢æ·",
-      "è¡¥é½æ¥ä»·å³é®å­æ®µï¼qty/budgetï¼",
-      "å­æ®µé½å¨åçææ¥ä»·åï¼è·è¿æ¥ä»·æå",
-      "ä½ç½®ä¿¡åº¦/å¤æé®é¢å·²è½¬äººå·¥ï¼åå¸­ä¼åååº"
+      "AI 已生成对话摘要，坐席确认后回复客户",
+      "补齐报价关键字段（qty/budget）",
+      "字段齐全后生成报价单，跟进报价意向",
+      "低置信度/复杂问题已转人工，坐席优先响应"
     ],
     "transferredAt": "2026-08-03 14:30:00"
   }
 }
 ```
 
-<h3 id="è½¬äººå·¥å¹¶çæäº¤æ¥åï¼ä¸ä¼ -operatorid-æ¶èªå¨åééå®ï¼-parameters">Parameters</h3>
+<h3 id="转人工并生成交接包（不传-operatorid-时自动分配销售）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ä¼è¯ ID|
-|operatorId|query|integer(int64)|false|æ¥æåå¸­ IDï¼å¯ç©ºï¼ä¸ä¼ æ¶èªå¨åéï¼|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|会话 ID|
+|operatorId|query|integer(int64)|false|接手坐席 ID（可空，不传时自动分配）|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="è½¬äººå·¥å¹¶çæäº¤æ¥åï¼ä¸ä¼ -operatorid-æ¶èªå¨åééå®ï¼-responses">Responses</h3>
+<h3 id="转人工并生成交接包（不传-operatorid-时自动分配销售）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|ææ å¯æ¥æçå¨çº¿åå¸­/operatorId ä¸è½ä¸ºç©º|[ResultTransferPackage](#schemaresulttransferpackage)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ä¼è¯ä¸å­å¨ï¼ä¸å¡ç  1401ï¼|[ResultTransferPackage](#schemaresulttransferpackage)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|暂无可接手的在线坐席/operatorId 不能为空|[ResultTransferPackage](#schemaresulttransferpackage)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|会话不存在（业务码 1401）|[ResultTransferPackage](#schemaresulttransferpackage)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## ä¼è¯æ¶æ¯åé¡µï¼åå²æ¼«æ¸¸ï¼
+## 会话消息分页（历史漫游）
 
 <a id="opIdmessages"></a>
 
@@ -10209,25 +10209,25 @@ fetch('http://localhost:8080/api/conversations/{id}/messages',
 
 `GET /api/conversations/{id}/messages`
 
-ä¼è¯ç®¡ç - æ¶æ¯åé¡µæ¥è¯¢ï¼æé message:listï¼ï¼å¯æåéæ¹è¿æ»¤ï¼æ¶æ¯æ ID ååºè¿åã
+会话管理 - 消息分页查询（权限 message:list），可按发送方过滤，消息按 ID 升序返回。
 
-senderType æä¸¾ï¼customerå®¢æ·/aiæºå¨äºº/humanäººå·¥/systemç³»ç»ã
+senderType 枚举：customer客户/ai机器人/human人工/system系统。
 
-<h3 id="ä¼è¯æ¶æ¯åé¡µï¼åå²æ¼«æ¸¸ï¼-parameters">Parameters</h3>
+<h3 id="会话消息分页（历史漫游）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ä¼è¯ ID|
-|senderType|query|string|false|åéæ¹ï¼customerå®¢æ·/aiæºå¨äºº/humanäººå·¥/systemç³»ç»|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|会话 ID|
+|senderType|query|string|false|发送方：customer客户/ai机器人/human人工/system系统|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="ä¼è¯æ¶æ¯åé¡µï¼åå²æ¼«æ¸¸ï¼-responses">Responses</h3>
+<h3 id="会话消息分页（历史漫游）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -10238,7 +10238,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## è¿½å æ¶æ¯
+## 追加消息
 
 <a id="opIdappendMessage"></a>
 
@@ -10292,20 +10292,20 @@ fetch('http://localhost:8080/api/conversations/{id}/messages',
 
 `POST /api/conversations/{id}/messages`
 
-ä¼è¯ç®¡ç - è¿½å ä¸æ¡æ¶æ¯ï¼æé message:addï¼ï¼ç¨äºäººå·¥/ç³»ç»è¡¥å½æ¶æ¯ã
+会话管理 - 追加一条消息（权限 message:add），用于人工/系统补录消息。
 
-è¯·æ±ç¤ºä¾ï¼
+请求示例：
 ```json
 {
   "tenantId": 1,
   "conversationId": 100,
   "senderType": "human",
-  "content": "æ¨å¥½ï¼å³äºæ¥ä»·éæ±æå·²æ´çï¼è¯·è¡¥åéè´­æ°é",
+  "content": "您好，关于报价需求我已整理，请补充采购数量",
   "msgType": "text",
   "aiGenerated": false
 }
 ```
-è¿åç¤ºä¾ï¼
+返回示例：
 ```json
 {
   "code": 200,
@@ -10315,7 +10315,7 @@ fetch('http://localhost:8080/api/conversations/{id}/messages',
     "tenantId": 1,
     "conversationId": 100,
     "senderType": "human",
-    "content": "æ¨å¥½ï¼å³äºæ¥ä»·éæ±æå·²æ´çï¼è¯·è¡¥åéè´­æ°é",
+    "content": "您好，关于报价需求我已整理，请补充采购数量",
     "msgType": "text",
     "aiGenerated": false,
     "createdAt": "2026-08-03 12:00:00",
@@ -10323,7 +10323,7 @@ fetch('http://localhost:8080/api/conversations/{id}/messages',
   }
 }
 ```
-æ³¨æï¼conversationId ä»¥è·¯å¾åæ°ä¸ºåï¼è¯·æ±ä½ä¸­çå¼ä¼è¢«è¦çï¼msgType ä¸ä¼ é»è®¤ textã
+注意：conversationId 以路径参数为准，请求体中的值会被覆盖；msgType 不传默认 text。
 
 > Body parameter
 
@@ -10344,31 +10344,31 @@ fetch('http://localhost:8080/api/conversations/{id}/messages',
 }
 ```
 
-<h3 id="è¿½å æ¶æ¯-parameters">Parameters</h3>
+<h3 id="追加消息-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ä¼è¯ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|会话 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[Message](#schemamessage)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="è¿½å æ¶æ¯-responses">Responses</h3>
+<h3 id="追加消息-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|conversationId/æ¶æ¯åå®¹ä¸è½ä¸ºç©º|[ResultMessage](#schemaresultmessage)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ä¼è¯ä¸å­å¨ï¼ä¸å¡ç  1401ï¼|[ResultMessage](#schemaresultmessage)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|conversationId/消息内容不能为空|[ResultMessage](#schemaresultmessage)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|会话不存在（业务码 1401）|[ResultMessage](#schemaresultmessage)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å³é­ä¼è¯
+## 关闭会话
 
 <a id="opIdclose"></a>
 
@@ -10407,32 +10407,32 @@ fetch('http://localhost:8080/api/conversations/{id}/close',
 
 `POST /api/conversations/{id}/close`
 
-ä¼è¯ç®¡ç - å³é­ä¼è¯ï¼æé conversation:editï¼ï¼å·²å½æ¡£ä¼è¯ä¸å¯å³é­ï¼å³é­åç¶æç½®ä¸º closedã
+会话管理 - 关闭会话（权限 conversation:edit），已归档会话不可关闭，关闭后状态置为 closed。
 
-<h3 id="å³é­ä¼è¯-parameters">Parameters</h3>
+<h3 id="关闭会话-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ä¼è¯ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|会话 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="å³é­ä¼è¯-responses">Responses</h3>
+<h3 id="关闭会话-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|å·²å½æ¡£ä¼è¯ä¸è½å³é­|[ResultConversation](#schemaresultconversation)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ä¼è¯ä¸å­å¨ï¼ä¸å¡ç  1401ï¼|[ResultConversation](#schemaresultconversation)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|已归档会话不能关闭|[ResultConversation](#schemaresultconversation)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|会话不存在（业务码 1401）|[ResultConversation](#schemaresultconversation)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## å½æ¡£ä¼è¯
+## 归档会话
 
 <a id="opIdarchive"></a>
 
@@ -10471,31 +10471,31 @@ fetch('http://localhost:8080/api/conversations/{id}/archive',
 
 `POST /api/conversations/{id}/archive`
 
-ä¼è¯ç®¡ç - å½æ¡£ä¼è¯ï¼æé conversation:editï¼ï¼å½æ¡£åç¶æç½®ä¸º archivedã
+会话管理 - 归档会话（权限 conversation:edit），归档后状态置为 archived。
 
-<h3 id="å½æ¡£ä¼è¯-parameters">Parameters</h3>
+<h3 id="归档会话-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ä¼è¯ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|会话 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="å½æ¡£ä¼è¯-responses">Responses</h3>
+<h3 id="归档会话-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ä¼è¯ä¸å­å¨ï¼ä¸å¡ç  1401ï¼|[ResultConversation](#schemaresultconversation)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|会话不存在（业务码 1401）|[ResultConversation](#schemaresultconversation)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## AI æ¥å¾ï¼æ¶æ¯è½åº â æåå¤å® â çæåå¤ï¼
+## AI 接待（消息落库 → 意向判定 → 生成回复）
 
 <a id="opIdaiReply"></a>
 
@@ -10536,10 +10536,10 @@ fetch('http://localhost:8080/api/conversations/{id}/ai-reply',
 
 `POST /api/conversations/{id}/ai-reply`
 
-ä¼è¯ç®¡ç - AI æ¥å¾å¥å£ï¼æé message:addï¼ï¼å®¢æ·æ¶æ¯è½åº â æåå¤å® â çæ AI åå¤ï¼AI ä¸å¯ç¨éçº§è§åè¯æ¯ï¼â åå¤è½åºã
+会话管理 - AI 接待入口（权限 message:add）：客户消息落库 → 意向判定 → 生成 AI 回复（AI 不可用降级规则话术）→ 回复落库。
 
-è¯·æ±ä½ä¸º JSON å­ç¬¦ä¸²ï¼è£¸å­ç¬¦ä¸²ï¼ï¼ä¾å¦ï¼"ææ³äºè§£è´µå¸äº§åçæ¥ä»·"
-è¿å AiReply å­æ®µï¼content åå¤åå®¹ãintent æåï¼quote/sample/selection/otherï¼ãconfidence ç½®ä¿¡åº¦ãshouldTransfer æ¯å¦å»ºè®®è½¬äººå·¥ã
+请求体为 JSON 字符串（裸字符串），例如："我想了解贵司产品的报价"
+返回 AiReply 字段：content 回复内容、intent 意向（quote/sample/selection/other）、confidence 置信度、shouldTransfer 是否建议转人工。
 
 > Body parameter
 
@@ -10547,30 +10547,30 @@ fetch('http://localhost:8080/api/conversations/{id}/ai-reply',
 "string"
 ```
 
-<h3 id="ai-æ¥å¾ï¼æ¶æ¯è½åº-â-æåå¤å®-â-çæåå¤ï¼-parameters">Parameters</h3>
+<h3 id="ai-接待（消息落库-→-意向判定-→-生成回复）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ä¼è¯ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|会话 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|string|true|none|
 
 > Example responses
 
 > 404 Response
 
-<h3 id="ai-æ¥å¾ï¼æ¶æ¯è½åº-â-æåå¤å®-â-çæåå¤ï¼-responses">Responses</h3>
+<h3 id="ai-接待（消息落库-→-意向判定-→-生成回复）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ä¼è¯ä¸å­å¨ï¼ä¸å¡ç  1401ï¼|[ResultAiReply](#schemaresultaireply)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|会话不存在（业务码 1401）|[ResultAiReply](#schemaresultaireply)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-## ä¼è¯è¯¦æ
+## 会话详情
 
 <a id="opIddetail_9"></a>
 
@@ -10609,20 +10609,20 @@ fetch('http://localhost:8080/api/conversations/{id}',
 
 `GET /api/conversations/{id}`
 
-ä¼è¯ç®¡ç - ä¼è¯è¯¦æï¼æé conversation:listï¼ã
+会话管理 - 会话详情（权限 conversation:list）。
 
-<h3 id="ä¼è¯è¯¦æ-parameters">Parameters</h3>
+<h3 id="会话详情-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ä¼è¯ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|会话 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="ä¼è¯è¯¦æ-responses">Responses</h3>
+<h3 id="会话详情-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -10633,7 +10633,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ¥è¯¢äº¤æ¥åï¼åå¸­æ¥æåæ¥çï¼
+## 查询交接包（坐席接手后查看）
 
 <a id="opIdgetTransferPackage"></a>
 
@@ -10672,9 +10672,9 @@ fetch('http://localhost:8080/api/conversations/{id}/transfer-package',
 
 `GET /api/conversations/{id}/transfer-package`
 
-ä¼è¯ç®¡ç - æ¥è¯¢äº¤æ¥åï¼æé conversation:listï¼ï¼åå¸­æ¥æåæ¥çä¼è¯ä¸ä¸æï¼å¯¹è¯æè¦ + æå + ç¼ºå¤±å­æ®µ + æ¨èè¯æ¯ï¼ã
+会话管理 - 查询交接包（权限 conversation:list）：坐席接手后查看会话上下文（对话摘要 + 意向 + 缺失字段 + 推荐话术）。
 
-è¿åç¤ºä¾ï¼
+返回示例：
 ```json
 {
   "code": 200,
@@ -10685,36 +10685,36 @@ fetch('http://localhost:8080/api/conversations/{id}/transfer-package',
     "leadId": 50,
     "conversationType": "wecom_chat",
     "operatorId": 8,
-    "summary": "AI æè¦æå¡æä¸å¯ç¨ï¼è¯·åå¸­æ¥çæè¿ 20 æ¡æ¶æ¯è®°å½ã",
+    "summary": "AI 摘要服务暂不可用，请坐席查看最近 20 条消息记录。",
     "summarySource": "fallback",
     "intent": "selection",
     "confidence": 0.76,
-    "evidence": "å®¢æ·è¡¨ç¤ºå¯¹åå·éåä¸ç¡®å®ï¼éè¦å¯¹æ¯æ¨è",
+    "evidence": "客户表示对型号选型不确定，需要对比推荐",
     "missingFields": ["scene", "qty", "budget", "lead_time", "model"],
-    "recommendedReply": "æ¨å¥½ï¼å·²æ¶å°æ¨çéåéæ±ãä¸ºç»åºç²¾åæ¨èï¼è¯·è¡¥ååºç¨åºæ¯ä¸å·¥åµè¦æ±ï¼æä»¬é©¬ä¸ä¸ºæ¨éåã",
+    "recommendedReply": "您好，已收到您的选型需求。为给出精准推荐，请补充应用场景与工况要求，我们马上为您选型。",
     "nextSteps": [
-      "AI å·²çæå¯¹è¯æè¦ï¼åå¸­ç¡®è®¤ååå¤å®¢æ·",
-      "è¾åºéåå¯¹æ¯è¡¨ï¼æ¨è 2-3 æ¬¾ï¼",
-      "éåç¡®è®¤åå¼å¯¼æ¥ä»·",
-      "ä½ç½®ä¿¡åº¦/å¤æé®é¢å·²è½¬äººå·¥ï¼åå¸­ä¼åååº"
+      "AI 已生成对话摘要，坐席确认后回复客户",
+      "输出选型对比表（推荐 2-3 款）",
+      "选型确认后引导报价",
+      "低置信度/复杂问题已转人工，坐席优先响应"
     ],
     "transferredAt": "2026-08-03 14:30:00"
   }
 }
 ```
 
-<h3 id="æ¥è¯¢äº¤æ¥åï¼åå¸­æ¥æåæ¥çï¼-parameters">Parameters</h3>
+<h3 id="查询交接包（坐席接手后查看）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ä¼è¯ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|会话 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ¥è¯¢äº¤æ¥åï¼åå¸­æ¥æåæ¥çï¼-responses">Responses</h3>
+<h3 id="查询交接包（坐席接手后查看）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -10725,7 +10725,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## è½¬äººå·¥æ¡ä»¶è¯ä¼°
+## 转人工条件评估
 
 <a id="opIdevaluateTransfer"></a>
 
@@ -10764,23 +10764,23 @@ fetch('http://localhost:8080/api/conversations/{id}/transfer-evaluation',
 
 `GET /api/conversations/{id}/transfer-evaluation`
 
-ä¼è¯ç®¡ç - è½¬äººå·¥æ¡ä»¶è¯ä¼°ï¼æé conversation:listï¼ï¼åºäºæè¿æåå¤å®ç»æå¤æ­æ¯å¦éè¦è½¬äººå·¥ã
+会话管理 - 转人工条件评估（权限 conversation:list）：基于最近意向判定结果判断是否需要转人工。
 
-è§¦åæ¡ä»¶ï¼æåä¸º other / ç½®ä¿¡åº¦ä½äº 0.5 / å°æ æåå¤å®ã
-è¿å TransferEvaluation å­æ®µï¼shouldTransfer æ¯å¦å»ºè®®è½¬äººå·¥ãintent æåãconfidence ç½®ä¿¡åº¦ãreason å¤å®åå ã
+触发条件：意向为 other / 置信度低于 0.5 / 尚无意向判定。
+返回 TransferEvaluation 字段：shouldTransfer 是否建议转人工、intent 意向、confidence 置信度、reason 判定原因。
 
-<h3 id="è½¬äººå·¥æ¡ä»¶è¯ä¼°-parameters">Parameters</h3>
+<h3 id="转人工条件评估-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|integer(int64)|true|ä¼è¯ ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|id|path|integer(int64)|true|会话 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="è½¬äººå·¥æ¡ä»¶è¯ä¼°-responses">Responses</h3>
+<h3 id="转人工条件评估-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -10791,9 +10791,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">æ¸ éäºä»¶</h1>
+<h1 id="aicrm---">渠道事件</h1>
 
-## æ¥æ¶æ¸ éäºä»¶ï¼Webhookï¼
+## 接收渠道事件（Webhook）
 
 <a id="opIdreceive"></a>
 
@@ -10845,11 +10845,11 @@ fetch('http://localhost:8080/api/channel/events',
 
 `POST /api/channel/events`
 
-ä¸æ¸ é Webhook ç»ä¸å¥å£ï¼æ¥æ¶æé³/è§é¢å·/ä¼ä¸å¾®ä¿¡ç­æ¸ éæ¨éçäºä»¶ï¼æ (tenantId+channelAccountId+externalEventId) å¹ç­å»éåå¥åºå¹¶åå¸å¼æ­¥äºä»¶ã
-è¿å true è¡¨ç¤ºé¦æ¬¡æ¥æ¶å¹¶å·²å¥åºï¼è¿å false è¡¨ç¤ºéå¤äºä»¶è¢«å¿½ç¥ï¼ä¸éå¤è½åºï¼ã
-eventType åå¼ï¼commentè¯è®º/dmç§ä¿¡/formè¡¨å/clickç¹å»/leadçº¿ç´¢ã
-rawPayloadï¼JSONBï¼å­å¨æ¸ éåè°çå®æ´åå§ JSONï¼å­æ®µéæ¸ éä¸äºä»¶ç±»åä¸åã
-è¯¥æ¥å£ä¸ºæ¸ éå¹³å°åè°å¥å£ï¼æ ç»å½ä¸æéæ ¡éªï¼æ¬çæ¬ä¸ºæ¨¡æå®ç°ï¼æªåæ¸ éç­¾åæ ¡éªï¼ã
+三渠道 Webhook 统一入口：接收抖音/视频号/企业微信等渠道推送的事件，按 (tenantId+channelAccountId+externalEventId) 幂等去重后入库并发布异步事件。
+返回 true 表示首次接收并已入库；返回 false 表示重复事件被忽略（不重复落库）。
+eventType 取值：comment评论/dm私信/form表单/click点击/lead线索。
+rawPayload（JSONB）存储渠道回调的完整原始 JSON，字段随渠道与事件类型不同。
+该接口为渠道平台回调入口，无登录与权限校验（本版本为模拟实现，未做渠道签名校验）。
 
 > Body parameter
 
@@ -10868,18 +10868,18 @@ rawPayloadï¼JSONBï¼å­å¨æ¸ éåè°çå®æ�
 }
 ```
 
-<h3 id="æ¥æ¶æ¸ éäºä»¶ï¼webhookï¼-parameters">Parameters</h3>
+<h3 id="接收渠道事件（webhook）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[ChannelEvent](#schemachannelevent)|true|none|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ¥æ¶æ¸ éäºä»¶ï¼webhookï¼-responses">Responses</h3>
+<h3 id="接收渠道事件（webhook）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -10890,9 +10890,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">è®¤è¯</h1>
+<h1 id="aicrm---">认证</h1>
 
-## ç»å½ï¼ç­¾å JWTï¼
+## 登录（签发 JWT）
 
 <a id="opIdlogin"></a>
 
@@ -10937,7 +10937,7 @@ fetch('http://localhost:8080/api/auth/login',
 
 `POST /api/auth/login`
 
-å¬å¼æ¥å£ï¼æ éç»å½ï¼æåè¿å JWT ä»¤ç
+公开接口，无需登录；成功返回 JWT 令牌
 
 > Body parameter
 
@@ -10949,33 +10949,33 @@ fetch('http://localhost:8080/api/auth/login',
 }
 ```
 
-<h3 id="ç»å½ï¼ç­¾å-jwtï¼-parameters">Parameters</h3>
+<h3 id="登录（签发-jwt）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 |body|body|[LoginRequest](#schemaloginrequest)|true|none|
 
 > Example responses
 
 > 400 Response
 
-<h3 id="ç»å½ï¼ç­¾å-jwtï¼-responses">Responses</h3>
+<h3 id="登录（签发-jwt）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|è´¦å·æå¯ç éè¯¯/è´¦å·å·²ç¦ç¨/åæ°ç¼ºå¤±|[ResultLoginResponse](#schemaresultloginresponse)|
-|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|ç§æ·å·²åç¨ï¼ä¸å¡ç  1002ï¼|[ResultLoginResponse](#schemaresultloginresponse)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|ç§æ·ä¸å­å¨ï¼ä¸å¡ç  1001ï¼|[ResultLoginResponse](#schemaresultloginresponse)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|账号或密码错误/账号已禁用/参数缺失|[ResultLoginResponse](#schemaresultloginresponse)|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|租户已停用（业务码 1002）|[ResultLoginResponse](#schemaresultloginresponse)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|租户不存在（业务码 1001）|[ResultLoginResponse](#schemaresultloginresponse)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">ä¼å¾®ä¾§è¾¹æ </h1>
+<h1 id="aicrm---">企微侧边栏</h1>
 
-## æ¨èè¯æ¯
+## 推荐话术
 
 <a id="opIdreplySuggestions"></a>
 
@@ -11014,23 +11014,23 @@ fetch('http://localhost:8080/api/wecom/sidebar/reply-suggestions?externalUserId=
 
 `GET /api/wecom/sidebar/reply-suggestions`
 
-ä¼å¾®ä¾§è¾¹æ  - æ¨èè¯æ¯ï¼æé wecom:sidebarï¼ï¼ææåè¿åå»ºè®®è¯æ¯ä¸ç¼ºå¤±å­æ®µï¼intent ä¸ä¼ æ¶åçº¿ç´¢æè¿æåã
+企微侧边栏 - 推荐话术（权限 wecom:sidebar）：按意向返回建议话术与缺失字段；intent 不传时取线索最近意向。
 
-intent æä¸¾ï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»ã
+intent 枚举：quote报价/sample样品/selection选型/other其他。
 
-<h3 id="æ¨èè¯æ¯-parameters">Parameters</h3>
+<h3 id="推荐话术-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|externalUserId|query|string|true|ä¼å¾®å¤é¨ç¨æ· ID|
-|intent|query|string|false|æåï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»ï¼å¯ç©ºï¼é»è®¤åçº¿ç´¢æè¿æåï¼|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|externalUserId|query|string|true|企微外部用户 ID|
+|intent|query|string|false|意向：quote报价/sample样品/selection选型/other其他（可空，默认取线索最近意向）|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ¨èè¯æ¯-responses">Responses</h3>
+<h3 id="推荐话术-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11041,7 +11041,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## å®¢æ·ç»å
+## 客户画像
 
 <a id="opIdprofile"></a>
 
@@ -11080,20 +11080,20 @@ fetch('http://localhost:8080/api/wecom/sidebar/profile?externalUserId=string',
 
 `GET /api/wecom/sidebar/profile`
 
-ä¼å¾®ä¾§è¾¹æ  - å®¢æ·ç»åï¼æé wecom:sidebarï¼ï¼æä¼å¾®å¤é¨ç¨æ· ID èåèº«ä»½âçº¿ç´¢âå®¢æ·ä¿¡æ¯ãæ ç­¾ãæè¿æåã
+企微侧边栏 - 客户画像（权限 wecom:sidebar）：按企微外部用户 ID 聚合身份→线索→客户信息、标签、最近意向。
 
-<h3 id="å®¢æ·ç»å-parameters">Parameters</h3>
+<h3 id="客户画像-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|externalUserId|query|string|true|ä¼å¾®å¤é¨ç¨æ· ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|externalUserId|query|string|true|企微外部用户 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="å®¢æ·ç»å-responses">Responses</h3>
+<h3 id="客户画像-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11104,7 +11104,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## äº§åèµæï¼å¿«æ·åéï¼
+## 产品资料（快捷发送）
 
 <a id="opIdproducts"></a>
 
@@ -11143,22 +11143,22 @@ fetch('http://localhost:8080/api/wecom/sidebar/products',
 
 `GET /api/wecom/sidebar/products`
 
-ä¼å¾®ä¾§è¾¹æ  - äº§åèµæåé¡µï¼æé wecom:sidebarï¼ï¼ä»å±ç¤ºä¸æ¶äº§åï¼ä¾åå¸­å¿«æ·åéã
+企微侧边栏 - 产品资料分页（权限 wecom:sidebar）：仅展示上架产品，供坐席快捷发送。
 
-<h3 id="äº§åèµæï¼å¿«æ·åéï¼-parameters">Parameters</h3>
+<h3 id="产品资料（快捷发送）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|äº§ååç§°å³é®å­ï¼å¯ç©ºï¼|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|产品名称关键字（可空）|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="äº§åèµæï¼å¿«æ·åéï¼-responses">Responses</h3>
+<h3 id="产品资料（快捷发送）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11169,7 +11169,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## åå²ä¼è¯
+## 历史会话
 
 <a id="opIdhistory"></a>
 
@@ -11208,20 +11208,20 @@ fetch('http://localhost:8080/api/wecom/sidebar/history?externalUserId=string',
 
 `GET /api/wecom/sidebar/history`
 
-ä¼å¾®ä¾§è¾¹æ  - åå²ä¼è¯ï¼æé wecom:sidebarï¼ï¼è¿åè¯¥ä¼å¾®å®¢æ·å³èçä¼è¯åè¡¨ï¼å«æè¿ä¸æ¡æ¶æ¯ï¼ã
+企微侧边栏 - 历史会话（权限 wecom:sidebar）：返回该企微客户关联的会话列表（含最近一条消息）。
 
-<h3 id="åå²ä¼è¯-parameters">Parameters</h3>
+<h3 id="历史会话-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|externalUserId|query|string|true|ä¼å¾®å¤é¨ç¨æ· ID|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|externalUserId|query|string|true|企微外部用户 ID|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="åå²ä¼è¯-responses">Responses</h3>
+<h3 id="历史会话-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11232,9 +11232,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">å¥é¤</h1>
+<h1 id="aicrm---">套餐</h1>
 
-## å¥é¤åè¡¨ï¼ä»ä¸æ¶ï¼
+## 套餐列表（仅上架）
 
 <a id="opIdlist"></a>
 
@@ -11273,19 +11273,19 @@ fetch('http://localhost:8080/api/plans',
 
 `GET /api/plans`
 
-ç»å½ç¨æ·å³å¯è®¿é®
+登录用户即可访问
 
-<h3 id="å¥é¤åè¡¨ï¼ä»ä¸æ¶ï¼-parameters">Parameters</h3>
+<h3 id="套餐列表（仅上架）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="å¥é¤åè¡¨ï¼ä»ä¸æ¶ï¼-responses">Responses</h3>
+<h3 id="套餐列表（仅上架）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11296,7 +11296,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## å¥é¤è¯¦æ
+## 套餐详情
 
 <a id="opIddetail_5"></a>
 
@@ -11335,20 +11335,20 @@ fetch('http://localhost:8080/api/plans/{code}',
 
 `GET /api/plans/{code}`
 
-ç»å½ç¨æ·å³å¯è®¿é®
+登录用户即可访问
 
-<h3 id="å¥é¤è¯¦æ-parameters">Parameters</h3>
+<h3 id="套餐详情-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|code|path|string|true|å¥é¤ç¼ç ï¼starter/pro/enterprise|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|code|path|string|true|套餐编码：starter/pro/enterprise|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="å¥é¤è¯¦æ-responses">Responses</h3>
+<h3 id="套餐详情-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11359,9 +11359,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">æ¥å¿ç®¡ç</h1>
+<h1 id="aicrm---">日志管理</h1>
 
-## æä½æ¥å¿åé¡µæ¥è¯¢
+## 操作日志分页查询
 
 <a id="opIdpageOperLogs"></a>
 
@@ -11400,24 +11400,24 @@ fetch('http://localhost:8080/api/logs/oper',
 
 `GET /api/logs/oper`
 
-éæé log:list
+需权限 log:list
 
-<h3 id="æä½æ¥å¿åé¡µæ¥è¯¢-parameters">Parameters</h3>
+<h3 id="操作日志分页查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|keyword|query|string|false|å³é®å­ï¼æä½äººå§å/æä½åå®¹/è¯·æ±å°åæ¨¡ç³å¹éï¼|
-|module|query|string|false|ä¸å¡æ¨¡å|
-|result|query|integer(int32)|false|æ§è¡ç»æï¼1 æå / 0 å¤±è´¥|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|keyword|query|string|false|关键字（操作人姓名/操作内容/请求地址模糊匹配）|
+|module|query|string|false|业务模块|
+|result|query|integer(int32)|false|执行结果：1 成功 / 0 失败|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æä½æ¥å¿åé¡µæ¥è¯¢-responses">Responses</h3>
+<h3 id="操作日志分页查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11428,7 +11428,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## ç»å½æ¥å¿åé¡µæ¥è¯¢
+## 登录日志分页查询
 
 <a id="opIdpageLoginLogs"></a>
 
@@ -11467,23 +11467,23 @@ fetch('http://localhost:8080/api/logs/login',
 
 `GET /api/logs/login`
 
-éæé log:list
+需权限 log:list
 
-<h3 id="ç»å½æ¥å¿åé¡µæ¥è¯¢-parameters">Parameters</h3>
+<h3 id="登录日志分页查询-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|mobile|query|string|false|ç»å½ææºå·|
-|status|query|integer(int32)|false|ç»å½ç»æï¼1 æå / 0 å¤±è´¥|
-|page|query|integer(int64)|false|é¡µç ï¼é»è®¤ 1|
-|size|query|integer(int64)|false|æ¯é¡µæ¡æ°ï¼é»è®¤ 20|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|mobile|query|string|false|登录手机号|
+|status|query|integer(int32)|false|登录结果：1 成功 / 0 失败|
+|page|query|integer(int64)|false|页码，默认 1|
+|size|query|integer(int64)|false|每页条数，默认 20|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="ç»å½æ¥å¿åé¡µæ¥è¯¢-responses">Responses</h3>
+<h3 id="登录日志分页查询-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11494,9 +11494,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">åºç¡çæ¿</h1>
+<h1 id="aicrm---">基础看板</h1>
 
-## æ¯æ¥è¶å¿ï¼çº¿ç´¢é/ä¼è¯é/AI è§£å³éææ¥èåï¼
+## 每日趋势（线索量/会话量/AI 解决量按日聚合）
 
 <a id="opIdtrend"></a>
 
@@ -11535,22 +11535,22 @@ fetch('http://localhost:8080/api/dashboard/trend?tenantId=0',
 
 `GET /api/dashboard/trend`
 
-ææ¥èåçº¿ç´¢/ä¼è¯/AI è§£å³éè¶å¿ï¼åºæ¯ï¼è¶å¿åæä¸è¿è¥å¤ç
+按日聚合线索/会话/AI 解决量趋势，场景：趋势分析与运营复盘
 
-<h3 id="æ¯æ¥è¶å¿ï¼çº¿ç´¢é/ä¼è¯é/ai-è§£å³éææ¥èåï¼-parameters">Parameters</h3>
+<h3 id="每日趋势（线索量/会话量/ai-解决量按日聚合）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|tenantId|query|integer(int64)|true|ç§æ· ID|
-|from|query|string(date-time)|false|å¼å§æ¶é´ï¼yyyy-MM-dd HH:mm:ssï¼ï¼ä¸ºç©ºåå¨é¨|
-|to|query|string(date-time)|false|ç»ææ¶é´ï¼yyyy-MM-dd HH:mm:ssï¼ï¼ä¸ºç©ºåå¨é¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|tenantId|query|integer(int64)|true|租户 ID|
+|from|query|string(date-time)|false|开始时间（yyyy-MM-dd HH:mm:ss），为空取全部|
+|to|query|string(date-time)|false|结束时间（yyyy-MM-dd HH:mm:ss），为空取全部|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ¯æ¥è¶å¿ï¼çº¿ç´¢é/ä¼è¯é/ai-è§£å³éææ¥èåï¼-responses">Responses</h3>
+<h3 id="每日趋势（线索量/会话量/ai-解决量按日聚合）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11561,7 +11561,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## éå®å·¥ä½éç»è®¡ï¼æéå®èååéçº¿ç´¢/è·è¿/æäº¤/ä¼è¯ï¼
+## 销售工作量统计（按销售聚合分配线索/跟进/成交/会话）
 
 <a id="opIdsalesWorkload"></a>
 
@@ -11600,22 +11600,22 @@ fetch('http://localhost:8080/api/dashboard/sales-workload?tenantId=0',
 
 `GET /api/dashboard/sales-workload`
 
-æéå®èååéçº¿ç´¢/è·è¿/æäº¤/ä¼è¯ï¼åºæ¯ï¼éå®ç»©æç»è®¡ä¸å·¥ä½éè¯ä¼°
+按销售聚合分配线索/跟进/成交/会话，场景：销售绩效统计与工作量评估
 
-<h3 id="éå®å·¥ä½éç»è®¡ï¼æéå®èååéçº¿ç´¢/è·è¿/æäº¤/ä¼è¯ï¼-parameters">Parameters</h3>
+<h3 id="销售工作量统计（按销售聚合分配线索/跟进/成交/会话）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|tenantId|query|integer(int64)|true|ç§æ· ID|
-|from|query|string(date-time)|false|å¼å§æ¶é´ï¼yyyy-MM-dd HH:mm:ssï¼ï¼ä¸ºç©ºåå¨é¨|
-|to|query|string(date-time)|false|ç»ææ¶é´ï¼yyyy-MM-dd HH:mm:ssï¼ï¼ä¸ºç©ºåå¨é¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|tenantId|query|integer(int64)|true|租户 ID|
+|from|query|string(date-time)|false|开始时间（yyyy-MM-dd HH:mm:ss），为空取全部|
+|to|query|string(date-time)|false|结束时间（yyyy-MM-dd HH:mm:ss），为空取全部|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="éå®å·¥ä½éç»è®¡ï¼æéå®èååéçº¿ç´¢/è·è¿/æäº¤/ä¼è¯ï¼-responses">Responses</h3>
+<h3 id="销售工作量统计（按销售聚合分配线索/跟进/成交/会话）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11626,7 +11626,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## çæ¿æ»è§ï¼çº¿ç´¢é/ä¼è¯é/è½¬äººå·¥æ°/ååºæ¶æ/ææå¯¹è¯ç/æååå¸ï¼
+## 看板总览（线索量/会话量/转人工数/响应时效/有效对话率/意向分布）
 
 <a id="opIdoverview"></a>
 
@@ -11665,22 +11665,22 @@ fetch('http://localhost:8080/api/dashboard/overview?tenantId=0',
 
 `GET /api/dashboard/overview`
 
-ææ¶é´èå´èåçæ¿æ ¸å¿ææ ï¼åºæ¯ï¼ç®¡çåå°é¦é¡µæ°æ®æ»è§
+按时间范围聚合看板核心指标，场景：管理后台首页数据总览
 
-<h3 id="çæ¿æ»è§ï¼çº¿ç´¢é/ä¼è¯é/è½¬äººå·¥æ°/ååºæ¶æ/ææå¯¹è¯ç/æååå¸ï¼-parameters">Parameters</h3>
+<h3 id="看板总览（线索量/会话量/转人工数/响应时效/有效对话率/意向分布）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|tenantId|query|integer(int64)|true|ç§æ· ID|
-|from|query|string(date-time)|false|å¼å§æ¶é´ï¼yyyy-MM-dd HH:mm:ssï¼ï¼ä¸ºç©ºåå¨é¨|
-|to|query|string(date-time)|false|ç»ææ¶é´ï¼yyyy-MM-dd HH:mm:ssï¼ï¼ä¸ºç©ºåå¨é¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|tenantId|query|integer(int64)|true|租户 ID|
+|from|query|string(date-time)|false|开始时间（yyyy-MM-dd HH:mm:ss），为空取全部|
+|to|query|string(date-time)|false|结束时间（yyyy-MM-dd HH:mm:ss），为空取全部|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="çæ¿æ»è§ï¼çº¿ç´¢é/ä¼è¯é/è½¬äººå·¥æ°/ååºæ¶æ/ææå¯¹è¯ç/æååå¸ï¼-responses">Responses</h3>
+<h3 id="看板总览（线索量/会话量/转人工数/响应时效/有效对话率/意向分布）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11691,7 +11691,7 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-## æ¸ éè½¬åæ°æ®ï¼ææ¸ éè´¦å·èåäºä»¶/çº¿ç´¢/è½¬åçï¼
+## 渠道转化数据（按渠道账号聚合事件/线索/转化率）
 
 <a id="opIdchannelConversion"></a>
 
@@ -11730,22 +11730,22 @@ fetch('http://localhost:8080/api/dashboard/channel-conversion?tenantId=0',
 
 `GET /api/dashboard/channel-conversion`
 
-ææ¸ éè´¦å·èåäºä»¶/çº¿ç´¢/è½¬åçï¼åºæ¯ï¼æ¸ éææåæä¸ææ¾ä¼å
+按渠道账号聚合事件/线索/转化率，场景：渠道效果分析与投放优化
 
-<h3 id="æ¸ éè½¬åæ°æ®ï¼ææ¸ éè´¦å·èåäºä»¶/çº¿ç´¢/è½¬åçï¼-parameters">Parameters</h3>
+<h3 id="渠道转化数据（按渠道账号聚合事件/线索/转化率）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|tenantId|query|integer(int64)|true|ç§æ· ID|
-|from|query|string(date-time)|false|å¼å§æ¶é´ï¼yyyy-MM-dd HH:mm:ssï¼ï¼ä¸ºç©ºåå¨é¨|
-|to|query|string(date-time)|false|ç»ææ¶é´ï¼yyyy-MM-dd HH:mm:ssï¼ï¼ä¸ºç©ºåå¨é¨|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|tenantId|query|integer(int64)|true|租户 ID|
+|from|query|string(date-time)|false|开始时间（yyyy-MM-dd HH:mm:ss），为空取全部|
+|to|query|string(date-time)|false|结束时间（yyyy-MM-dd HH:mm:ss），为空取全部|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="æ¸ éè½¬åæ°æ®ï¼ææ¸ éè´¦å·èåäºä»¶/çº¿ç´¢/è½¬åçï¼-responses">Responses</h3>
+<h3 id="渠道转化数据（按渠道账号聚合事件/线索/转化率）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11756,9 +11756,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
-<h1 id="aicrm---">æ¸ éç®¡ç</h1>
+<h1 id="aicrm---">渠道管理</h1>
 
-## å¯ç¨æ¸ éåè¡¨ï¼åç«¯ä¸æï¼
+## 启用渠道列表（前端下拉）
 
 <a id="opIdlistEnabled"></a>
 
@@ -11797,20 +11797,20 @@ fetch('http://localhost:8080/api/channels',
 
 `GET /api/channels`
 
-è·åå¨é¨å¯ç¨ç¶æçæ¸ éå®ä¹åè¡¨ï¼ä¾åç«¯ä¸æ/ç­éä½¿ç¨ãéæé channel:listã
-æ¸ éç¼ç  code åå¼ï¼douyinæé³ / video_channelè§é¢å· / tiktok TikTok / wecomä¼ä¸å¾®ä¿¡ / whatsapp WhatsAppã
+获取全部启用状态的渠道定义列表，供前端下拉/筛选使用。需权限 channel:list。
+渠道编码 code 取值：douyin抖音 / video_channel视频号 / tiktok TikTok / wecom企业微信 / whatsapp WhatsApp。
 
-<h3 id="å¯ç¨æ¸ éåè¡¨ï¼åç«¯ä¸æï¼-parameters">Parameters</h3>
+<h3 id="启用渠道列表（前端下拉）-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|X-Tenant-Id|header|string|false|ç§æ· IDï¼å¤ç§æ·éç¦»åºæ¯å¿å¡«ï¼æªç»å½ç´è¿è°è¯æ¶ä½¿ç¨ï¼|
+|X-Tenant-Id|header|string|false|租户 ID（多租户隔离场景必填；未登录直连调试时使用）|
 
 > Example responses
 
 > 200 Response
 
-<h3 id="å¯ç¨æ¸ éåè¡¨ï¼åç«¯ä¸æï¼-responses">Responses</h3>
+<h3 id="启用渠道列表（前端下拉）-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -11846,22 +11846,22 @@ BearerAuth
 
 ```
 
-åå¸­/åå·¥
+坐席/员工
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|name|string|false|none|å§å|
-|mobile|string|false|none|ææºå·|
-|email|string|false|none|é®ç®±|
-|roleCode|string|false|none|è§è²ç¼ç ï¼sales/supervisor/admin|
-|status|integer(int32)|false|none|ç¶æï¼1å¯ç¨/0åç¨|
-|lastActiveAt|string(date-time)|false|none|æåæ´»è·æ¶é´|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|name|string|false|none|姓名|
+|mobile|string|false|none|手机号|
+|email|string|false|none|邮箱|
+|roleCode|string|false|none|角色编码：sales/supervisor/admin|
+|status|integer(int32)|false|none|状态：1启用/0停用|
+|lastActiveAt|string(date-time)|false|none|最后活跃时间|
 
 <h2 id="tocS_ResultUser">ResultUser</h2>
 <!-- backwards compatibility -->
@@ -11873,7 +11873,7 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
@@ -11890,15 +11890,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[User](#schemauser)|false|none|åå¸­/åå·¥|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[User](#schemauser)|false|none|坐席/员工|
 
 <h2 id="tocS_ResultVoid">ResultVoid</h2>
 <!-- backwards compatibility -->
@@ -11910,21 +11910,21 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {}
 }
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|object|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|object|false|none|业务数据|
 
 <h2 id="tocS_Tenant">Tenant</h2>
 <!-- backwards compatibility -->
@@ -11950,23 +11950,23 @@ BearerAuth
 
 ```
 
-ç§æ·ï¼ä¼ä¸ï¼ââ è®¢éæ¨¡å¼æ ¹å®ä½
+租户（企业）—— 订阅模式根实体
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|name|string|false|none|ä¼ä¸åç§°|
-|planCode|string|false|none|å¥é¤ç¼ç ï¼starter/pro/enterprise|
-|seatCount|integer(int32)|false|none|åå¸­æ°ä¸é|
-|aiQuotaMonth|integer(int64)|false|none|æåº¦ AI è°ç¨é¢åº¦|
-|expireAt|string(date-time)|false|none|å°ææ¶é´ï¼ä¸ºç©ºè¡¨ç¤ºé¿æææ|
-|contactName|string|false|none|å¹³å°å¯¹æ¥èç³»äºº|
-|contactMobile|string|false|none|å¹³å°å¯¹æ¥èç³»çµè¯|
-|status|integer(int32)|false|none|ç¶æï¼1å¯ç¨/0åç¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|name|string|false|none|企业名称|
+|planCode|string|false|none|套餐编码：starter/pro/enterprise|
+|seatCount|integer(int32)|false|none|坐席数上限|
+|aiQuotaMonth|integer(int64)|false|none|月度 AI 调用额度|
+|expireAt|string(date-time)|false|none|到期时间，为空表示长期有效|
+|contactName|string|false|none|平台对接联系人|
+|contactMobile|string|false|none|平台对接联系电话|
+|status|integer(int32)|false|none|状态：1启用/0停用|
 
 <h2 id="tocS_ResultTenant">ResultTenant</h2>
 <!-- backwards compatibility -->
@@ -11978,7 +11978,7 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
@@ -11996,15 +11996,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Tenant](#schematenant)|false|none|ç§æ·ï¼ä¼ä¸ï¼ââ è®¢éæ¨¡å¼æ ¹å®ä½|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Tenant](#schematenant)|false|none|租户（企业）—— 订阅模式根实体|
 
 <h2 id="tocS_CustomerTag">CustomerTag</h2>
 <!-- backwards compatibility -->
@@ -12019,7 +12019,7 @@ BearerAuth
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "é«æåå®¢æ·",
+  "name": "高意向客户",
   "color": "#FF5733",
   "remark": "string",
   "status": 1
@@ -12027,20 +12027,20 @@ BearerAuth
 
 ```
 
-æ ç­¾ä¿¡æ¯
+标签信息
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|name|string|false|none|æ ç­¾åç§°|
-|color|string|false|none|æ ç­¾é¢è²ï¼åç«¯å±ç¤ºï¼å¦ #FF5733ï¼|
-|remark|string|false|none|å¤æ³¨|
-|status|integer(int32)|false|none|ç¶æï¼1 å¯ç¨ / 0 åç¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|name|string|false|none|标签名称|
+|color|string|false|none|标签颜色（前端展示，如 #FF5733）|
+|remark|string|false|none|备注|
+|status|integer(int32)|false|none|状态：1 启用 / 0 停用|
 
 <h2 id="tocS_ResultCustomerTag">ResultCustomerTag</h2>
 <!-- backwards compatibility -->
@@ -12052,13 +12052,13 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "tenantId": 0,
-    "name": "é«æåå®¢æ·",
+    "name": "高意向客户",
     "color": "#FF5733",
     "remark": "string",
     "status": 1
@@ -12067,15 +12067,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[CustomerTag](#schemacustomertag)|false|none|æ ç­¾ä¿¡æ¯|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[CustomerTag](#schemacustomertag)|false|none|标签信息|
 
 <h2 id="tocS_CustomerTagRule">CustomerTagRule</h2>
 <!-- backwards compatibility -->
@@ -12090,7 +12090,7 @@ BearerAuth
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "ruleName": "è¯åé«äº80èªå¨ææ ",
+  "ruleName": "评分高于80自动打标",
   "tagId": 0,
   "conditionField": "score",
   "conditionOp": "gte",
@@ -12100,22 +12100,22 @@ BearerAuth
 
 ```
 
-èªå¨æ ç­¾è§åä¿¡æ¯
+自动标签规则信息
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|ruleName|string|false|none|è§ååç§°|
-|tagId|integer(int64)|false|none|å½ä¸­åæçæ ç­¾ ID|
-|conditionField|string|false|none|æ¡ä»¶å­æ®µï¼scoreè¯å/intent_levelæåç­çº§/stageå®¢æ·é¶æ®µ/industryè¡ä¸/regionå°åº/sourceæ¥æº|
-|conditionOp|string|false|none|æ¡ä»¶æä½ç¬¦ï¼gtå¤§äº/gteå¤§äºç­äº/ltå°äº/lteå°äºç­äº/eqç­äº/containsåå«|
-|conditionValue|string|false|none|æ¡ä»¶å¼ï¼ä¸ condition_field å¯¹åºï¼å¦è¯åéå¼ãé¶æ®µåå¼ãè¡ä¸åç­ï¼|
-|status|integer(int32)|false|none|ç¶æï¼1 å¯ç¨ / 0 åç¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|ruleName|string|false|none|规则名称|
+|tagId|integer(int64)|false|none|命中后打的标签 ID|
+|conditionField|string|false|none|条件字段：score评分/intent_level意向等级/stage客户阶段/industry行业/region地区/source来源|
+|conditionOp|string|false|none|条件操作符：gt大于/gte大于等于/lt小于/lte小于等于/eq等于/contains包含|
+|conditionValue|string|false|none|条件值（与 condition_field 对应，如评分阈值、阶段取值、行业名等）|
+|status|integer(int32)|false|none|状态：1 启用 / 0 停用|
 
 <h2 id="tocS_ResultCustomerTagRule">ResultCustomerTagRule</h2>
 <!-- backwards compatibility -->
@@ -12127,13 +12127,13 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "tenantId": 0,
-    "ruleName": "è¯åé«äº80èªå¨ææ ",
+    "ruleName": "评分高于80自动打标",
     "tagId": 0,
     "conditionField": "score",
     "conditionOp": "gte",
@@ -12144,15 +12144,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[CustomerTagRule](#schemacustomertagrule)|false|none|èªå¨æ ç­¾è§åä¿¡æ¯|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[CustomerTagRule](#schemacustomertagrule)|false|none|自动标签规则信息|
 
 <h2 id="tocS_SpeechLibrary">SpeechLibrary</h2>
 <!-- backwards compatibility -->
@@ -12167,7 +12167,7 @@ BearerAuth
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "title": "å¼åºç½-æ åç",
+  "title": "开场白-标准版",
   "category": "general",
   "content": "string",
   "status": 1
@@ -12175,20 +12175,20 @@ BearerAuth
 
 ```
 
-è¯æ¯åº
+话术库
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|title|string|false|none|è¯æ¯æ é¢|
-|category|string|false|none|åºæ¯åç±»ï¼generaléç¨/quoteæ¥ä»·/selectionéå/objectionå¼è®®/followè·è¿/openingå¼åº|
-|content|string|false|none|è¯æ¯åå®¹|
-|status|integer(int32)|false|none|ç¶æï¼1 å¯ç¨ / 0 åç¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|title|string|false|none|话术标题|
+|category|string|false|none|场景分类：general通用/quote报价/selection选型/objection异议/follow跟进/opening开场|
+|content|string|false|none|话术内容|
+|status|integer(int32)|false|none|状态：1 启用 / 0 停用|
 
 <h2 id="tocS_ResultSpeechLibrary">ResultSpeechLibrary</h2>
 <!-- backwards compatibility -->
@@ -12200,13 +12200,13 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "tenantId": 0,
-    "title": "å¼åºç½-æ åç",
+    "title": "开场白-标准版",
     "category": "general",
     "content": "string",
     "status": 1
@@ -12215,15 +12215,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[SpeechLibrary](#schemaspeechlibrary)|false|none|è¯æ¯åº|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[SpeechLibrary](#schemaspeechlibrary)|false|none|话术库|
 
 <h2 id="tocS_Role">Role</h2>
 <!-- backwards compatibility -->
@@ -12246,20 +12246,20 @@ BearerAuth
 
 ```
 
-è§è²ï¼ç§æ·åï¼
+角色（租户内）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|code|string|false|none|è§è²ç¼ç ï¼admin/sales/supervisor æèªå®ä¹|
-|name|string|false|none|è§è²åç§°|
-|description|string|false|none|è§è²æè¿°|
-|status|integer(int32)|false|none|ç¶æï¼1å¯ç¨/0åç¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|code|string|false|none|角色编码：admin/sales/supervisor 或自定义|
+|name|string|false|none|角色名称|
+|description|string|false|none|角色描述|
+|status|integer(int32)|false|none|状态：1启用/0停用|
 
 <h2 id="tocS_ResultRole">ResultRole</h2>
 <!-- backwards compatibility -->
@@ -12271,7 +12271,7 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
@@ -12286,15 +12286,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Role](#schemarole)|false|none|è§è²ï¼ç§æ·åï¼|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Role](#schemarole)|false|none|角色（租户内）|
 
 <h2 id="tocS_Product">Product</h2>
 <!-- backwards compatibility -->
@@ -12310,37 +12310,37 @@ BearerAuth
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
   "categoryId": 0,
-  "name": "ä¼ä¸ç CRM",
+  "name": "企业版 CRM",
   "sku": "CRM-ENT-001",
-  "spec": "æ åç",
+  "spec": "标准版",
   "price": 1999,
-  "params": "{\"å®¹é\":\"100GB\",\"å¹¶åæ°\":\"500\"}",
-  "attachments": "[{\"name\":\"éåè¡¨.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
+  "params": "{\"容量\":\"100GB\",\"并发数\":\"500\"}",
+  "attachments": "[{\"name\":\"选型表.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
   "description": "string",
   "status": 1
 }
 
 ```
 
-äº§åèµæ
+产品资料
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|categoryId|integer(int64)|false|none|åç±» ID|
-|name|string|false|none|äº§ååç§°|
-|sku|string|false|none|äº§åç¼ç ï¼SKUï¼|
-|spec|string|false|none|è§æ ¼åå·|
-|price|number|false|none|åèä»·æ ¼ï¼åï¼|
-|params|string|false|none|äº§ååæ°ï¼JSONB å¯¹è±¡ï¼ç»æåé®å¼å¯¹ï¼å¦ {"å®¹é":"100GB","å¹¶åæ°":"500"}ï¼|
-|attachments|string|false|none|éä»¶åè¡¨ï¼JSONB æ°ç»ï¼åç´ å« name åç§°/url å°åï¼å¦ [{"name":"éåè¡¨.xlsx","url":"/uploads/xxx.xlsx"}]ï¼|
-|description|string|false|none|äº§åæè¿°|
-|status|integer(int32)|false|none|ç¶æï¼1 ä¸æ¶ / 0 ä¸æ¶|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|categoryId|integer(int64)|false|none|分类 ID|
+|name|string|false|none|产品名称|
+|sku|string|false|none|产品编码（SKU）|
+|spec|string|false|none|规格型号|
+|price|number|false|none|参考价格（元）|
+|params|string|false|none|产品参数（JSONB 对象，结构化键值对，如 {"容量":"100GB","并发数":"500"}）|
+|attachments|string|false|none|附件列表（JSONB 数组，元素含 name 名称/url 地址，如 [{"name":"选型表.xlsx","url":"/uploads/xxx.xlsx"}]）|
+|description|string|false|none|产品描述|
+|status|integer(int32)|false|none|状态：1 上架 / 0 下架|
 
 <h2 id="tocS_ResultProduct">ResultProduct</h2>
 <!-- backwards compatibility -->
@@ -12352,19 +12352,19 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "tenantId": 0,
     "categoryId": 0,
-    "name": "ä¼ä¸ç CRM",
+    "name": "企业版 CRM",
     "sku": "CRM-ENT-001",
-    "spec": "æ åç",
+    "spec": "标准版",
     "price": 1999,
-    "params": "{\"å®¹é\":\"100GB\",\"å¹¶åæ°\":\"500\"}",
-    "attachments": "[{\"name\":\"éåè¡¨.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
+    "params": "{\"容量\":\"100GB\",\"并发数\":\"500\"}",
+    "attachments": "[{\"name\":\"选型表.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
     "description": "string",
     "status": 1
   }
@@ -12372,15 +12372,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Product](#schemaproduct)|false|none|äº§åèµæ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Product](#schemaproduct)|false|none|产品资料|
 
 <h2 id="tocS_ProductCategory">ProductCategory</h2>
 <!-- backwards compatibility -->
@@ -12395,7 +12395,7 @@ BearerAuth
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "CRM äº§åçº¿",
+  "name": "CRM 产品线",
   "parentId": 0,
   "sort": 1,
   "status": 1
@@ -12403,20 +12403,20 @@ BearerAuth
 
 ```
 
-äº§ååç±»
+产品分类
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|name|string|false|none|åç±»åç§°|
-|parentId|integer(int64)|false|none|ç¶åç±» IDï¼0 ä¸ºé¡¶çº§ï¼|
-|sort|integer(int32)|false|none|æåºï¼å°å¨åï¼|
-|status|integer(int32)|false|none|ç¶æï¼1 å¯ç¨ / 0 åç¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|name|string|false|none|分类名称|
+|parentId|integer(int64)|false|none|父分类 ID（0 为顶级）|
+|sort|integer(int32)|false|none|排序（小在前）|
+|status|integer(int32)|false|none|状态：1 启用 / 0 停用|
 
 <h2 id="tocS_ResultProductCategory">ResultProductCategory</h2>
 <!-- backwards compatibility -->
@@ -12428,13 +12428,13 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "tenantId": 0,
-    "name": "CRM äº§åçº¿",
+    "name": "CRM 产品线",
     "parentId": 0,
     "sort": 1,
     "status": 1
@@ -12443,15 +12443,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[ProductCategory](#schemaproductcategory)|false|none|äº§ååç±»|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[ProductCategory](#schemaproductcategory)|false|none|产品分类|
 
 <h2 id="tocS_Menu">Menu</h2>
 <!-- backwards compatibility -->
@@ -12497,26 +12497,26 @@ BearerAuth
 
 ```
 
-èå/æéï¼å¹³å°çº§å®ä¹ï¼ç§æ·éè¿è§è²-èåå³èè·å¾ï¼
+菜单/权限（平台级定义，租户通过角色-菜单关联获得）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|parentId|integer(int64)|false|none|ç¶èå IDï¼é¡¶çº§ä¸º 0|
-|menuName|string|false|none|èååç§°|
-|menuType|string|false|none|ç±»åï¼dirç®å½/menuèå/buttonæé®|
-|path|string|false|none|åç«¯è·¯ç±è·¯å¾|
-|component|string|false|none|åç«¯ç»ä»¶|
-|perms|string|false|none|æé®æéç ï¼å¦ user:add|
-|icon|string|false|none|å¾æ |
-|sort|integer(int32)|false|none|æåºå·|
-|visible|integer(int32)|false|none|æ¯å¦æ¾ç¤ºï¼1æ¾ç¤º/0éè|
-|status|integer(int32)|false|none|ç¶æï¼1å¯ç¨/0åç¨|
-|children|[[Menu](#schemamenu)]|false|none|å­èåï¼æ å½¢å±ç¤ºç¨ï¼éè¡¨å­æ®µï¼|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|parentId|integer(int64)|false|none|父菜单 ID，顶级为 0|
+|menuName|string|false|none|菜单名称|
+|menuType|string|false|none|类型：dir目录/menu菜单/button按钮|
+|path|string|false|none|前端路由路径|
+|component|string|false|none|前端组件|
+|perms|string|false|none|按钮权限码，如 user:add|
+|icon|string|false|none|图标|
+|sort|integer(int32)|false|none|排序号|
+|visible|integer(int32)|false|none|是否显示：1显示/0隐藏|
+|status|integer(int32)|false|none|状态：1启用/0停用|
+|children|[[Menu](#schemamenu)]|false|none|子菜单（树形展示用，非表字段）|
 
 <h2 id="tocS_ResultMenu">ResultMenu</h2>
 <!-- backwards compatibility -->
@@ -12528,7 +12528,7 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
@@ -12551,15 +12551,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Menu](#schemamenu)|false|none|èå/æéï¼å¹³å°çº§å®ä¹ï¼ç§æ·éè¿è§è²-èåå³èè·å¾ï¼|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Menu](#schemamenu)|false|none|菜单/权限（平台级定义，租户通过角色-菜单关联获得）|
 
 <h2 id="tocS_LeadAssignRule">LeadAssignRule</h2>
 <!-- backwards compatibility -->
@@ -12574,9 +12574,9 @@ BearerAuth
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "ruleName": "åä¸åºåçº¿ç´¢åé",
+  "ruleName": "华东区域线索分配",
   "ruleType": "region",
-  "matchValue": "åä¸",
+  "matchValue": "华东",
   "targetUserId": 0,
   "targetGroupIds": "string",
   "sort": 1,
@@ -12585,23 +12585,23 @@ BearerAuth
 
 ```
 
-åéè§åä¿¡æ¯
+分配规则信息
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|ruleName|string|false|none|è§ååç§°|
-|ruleType|string|false|none|è§åç±»åï¼productæäº§åçº¿/regionæå°å/round_robinè½®è¯¢ç»|
-|matchValue|string|false|none|å¹éå¼ï¼äº§åçº¿æå°åï¼product/region è§åç¨ï¼|
-|targetUserId|integer(int64)|false|none|æå®éå® IDï¼product/region è§åç¨ï¼|
-|targetGroupIds|string|false|none|è½®è¯¢ç»éå® ID æ°ç»ï¼round_robin è§åç¨ï¼JSONBï¼ï¼å­å¨ç»æç¤ºä¾ï¼[1,2,3]|
-|sort|integer(int32)|false|none|ä¼åçº§ï¼æ°å¼è¶å°è¶åå¹éï¼|
-|status|integer(int32)|false|none|ç¶æï¼1 å¯ç¨ / 0 åç¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|ruleName|string|false|none|规则名称|
+|ruleType|string|false|none|规则类型：product按产品线/region按地域/round_robin轮询组|
+|matchValue|string|false|none|匹配值：产品线或地域（product/region 规则用）|
+|targetUserId|integer(int64)|false|none|指定销售 ID（product/region 规则用）|
+|targetGroupIds|string|false|none|轮询组销售 ID 数组（round_robin 规则用，JSONB），存储结构示例：[1,2,3]|
+|sort|integer(int32)|false|none|优先级（数值越小越先匹配）|
+|status|integer(int32)|false|none|状态：1 启用 / 0 停用|
 
 <h2 id="tocS_ResultLeadAssignRule">ResultLeadAssignRule</h2>
 <!-- backwards compatibility -->
@@ -12613,15 +12613,15 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "tenantId": 0,
-    "ruleName": "åä¸åºåçº¿ç´¢åé",
+    "ruleName": "华东区域线索分配",
     "ruleType": "region",
-    "matchValue": "åä¸",
+    "matchValue": "华东",
     "targetUserId": 0,
     "targetGroupIds": "string",
     "sort": 1,
@@ -12631,15 +12631,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[LeadAssignRule](#schemaleadassignrule)|false|none|åéè§åä¿¡æ¯|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[LeadAssignRule](#schemaleadassignrule)|false|none|分配规则信息|
 
 <h2 id="tocS_Document">Document</h2>
 <!-- backwards compatibility -->
@@ -12654,32 +12654,32 @@ BearerAuth
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "title": "AI å¤å¼ç³»ç»äº§åæå",
+  "title": "AI 外呼系统产品手册",
   "docType": "product_brochure",
   "fileUrl": "/uploads/xxx.pdf",
   "version": 1,
   "status": 0,
-  "tags": "[\"AI\",\"å¤å¼\"]"
+  "tags": "[\"AI\",\"外呼\"]"
 }
 
 ```
 
-èµæææ¡£
+资料文档
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|title|string|false|none|æ é¢|
-|docType|string|false|none|ç±»åï¼product_brochureäº§åæå/caseæ¡ä¾/whitepaperç½ç®ä¹¦/selection_tableéåè¡¨|
-|fileUrl|string|false|none|æä»¶å°åï¼å¯¹è±¡å­å¨/æ¬å°ï¼|
-|version|integer(int32)|false|none|çæ¬å·|
-|status|integer(int32)|false|none|ç¶æï¼0 èç¨¿ / 1 å·²åå¸|
-|tags|string|false|none|æ ç­¾ï¼JSON æ°ç»å­ç¬¦ä¸²ï¼|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|title|string|false|none|标题|
+|docType|string|false|none|类型：product_brochure产品手册/case案例/whitepaper白皮书/selection_table选型表|
+|fileUrl|string|false|none|文件地址（对象存储/本地）|
+|version|integer(int32)|false|none|版本号|
+|status|integer(int32)|false|none|状态：0 草稿 / 1 已发布|
+|tags|string|false|none|标签（JSON 数组字符串）|
 
 <h2 id="tocS_ResultDocument">ResultDocument</h2>
 <!-- backwards compatibility -->
@@ -12691,32 +12691,32 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "tenantId": 0,
-    "title": "AI å¤å¼ç³»ç»äº§åæå",
+    "title": "AI 外呼系统产品手册",
     "docType": "product_brochure",
     "fileUrl": "/uploads/xxx.pdf",
     "version": 1,
     "status": 0,
-    "tags": "[\"AI\",\"å¤å¼\"]"
+    "tags": "[\"AI\",\"外呼\"]"
   }
 }
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Document](#schemadocument)|false|none|èµæææ¡£|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Document](#schemadocument)|false|none|资料文档|
 
 <h2 id="tocS_DictType">DictType</h2>
 <!-- backwards compatibility -->
@@ -12731,26 +12731,26 @@ BearerAuth
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "dictType": "lead_status",
-  "dictName": "çº¿ç´¢ç¶æ",
+  "dictName": "线索状态",
   "status": 1,
   "remark": "string"
 }
 
 ```
 
-å­å¸ç±»å
+字典类型
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|dictType|string|false|none|å­å¸ç±»åç¼ç |
-|dictName|string|false|none|å­å¸åç§°|
-|status|integer(int32)|false|none|ç¶æï¼1 å¯ç¨ / 0 åç¨|
-|remark|string|false|none|å¤æ³¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|dictType|string|false|none|字典类型编码|
+|dictName|string|false|none|字典名称|
+|status|integer(int32)|false|none|状态：1 启用 / 0 停用|
+|remark|string|false|none|备注|
 
 <h2 id="tocS_ResultDictType">ResultDictType</h2>
 <!-- backwards compatibility -->
@@ -12762,13 +12762,13 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "dictType": "lead_status",
-    "dictName": "çº¿ç´¢ç¶æ",
+    "dictName": "线索状态",
     "status": 1,
     "remark": "string"
   }
@@ -12776,15 +12776,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[DictType](#schemadicttype)|false|none|å­å¸ç±»å|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[DictType](#schemadicttype)|false|none|字典类型|
 
 <h2 id="tocS_DictData">DictData</h2>
 <!-- backwards compatibility -->
@@ -12799,7 +12799,7 @@ BearerAuth
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "dictType": "lead_status",
-  "label": "å·²åé",
+  "label": "已分配",
   "value": "1",
   "sort": 0,
   "status": 1,
@@ -12808,21 +12808,21 @@ BearerAuth
 
 ```
 
-å­å¸æ°æ®
+字典数据
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|dictType|string|false|none|æå±å­å¸ç±»åç¼ç |
-|label|string|false|none|æ¾ç¤ºææ¬|
-|value|string|false|none|å­å¸å¼|
-|sort|integer(int32)|false|none|æåºå·ï¼ååºæåï¼|
-|status|integer(int32)|false|none|ç¶æï¼1 å¯ç¨ / 0 åç¨|
-|remark|string|false|none|å¤æ³¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|dictType|string|false|none|所属字典类型编码|
+|label|string|false|none|显示文本|
+|value|string|false|none|字典值|
+|sort|integer(int32)|false|none|排序号（升序排列）|
+|status|integer(int32)|false|none|状态：1 启用 / 0 停用|
+|remark|string|false|none|备注|
 
 <h2 id="tocS_ResultDictData">ResultDictData</h2>
 <!-- backwards compatibility -->
@@ -12834,13 +12834,13 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "dictType": "lead_status",
-    "label": "å·²åé",
+    "label": "已分配",
     "value": "1",
     "sort": 0,
     "status": 1,
@@ -12850,15 +12850,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[DictData](#schemadictdata)|false|none|å­å¸æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[DictData](#schemadictdata)|false|none|字典数据|
 
 <h2 id="tocS_Customer">Customer</h2>
 <!-- backwards compatibility -->
@@ -12873,10 +12873,10 @@ BearerAuth
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "ææç§ææéå¬å¸",
-  "industry": "è½¯ä»¶æå¡",
-  "scale": "100-499äºº",
-  "region": "ä¸æµ·",
+  "name": "某某科技有限公司",
+  "industry": "软件服务",
+  "scale": "100-499人",
+  "region": "上海",
   "orgStructure": "string",
   "source": "public_data",
   "enrichmentStatus": 0,
@@ -12887,26 +12887,26 @@ BearerAuth
 
 ```
 
-å®¢æ·ä¿¡æ¯ï¼name å¿å¡«ï¼
+客户信息（name 必填）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|name|string|false|none|å¬å¸åç§°|
-|industry|string|false|none|è¡ä¸|
-|scale|string|false|none|è§æ¨¡|
-|region|string|false|none|å°åº|
-|orgStructure|string|false|none|äººåæ¶æï¼ææ/å¬å¼æ°æ®ï¼JSONBï¼ï¼å­å¨ç»æç¤ºä¾ï¼{"executives":[{"name":"å§å","title":"èä½","phone":"ææºå·","email":"é®ç®±"}],"departments":["é¨é¨å"]}ï¼å®éå­æ®µä»¥ç¬¬ä¸æ¹è¿åä¸ºå|
-|source|string|false|none|enrichment æ¥æºï¼public_dataå¬å¼æ°æ®/customer_providedå®¢æ·æä¾|
-|enrichmentStatus|integer(int32)|false|none|æ°æ®è¡¥å¨ç¶æï¼0 æªè¡¥å¨ / 1 å·²è¡¥å¨|
-|stage|string|false|none|å®¢æ·é¶æ®µï¼newæ½å¨/potentialææå/intentionæ¥ä»·/negotiatingè°å¤/wonæäº¤/lostæµå¤±|
-|intentLevel|integer(int32)|false|none|æåç­çº§ï¼0-5|
-|score|integer(int32)|false|none|ç»¼åè¯åï¼0-100|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|name|string|false|none|公司名称|
+|industry|string|false|none|行业|
+|scale|string|false|none|规模|
+|region|string|false|none|地区|
+|orgStructure|string|false|none|人员架构（授权/公开数据，JSONB），存储结构示例：{"executives":[{"name":"姓名","title":"职位","phone":"手机号","email":"邮箱"}],"departments":["部门名"]}，实际字段以第三方返回为准|
+|source|string|false|none|enrichment 来源：public_data公开数据/customer_provided客户提供|
+|enrichmentStatus|integer(int32)|false|none|数据补全状态：0 未补全 / 1 已补全|
+|stage|string|false|none|客户阶段：new潜在/potential有意向/intention报价/negotiating谈判/won成交/lost流失|
+|intentLevel|integer(int32)|false|none|意向等级：0-5|
+|score|integer(int32)|false|none|综合评分：0-100|
 
 <h2 id="tocS_ResultCustomer">ResultCustomer</h2>
 <!-- backwards compatibility -->
@@ -12918,16 +12918,16 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "tenantId": 0,
-    "name": "ææç§ææéå¬å¸",
-    "industry": "è½¯ä»¶æå¡",
-    "scale": "100-499äºº",
-    "region": "ä¸æµ·",
+    "name": "某某科技有限公司",
+    "industry": "软件服务",
+    "scale": "100-499人",
+    "region": "上海",
     "orgStructure": "string",
     "source": "public_data",
     "enrichmentStatus": 0,
@@ -12939,15 +12939,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Customer](#schemacustomer)|false|none|å®¢æ·ä¿¡æ¯ï¼name å¿å¡«ï¼|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Customer](#schemacustomer)|false|none|客户信息（name 必填）|
 
 <h2 id="tocS_Config">Config</h2>
 <!-- backwards compatibility -->
@@ -12962,28 +12962,28 @@ BearerAuth
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "configKey": "system.siteName",
-  "configValue": "AI éå®çº¿ç´¢ç³»ç»",
-  "configName": "ç«ç¹åç§°",
+  "configValue": "AI 销售线索系统",
+  "configName": "站点名称",
   "configType": 2,
   "remark": "string"
 }
 
 ```
 
-ç³»ç»åæ°éç½®
+系统参数配置
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|configKey|string|false|none|åæ°é®|
-|configValue|string|false|none|åæ°å¼|
-|configName|string|false|none|åæ°åç§°|
-|configType|integer(int32)|false|none|ç±»åï¼1 åç½® / 2 èªå®ä¹|
-|remark|string|false|none|å¤æ³¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|configKey|string|false|none|参数键|
+|configValue|string|false|none|参数值|
+|configName|string|false|none|参数名称|
+|configType|integer(int32)|false|none|类型：1 内置 / 2 自定义|
+|remark|string|false|none|备注|
 
 <h2 id="tocS_ResultConfig">ResultConfig</h2>
 <!-- backwards compatibility -->
@@ -12995,14 +12995,14 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "configKey": "system.siteName",
-    "configValue": "AI éå®çº¿ç´¢ç³»ç»",
-    "configName": "ç«ç¹åç§°",
+    "configValue": "AI 销售线索系统",
+    "configName": "站点名称",
     "configType": 2,
     "remark": "string"
   }
@@ -13010,15 +13010,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Config](#schemaconfig)|false|none|ç³»ç»åæ°éç½®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Config](#schemaconfig)|false|none|系统参数配置|
 
 <h2 id="tocS_Competitor">Competitor</h2>
 <!-- backwards compatibility -->
@@ -13033,36 +13033,36 @@ BearerAuth
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "name": "ææäº CRM",
+  "name": "某某云 CRM",
   "category": "CRM",
   "officialUrl": "https://www.example.com",
   "description": "string",
-  "strengths": "[\"åè½å¨é¢\",\"ä»·æ ¼ä½\"]",
-  "weaknesses": "[\"å®æ½å¤æ\",\"å®åå·®\"]",
-  "defenseTactics": "[{\"scenario\":\"æ¯ä»·æ ¼\",\"tactic\":\"å¼ºè°æ»æ¥æææ¬\"}]",
+  "strengths": "[\"功能全面\",\"价格低\"]",
+  "weaknesses": "[\"实施复杂\",\"售后差\"]",
+  "defenseTactics": "[{\"scenario\":\"比价格\",\"tactic\":\"强调总拥有成本\"}]",
   "status": 1
 }
 
 ```
 
-ç«åä¸»ä½æ¡£æ¡
+竞品主体档案
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|name|string|false|none|ç«ååç§°|
-|category|string|false|none|ç«ååç±»|
-|officialUrl|string|false|none|å®ç½å°å|
-|description|string|false|none|ä¸»ä½æè¿°|
-|strengths|string|false|none|ä¼å¿åè¡¨ï¼JSONB æ°ç»ï¼å¦ ["åè½å¨é¢","ä»·æ ¼ä½"]ï¼|
-|weaknesses|string|false|none|å£å¿åè¡¨ï¼JSONB æ°ç»ï¼å¦ ["å®æ½å¤æ","å®åå·®"]ï¼|
-|defenseTactics|string|false|none|æ»é²è¯æ¯åè¡¨ï¼JSONB æ°ç»ï¼åç´ å« scenario åºæ¯/tactic è¯æ¯ï¼å¦ [{"scenario":"æ¯ä»·æ ¼","tactic":"å¼ºè°æ»æ¥æææ¬"}]ï¼|
-|status|integer(int32)|false|none|ç¶æï¼1 å¯ç¨ / 0 åç¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|name|string|false|none|竞品名称|
+|category|string|false|none|竞品品类|
+|officialUrl|string|false|none|官网地址|
+|description|string|false|none|主体描述|
+|strengths|string|false|none|优势列表（JSONB 数组，如 ["功能全面","价格低"]）|
+|weaknesses|string|false|none|劣势列表（JSONB 数组，如 ["实施复杂","售后差"]）|
+|defenseTactics|string|false|none|攻防话术列表（JSONB 数组，元素含 scenario 场景/tactic 话术，如 [{"scenario":"比价格","tactic":"强调总拥有成本"}]）|
+|status|integer(int32)|false|none|状态：1 启用 / 0 停用|
 
 <h2 id="tocS_ResultCompetitor">ResultCompetitor</h2>
 <!-- backwards compatibility -->
@@ -13074,34 +13074,34 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "tenantId": 0,
-    "name": "ææäº CRM",
+    "name": "某某云 CRM",
     "category": "CRM",
     "officialUrl": "https://www.example.com",
     "description": "string",
-    "strengths": "[\"åè½å¨é¢\",\"ä»·æ ¼ä½\"]",
-    "weaknesses": "[\"å®æ½å¤æ\",\"å®åå·®\"]",
-    "defenseTactics": "[{\"scenario\":\"æ¯ä»·æ ¼\",\"tactic\":\"å¼ºè°æ»æ¥æææ¬\"}]",
+    "strengths": "[\"功能全面\",\"价格低\"]",
+    "weaknesses": "[\"实施复杂\",\"售后差\"]",
+    "defenseTactics": "[{\"scenario\":\"比价格\",\"tactic\":\"强调总拥有成本\"}]",
     "status": 1
   }
 }
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Competitor](#schemacompetitor)|false|none|ç«åä¸»ä½æ¡£æ¡|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Competitor](#schemacompetitor)|false|none|竞品主体档案|
 
 <h2 id="tocS_CompetitorProduct">CompetitorProduct</h2>
 <!-- backwards compatibility -->
@@ -13117,29 +13117,29 @@ BearerAuth
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
   "competitorId": 0,
-  "productName": "ç«åäºç",
-  "spec": "æè°ç",
+  "productName": "竞品云版",
+  "spec": "旗舰版",
   "price": 2999,
-  "params": "{\"å¹¶åæ°\":\"300\",\"å­å¨\":\"50GB\"}"
+  "params": "{\"并发数\":\"300\",\"存储\":\"50GB\"}"
 }
 
 ```
 
-ç«åäº§ååæ°
+竞品产品参数
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|competitorId|integer(int64)|false|none|ç«å ID|
-|productName|string|false|none|ç«åäº§ååç§°|
-|spec|string|false|none|è§æ ¼åå·|
-|price|number|false|none|åèä»·æ ¼ï¼åï¼|
-|params|string|false|none|ç«åäº§ååæ°ï¼JSONB å¯¹è±¡ï¼ç»æåé®å¼å¯¹ï¼å¦ {"å¹¶åæ°":"300","å­å¨":"50GB"}ï¼|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|competitorId|integer(int64)|false|none|竞品 ID|
+|productName|string|false|none|竞品产品名称|
+|spec|string|false|none|规格型号|
+|price|number|false|none|参考价格（元）|
+|params|string|false|none|竞品产品参数（JSONB 对象，结构化键值对，如 {"并发数":"300","存储":"50GB"}）|
 
 <h2 id="tocS_ResultCompetitorProduct">ResultCompetitorProduct</h2>
 <!-- backwards compatibility -->
@@ -13151,31 +13151,31 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "tenantId": 0,
     "competitorId": 0,
-    "productName": "ç«åäºç",
-    "spec": "æè°ç",
+    "productName": "竞品云版",
+    "spec": "旗舰版",
     "price": 2999,
-    "params": "{\"å¹¶åæ°\":\"300\",\"å­å¨\":\"50GB\"}"
+    "params": "{\"并发数\":\"300\",\"存储\":\"50GB\"}"
   }
 }
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[CompetitorProduct](#schemacompetitorproduct)|false|none|ç«åäº§ååæ°|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[CompetitorProduct](#schemacompetitorproduct)|false|none|竞品产品参数|
 
 <h2 id="tocS_ChannelQrCode">ChannelQrCode</h2>
 <!-- backwards compatibility -->
@@ -13190,7 +13190,7 @@ BearerAuth
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 1,
-  "name": "æé³å¼æµæ´»ç ",
+  "name": "抖音引流活码",
   "channelAccountId": 1,
   "scene": "1:1",
   "qrUrl": "https://example.com/landing?from=qr",
@@ -13201,23 +13201,23 @@ BearerAuth
 
 ```
 
-æ¸ éæ´»ç ï¼æ«ç å¼æµ/æ¸ éæ¥æºæ è®°/å¼æµå½å ï¼
+渠道活码（扫码引流/渠道来源标记/引流归因）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|name|string|false|none|æ´»ç åç§°|
-|channelAccountId|integer(int64)|false|none|å¼æµç®æ æ¸ éè´¦å· ID|
-|scene|string|false|none|æ¸ éæ¥æºæ è®°ï¼æ«ç äºä»¶æºå¸¦ï¼ç¨äºçº¿ç´¢å½å ï¼ï¼ä¸å¡«é»è®¤å æ¸ éID:è´¦å·ID|
-|qrUrl|string|false|none|æ«ç è·³è½¬è½å°å°å|
-|status|integer(int32)|false|none|ç¶æï¼1å¯ç¨/0åç¨|
-|scanCount|integer(int32)|false|none|æ«ç æ¬¡æ°|
-|convertedCount|integer(int32)|false|none|è½¬åæ°ï¼æ«ç åè½¬åä¸ºçº¿ç´¢æ°ï¼ä¸å®¢æ·èº«ä»½å½ä¸èå¨ï¼|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|name|string|false|none|活码名称|
+|channelAccountId|integer(int64)|false|none|引流目标渠道账号 ID|
+|scene|string|false|none|渠道来源标记（扫码事件携带，用于线索归因），不填默认取 渠道ID:账号ID|
+|qrUrl|string|false|none|扫码跳转落地地址|
+|status|integer(int32)|false|none|状态：1启用/0停用|
+|scanCount|integer(int32)|false|none|扫码次数|
+|convertedCount|integer(int32)|false|none|转化数（扫码后转化为线索数，与客户身份归一联动）|
 
 <h2 id="tocS_ResultChannelQrCode">ResultChannelQrCode</h2>
 <!-- backwards compatibility -->
@@ -13229,13 +13229,13 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "tenantId": 1,
-    "name": "æé³å¼æµæ´»ç ",
+    "name": "抖音引流活码",
     "channelAccountId": 1,
     "scene": "1:1",
     "qrUrl": "https://example.com/landing?from=qr",
@@ -13247,15 +13247,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[ChannelQrCode](#schemachannelqrcode)|false|none|æ¸ éæ´»ç ï¼æ«ç å¼æµ/æ¸ éæ¥æºæ è®°/å¼æµå½å ï¼|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[ChannelQrCode](#schemachannelqrcode)|false|none|渠道活码（扫码引流/渠道来源标记/引流归因）|
 
 <h2 id="tocS_ChannelAccount">ChannelAccount</h2>
 <!-- backwards compatibility -->
@@ -13271,7 +13271,7 @@ BearerAuth
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 1,
   "channelId": 1,
-  "accountName": "åçå®æ¹å·",
+  "accountName": "品牌官方号",
   "externalId": "douyin_open_id_xxx",
   "authConfig": "string",
   "healthStatus": 1,
@@ -13280,22 +13280,22 @@ BearerAuth
 
 ```
 
-æ¸ éè´¦å·ï¼ä¼ä¸å·/ç©éµå·ï¼
+渠道账号（企业号/矩阵号）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|channelId|integer(int64)|false|none|æ¸ é IDï¼å¯¹åº channel.idï¼|
-|accountName|string|false|none|è´¦å·åç§°|
-|externalId|string|false|none|æ¸ éä¾§è´¦å· ID|
-|authConfig|string|false|none|ææå­è¯ï¼å å¯å­å¨ï¼JSONBï¼ï¼ç»æï¼{"accessToken":"è®¿é®ä»¤ç","refreshToken":"å·æ°ä»¤ç","expireAt":"è¿ææ¶é´epochæ¯«ç§"}ï¼æé³å¦å« appId/secretãä¼ä¸å¾®ä¿¡å¦å« corpId/corpSecretï¼ææ¸ éå¯æ©å±|
-|healthStatus|integer(int32)|false|none|è´¦å·å¥åº·ç¶æï¼1æ­£å¸¸/2åé/3å°ç¦|
-|riskLevel|integer(int32)|false|none|é£æ§ç­çº§ï¼0ä½/1ä¸­/2é«|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|channelId|integer(int64)|false|none|渠道 ID（对应 channel.id）|
+|accountName|string|false|none|账号名称|
+|externalId|string|false|none|渠道侧账号 ID|
+|authConfig|string|false|none|授权凭证（加密存储，JSONB），结构：{"accessToken":"访问令牌","refreshToken":"刷新令牌","expireAt":"过期时间epoch毫秒"}，抖音另含 appId/secret、企业微信另含 corpId/corpSecret，按渠道可扩展|
+|healthStatus|integer(int32)|false|none|账号健康状态：1正常/2受限/3封禁|
+|riskLevel|integer(int32)|false|none|风控等级：0低/1中/2高|
 
 <h2 id="tocS_ResultChannelAccount">ResultChannelAccount</h2>
 <!-- backwards compatibility -->
@@ -13307,14 +13307,14 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
     "updatedAt": "2019-08-24T14:15:22Z",
     "tenantId": 1,
     "channelId": 1,
-    "accountName": "åçå®æ¹å·",
+    "accountName": "品牌官方号",
     "externalId": "douyin_open_id_xxx",
     "authConfig": "string",
     "healthStatus": 1,
@@ -13324,15 +13324,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[ChannelAccount](#schemachannelaccount)|false|none|æ¸ éè´¦å·ï¼ä¼ä¸å·/ç©éµå·ï¼|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[ChannelAccount](#schemachannelaccount)|false|none|渠道账号（企业号/矩阵号）|
 
 <h2 id="tocS_TenantCreateRequest">TenantCreateRequest</h2>
 <!-- backwards compatibility -->
@@ -13357,22 +13357,22 @@ BearerAuth
 
 ```
 
-åå»ºç§æ·è¯·æ±ï¼å«åå§åç®¡çåè´¦å·ï¼
+创建租户请求（含初始化管理员账号）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|name|string|true|none|ä¼ä¸åç§°|
-|planCode|string|false|none|å¥é¤ç¼ç ï¼starter/pro/enterpriseï¼ä¸ºç©ºé»è®¤ starter|
-|seatCount|integer(int32)|false|none|åå¸­æ°ä¸éï¼ä¸ºç©ºæå¥é¤é»è®¤|
-|aiQuotaMonth|integer(int64)|false|none|æåº¦ AI è°ç¨é¢åº¦ï¼ä¸ºç©ºæå¥é¤é»è®¤|
-|expireAt|string(date-time)|false|none|å°ææ¶é´ï¼ä¸ºç©ºè¡¨ç¤ºé¿æææ|
-|contactName|string|false|none|å¹³å°å¯¹æ¥èç³»äºº|
-|contactMobile|string|false|none|å¹³å°å¯¹æ¥èç³»çµè¯|
-|status|integer(int32)|false|none|ç¶æï¼1å¯ç¨/0åç¨ï¼ä¸ºç©ºé»è®¤å¯ç¨|
-|adminMobile|string|true|none|åå§åç®¡çåææºå·ï¼ç»å½è´¦å·ï¼|
-|adminPassword|string|false|none|åå§åç®¡çåå¯ç ï¼ä¸ºç©ºä½¿ç¨é»è®¤å¯ç |
+|name|string|true|none|企业名称|
+|planCode|string|false|none|套餐编码：starter/pro/enterprise，为空默认 starter|
+|seatCount|integer(int32)|false|none|坐席数上限，为空按套餐默认|
+|aiQuotaMonth|integer(int64)|false|none|月度 AI 调用额度，为空按套餐默认|
+|expireAt|string(date-time)|false|none|到期时间，为空表示长期有效|
+|contactName|string|false|none|平台对接联系人|
+|contactMobile|string|false|none|平台对接联系电话|
+|status|integer(int32)|false|none|状态：1启用/0停用，为空默认启用|
+|adminMobile|string|true|none|初始化管理员手机号（登录账号）|
+|adminPassword|string|false|none|初始化管理员密码，为空使用默认密码|
 
 <h2 id="tocS_ResultInteger">ResultInteger</h2>
 <!-- backwards compatibility -->
@@ -13384,21 +13384,21 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": 0
 }
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|integer(int32)|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|integer(int32)|false|none|业务数据|
 
 <h2 id="tocS_Lead">Lead</h2>
 <!-- backwards compatibility -->
@@ -13428,27 +13428,27 @@ BearerAuth
 
 ```
 
-çº¿ç´¢ä¿¡æ¯
+线索信息
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|customerId|integer(int64)|false|none|å³èå®¢æ·å¬å¸ IDï¼å¯ç©ºï¼|
-|contactId|integer(int64)|false|none|å³èèç³»äºº IDï¼å¯ç©ºï¼|
-|sourceChannelId|integer(int64)|false|none|æ¥æºæ¸ éè´¦å· ID|
-|sourceContentId|string|false|none|æ¥æºåå®¹/è§é¢/å¹¿å ID|
-|sourceType|string|false|none|æ¥æºç±»åï¼commentè¯è®º/dmç§ä¿¡/formè¡¨å/clickç¹å»|
-|intent|string|false|none|æåï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»|
-|status|string|false|none|ç¶æï¼newæ°çº¿ç´¢/assignedå·²åé/contactingè·è¿ä¸­/effectiveææ/quotedå·²æ¥ä»·/opportunityåæº/lostæµå¤±|
-|score|integer(int32)|false|none|çº¿ç´¢è¯åï¼0-100|
-|ownerId|integer(int64)|false|none|å½å±åå¸­ ID|
-|slaDeadline|string(date-time)|false|none|ååº SLA æªæ­¢æ¶é´|
-|extra|string|false|none|æ½åå³é®å­æ®µï¼JSONBï¼ï¼å­å¨ç»æç¤ºä¾ï¼{"scenario":"åºæ¯","quantity":"æ°é","budget":"é¢ç®","delivery":"äº¤æ"}|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|customerId|integer(int64)|false|none|关联客户公司 ID（可空）|
+|contactId|integer(int64)|false|none|关联联系人 ID（可空）|
+|sourceChannelId|integer(int64)|false|none|来源渠道账号 ID|
+|sourceContentId|string|false|none|来源内容/视频/广告 ID|
+|sourceType|string|false|none|来源类型：comment评论/dm私信/form表单/click点击|
+|intent|string|false|none|意向：quote报价/sample样品/selection选型/other其他|
+|status|string|false|none|状态：new新线索/assigned已分配/contacting跟进中/effective有效/quoted已报价/opportunity商机/lost流失|
+|score|integer(int32)|false|none|线索评分：0-100|
+|ownerId|integer(int64)|false|none|归属坐席 ID|
+|slaDeadline|string(date-time)|false|none|响应 SLA 截止时间|
+|extra|string|false|none|抽取关键字段（JSONB），存储结构示例：{"scenario":"场景","quantity":"数量","budget":"预算","delivery":"交期"}|
 
 <h2 id="tocS_ResultLead">ResultLead</h2>
 <!-- backwards compatibility -->
@@ -13460,7 +13460,7 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
@@ -13482,15 +13482,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Lead](#schemalead)|false|none|çº¿ç´¢ä¿¡æ¯|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Lead](#schemalead)|false|none|线索信息|
 
 <h2 id="tocS_ResultLong">ResultLong</h2>
 <!-- backwards compatibility -->
@@ -13502,21 +13502,21 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": 0
 }
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|integer(int64)|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|integer(int64)|false|none|业务数据|
 
 <h2 id="tocS_BindRequest">BindRequest</h2>
 <!-- backwards compatibility -->
@@ -13536,17 +13536,17 @@ BearerAuth
 
 ```
 
-ç»å®è¯·æ±ä½
+绑定请求体
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tenantId|integer(int64)|false|none|ç§æ· IDï¼ä¸ºç©ºé»è®¤å½åç§æ·ï¼|
-|identityType|string|false|none|èº«ä»½ç±»åï¼mobileææºå·/emailé®ç®±/socialç¤¾åªID/wecomä¼å¾®ID/whatsapp/domainä¼ä¸åå|
-|identityValue|string|false|none|èº«ä»½å¼ï¼å¦ææºå·ãé®ç®±å°åãç¤¾åª/ä¼å¾®/WhatsApp IDãä¼ä¸ååï¼|
-|entityId|integer(int64)|false|none|ç®æ çº¿ç´¢ ID|
-|source|string|false|none|ç»å®æ¥æºæ è¯ï¼å¦ manualæå¨ï¼|
+|tenantId|integer(int64)|false|none|租户 ID（为空默认当前租户）|
+|identityType|string|false|none|身份类型：mobile手机号/email邮箱/social社媒ID/wecom企微ID/whatsapp/domain企业域名|
+|identityValue|string|false|none|身份值（如手机号、邮箱地址、社媒/企微/WhatsApp ID、企业域名）|
+|entityId|integer(int64)|false|none|目标线索 ID|
+|source|string|false|none|绑定来源标识（如 manual手动）|
 
 <h2 id="tocS_FollowUp">FollowUp</h2>
 <!-- backwards compatibility -->
@@ -13564,29 +13564,29 @@ BearerAuth
   "leadId": 0,
   "customerId": 0,
   "userId": 0,
-  "content": "å®¢æ·å¯¹æ¥ä»·æ¹æ¡ææåï¼çº¦ä¸å¨é¢è°",
+  "content": "客户对报价方案有意向，约下周面谈",
   "method": "wechat",
   "nextTime": "2019-08-24T14:15:22Z"
 }
 
 ```
 
-è·è¿è®°å½ä¿¡æ¯ï¼method åå¼ï¼phoneçµè¯/wechatå¾®ä¿¡/visitæè®¿/otherå¶ä»ï¼
+跟进记录信息（method 取值：phone电话/wechat微信/visit拜访/other其他）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|leadId|integer(int64)|false|none|å³èçº¿ç´¢ IDï¼å¯ç©ºï¼|
-|customerId|integer(int64)|false|none|å³èå®¢æ· IDï¼å¯ç©ºï¼|
-|userId|integer(int64)|false|none|è·è¿äºº ID|
-|content|string|false|none|è·è¿åå®¹|
-|method|string|false|none|è·è¿æ¹å¼ï¼phoneçµè¯/wechatå¾®ä¿¡/visitæè®¿/otherå¶ä»|
-|nextTime|string(date-time)|false|none|ä¸æ¬¡è·è¿æ¶é´|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|leadId|integer(int64)|false|none|关联线索 ID（可空）|
+|customerId|integer(int64)|false|none|关联客户 ID（可空）|
+|userId|integer(int64)|false|none|跟进人 ID|
+|content|string|false|none|跟进内容|
+|method|string|false|none|跟进方式：phone电话/wechat微信/visit拜访/other其他|
+|nextTime|string(date-time)|false|none|下次跟进时间|
 
 <h2 id="tocS_ResultFollowUp">ResultFollowUp</h2>
 <!-- backwards compatibility -->
@@ -13598,7 +13598,7 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
@@ -13607,7 +13607,7 @@ BearerAuth
     "leadId": 0,
     "customerId": 0,
     "userId": 0,
-    "content": "å®¢æ·å¯¹æ¥ä»·æ¹æ¡ææåï¼çº¦ä¸å¨é¢è°",
+    "content": "客户对报价方案有意向，约下周面谈",
     "method": "wechat",
     "nextTime": "2019-08-24T14:15:22Z"
   }
@@ -13615,15 +13615,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[FollowUp](#schemafollowup)|false|none|è·è¿è®°å½ä¿¡æ¯ï¼method åå¼ï¼phoneçµè¯/wechatå¾®ä¿¡/visitæè®¿/otherå¶ä»ï¼|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[FollowUp](#schemafollowup)|false|none|跟进记录信息（method 取值：phone电话/wechat微信/visit拜访/other其他）|
 
 <h2 id="tocS_FileUploadVO">FileUploadVO</h2>
 <!-- backwards compatibility -->
@@ -13643,17 +13643,17 @@ BearerAuth
 
 ```
 
-æä»¶ä¸ä¼ ç»æ
+文件上传结果
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|æä»¶è®°å½ ID|
-|fileName|string|false|none|åå§æä»¶å|
-|fileSize|integer(int64)|false|none|æä»¶å¤§å°ï¼å­èï¼|
-|contentType|string|false|none|åå®¹ç±»å|
-|url|string|false|none|è®¿é®å°å|
+|id|integer(int64)|false|none|文件记录 ID|
+|fileName|string|false|none|原始文件名|
+|fileSize|integer(int64)|false|none|文件大小（字节）|
+|contentType|string|false|none|内容类型|
+|url|string|false|none|访问地址|
 
 <h2 id="tocS_ResultFileUploadVO">ResultFileUploadVO</h2>
 <!-- backwards compatibility -->
@@ -13665,7 +13665,7 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 0,
     "fileName": "string",
@@ -13677,15 +13677,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[FileUploadVO](#schemafileuploadvo)|false|none|æä»¶ä¸ä¼ ç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[FileUploadVO](#schemafileuploadvo)|false|none|文件上传结果|
 
 <h2 id="tocS_ResultString">ResultString</h2>
 <!-- backwards compatibility -->
@@ -13697,21 +13697,21 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": "string"
 }
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|string|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|string|false|none|业务数据|
 
 <h2 id="tocS_Conversation">Conversation</h2>
 <!-- backwards compatibility -->
@@ -13737,23 +13737,23 @@ BearerAuth
 
 ```
 
-ä¼è¯ï¼æ¿æ¥éµå°ï¼ä¼å¾®/WhatsApp/ç§ä¿¡ï¼
+会话（承接阵地：企微/WhatsApp/私信）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|channelAccountId|integer(int64)|false|none|æ¿æ¥æ¸ éè´¦å· ID|
-|contactId|integer(int64)|false|none|èç³»äºº ID|
-|leadId|integer(int64)|false|none|çº¿ç´¢ ID|
-|conversationType|string|false|none|ä¼è¯ç±»åï¼dmç´æ¥ç§ä¿¡/wecom_chatä¼å¾®èå¤©/whatsapp|
-|status|string|false|none|ç¶æï¼activeè¿è¡ä¸­/transferredå·²è½¬äººå·¥/closedå·²å³é­/archivedå·²å½æ¡£|
-|assignedTo|integer(int64)|false|none|å½åäººå·¥å¤çäºº ID|
-|lastMessageAt|string(date-time)|false|none|æåæ¶æ¯æ¶é´|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|channelAccountId|integer(int64)|false|none|承接渠道账号 ID|
+|contactId|integer(int64)|false|none|联系人 ID|
+|leadId|integer(int64)|false|none|线索 ID|
+|conversationType|string|false|none|会话类型：dm直接私信/wecom_chat企微聊天/whatsapp|
+|status|string|false|none|状态：active进行中/transferred已转人工/closed已关闭/archived已归档|
+|assignedTo|integer(int64)|false|none|当前人工处理人 ID|
+|lastMessageAt|string(date-time)|false|none|最后消息时间|
 
 <h2 id="tocS_ResultConversation">ResultConversation</h2>
 <!-- backwards compatibility -->
@@ -13765,7 +13765,7 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
@@ -13783,15 +13783,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Conversation](#schemaconversation)|false|none|ä¼è¯ï¼æ¿æ¥éµå°ï¼ä¼å¾®/WhatsApp/ç§ä¿¡ï¼|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Conversation](#schemaconversation)|false|none|会话（承接阵地：企微/WhatsApp/私信）|
 
 <h2 id="tocS_ResultTransferPackage">ResultTransferPackage</h2>
 <!-- backwards compatibility -->
@@ -13803,7 +13803,7 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "conversationId": 100,
     "tenantId": 1,
@@ -13829,15 +13829,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[TransferPackage](#schematransferpackage)|false|none|è½¬äººå·¥äº¤æ¥åï¼åå¸­æ¥ææ¶çå°çä¼è¯ä¸ä¸æï¼å¯¹è¯æè¦/æåå¤å®/ç¼ºå¤±å­æ®µ/æ¨èåå¤/ä¸ä¸æ­¥å¨ä½ï¼|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[TransferPackage](#schematransferpackage)|false|none|转人工交接包：坐席接手时看到的会话上下文（对话摘要/意向判定/缺失字段/推荐回复/下一步动作）|
 
 <h2 id="tocS_TransferPackage">TransferPackage</h2>
 <!-- backwards compatibility -->
@@ -13871,26 +13871,26 @@ BearerAuth
 
 ```
 
-è½¬äººå·¥äº¤æ¥åï¼åå¸­æ¥ææ¶çå°çä¼è¯ä¸ä¸æï¼å¯¹è¯æè¦/æåå¤å®/ç¼ºå¤±å­æ®µ/æ¨èåå¤/ä¸ä¸æ­¥å¨ä½ï¼
+转人工交接包：坐席接手时看到的会话上下文（对话摘要/意向判定/缺失字段/推荐回复/下一步动作）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|conversationId|integer(int64)|false|none|ä¼è¯ ID|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|leadId|integer(int64)|false|none|çº¿ç´¢ ID|
-|conversationType|string|false|none|ä¼è¯ç±»åï¼dmç´æ¥ç§ä¿¡/wecom_chatä¼å¾®èå¤©/whatsapp|
-|operatorId|integer(int64)|false|none|æ¥æåå¸­ ID|
-|summary|string|false|none|å¯¹è¯æè¦ï¼AI summaryï¼å¤±è´¥æ¶éçº§æç¤ºï¼|
-|summarySource|string|false|none|æè¦æ¥æºï¼ai/fallback|
-|intent|string|false|none|æåï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»|
-|confidence|number|false|none|æåç½®ä¿¡åº¦|
-|evidence|string|false|none|å¤å®ä¾æ®çæ®µ|
-|missingFields|[string]|false|none|ç¼ºå¤±å­æ®µï¼sceneåºæ¯/qtyæ°é/budgeté¢ç®/lead_timeäº¤æ/modelåå· ä¸­æªæ¶éå°ç|
-|recommendedReply|string|false|none|æ¨èåå¤è¯æ¯ï¼ææåçæï¼|
-|nextSteps|[string]|false|none|ä¸ä¸æ­¥å¨ä½æ¸å|
-|transferredAt|string(date-time)|false|none|è½¬äººå·¥æ¶é´|
+|conversationId|integer(int64)|false|none|会话 ID|
+|tenantId|integer(int64)|false|none|租户 ID|
+|leadId|integer(int64)|false|none|线索 ID|
+|conversationType|string|false|none|会话类型：dm直接私信/wecom_chat企微聊天/whatsapp|
+|operatorId|integer(int64)|false|none|接手坐席 ID|
+|summary|string|false|none|对话摘要（AI summary，失败时降级提示）|
+|summarySource|string|false|none|摘要来源：ai/fallback|
+|intent|string|false|none|意向：quote报价/sample样品/selection选型/other其他|
+|confidence|number|false|none|意向置信度|
+|evidence|string|false|none|判定依据片段|
+|missingFields|[string]|false|none|缺失字段：scene场景/qty数量/budget预算/lead_time交期/model型号 中未收集到的|
+|recommendedReply|string|false|none|推荐回复话术（按意向生成）|
+|nextSteps|[string]|false|none|下一步动作清单|
+|transferredAt|string(date-time)|false|none|转人工时间|
 
 <h2 id="tocS_Message">Message</h2>
 <!-- backwards compatibility -->
@@ -13917,24 +13917,24 @@ BearerAuth
 
 ```
 
-æ¶æ¯
+消息
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|conversationId|integer(int64)|false|none|ä¼è¯ ID|
-|senderType|string|false|none|åéæ¹ï¼customerå®¢æ·/aiæºå¨äºº/humanäººå·¥/systemç³»ç»|
-|content|string|false|none|æ¶æ¯åå®¹|
-|msgType|string|false|none|æ¶æ¯ç±»åï¼textææ¬/imageå¾ç/fileæä»¶/cardå¡ç|
-|attachments|string|false|none|éä»¶ ID åè¡¨ï¼JSONB å­ç¬¦ä¸²ï¼|
-|aiGenerated|boolean|false|none|æ¯å¦ AI çæ|
-|quotedDocIds|string|false|none|å¼ç¨ç¥è¯ææ¡£ IDï¼æº¯æºï¼JSONB å­ç¬¦ä¸²ï¼|
-|raw|string|false|none|åå§æ¶æ¯ï¼JSONB å­ç¬¦ä¸²ï¼|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|conversationId|integer(int64)|false|none|会话 ID|
+|senderType|string|false|none|发送方：customer客户/ai机器人/human人工/system系统|
+|content|string|false|none|消息内容|
+|msgType|string|false|none|消息类型：text文本/image图片/file文件/card卡片|
+|attachments|string|false|none|附件 ID 列表（JSONB 字符串）|
+|aiGenerated|boolean|false|none|是否 AI 生成|
+|quotedDocIds|string|false|none|引用知识文档 ID（溯源，JSONB 字符串）|
+|raw|string|false|none|原始消息（JSONB 字符串）|
 
 <h2 id="tocS_ResultMessage">ResultMessage</h2>
 <!-- backwards compatibility -->
@@ -13946,7 +13946,7 @@ BearerAuth
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
@@ -13965,15 +13965,15 @@ BearerAuth
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Message](#schemamessage)|false|none|æ¶æ¯|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Message](#schemamessage)|false|none|消息|
 
 <h2 id="tocS_AiReply">AiReply</h2>
 <!-- backwards compatibility -->
@@ -13992,16 +13992,16 @@ BearerAuth
 
 ```
 
-AI åå¤ç»æ
+AI 回复结果
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|content|string|false|none|åå¤åå®¹|
-|intent|string|false|none|æåï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»|
-|confidence|number|false|none|ç½®ä¿¡åº¦ï¼0-1ï¼|
-|shouldTransfer|boolean|false|none|æ¯å¦å»ºè®®è½¬äººå·¥|
+|content|string|false|none|回复内容|
+|intent|string|false|none|意向：quote报价/sample样品/selection选型/other其他|
+|confidence|number|false|none|置信度（0-1）|
+|shouldTransfer|boolean|false|none|是否建议转人工|
 
 <h2 id="tocS_ResultAiReply">ResultAiReply</h2>
 <!-- backwards compatibility -->
@@ -14013,7 +14013,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "content": "string",
     "intent": "quote",
@@ -14024,15 +14024,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[AiReply](#schemaaireply)|false|none|AI åå¤ç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[AiReply](#schemaaireply)|false|none|AI 回复结果|
 
 <h2 id="tocS_ChannelEvent">ChannelEvent</h2>
 <!-- backwards compatibility -->
@@ -14057,22 +14057,22 @@ AI åå¤ç»æ
 
 ```
 
-æ¸ éåå§äºä»¶ï¼ä¸æ¸ éç»ä¸å¥å£ï¼å¹ç­å»éï¼
+渠道原始事件（三渠道统一入口，幂等去重）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|channelAccountId|integer(int64)|false|none|æ¸ éè´¦å· IDï¼å¯¹åº channel_account.idï¼|
-|eventType|string|false|none|äºä»¶ç±»åï¼commentè¯è®º/dmç§ä¿¡/formè¡¨å/clickç¹å»/leadçº¿ç´¢ï¼æ´»ç æ«ç åé¨äºä»¶ä¸º qrï¼ä¸å¥æ­¤æ¥å£ï¼|
-|externalEventId|string|false|none|æ¸ éäºä»¶å¯ä¸ IDï¼å»éé®ï¼ä¸ tenantId+channelAccountId ç»åå¹ç­ï¼|
-|externalUserId|string|false|none|æ¸ éä¾§ç¨æ· ID|
-|rawPayload|string|false|none|åå§äºä»¶æ°æ®ï¼JSONBï¼ï¼å­å¨æ¸ éåè°çå®æ´åå§ JSONï¼å­æ®µéæ¸ éä¸äºä»¶ç±»åä¸å|
-|mapped|integer(int32)|false|none|æ¯å¦å·²æ å°è½çº¿ç´¢ï¼0æªå¤ç/1å·²æ å°|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|channelAccountId|integer(int64)|false|none|渠道账号 ID（对应 channel_account.id）|
+|eventType|string|false|none|事件类型：comment评论/dm私信/form表单/click点击/lead线索（活码扫码内部事件为 qr，不入此接口）|
+|externalEventId|string|false|none|渠道事件唯一 ID（去重键，与 tenantId+channelAccountId 组合幂等）|
+|externalUserId|string|false|none|渠道侧用户 ID|
+|rawPayload|string|false|none|原始事件数据（JSONB），存储渠道回调的完整原始 JSON，字段随渠道与事件类型不同|
+|mapped|integer(int32)|false|none|是否已映射落线索：0未处理/1已映射|
 
 <h2 id="tocS_ResultBoolean">ResultBoolean</h2>
 <!-- backwards compatibility -->
@@ -14084,21 +14084,21 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": true
 }
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|boolean|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|boolean|false|none|业务数据|
 
 <h2 id="tocS_LoginRequest">LoginRequest</h2>
 <!-- backwards compatibility -->
@@ -14116,15 +14116,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»å½è¯·æ±
+登录请求
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tenantId|integer(int64)|true|none|ç§æ· ID|
-|mobile|string|true|none|ææºå·ï¼ç»å½è´¦å·ï¼|
-|password|string|true|none|ç»å½å¯ç ï¼ææï¼|
+|tenantId|integer(int64)|true|none|租户 ID|
+|mobile|string|true|none|手机号（登录账号）|
+|password|string|true|none|登录密码（明文）|
 
 <h2 id="tocS_LoginResponse">LoginResponse</h2>
 <!-- backwards compatibility -->
@@ -14150,19 +14150,19 @@ AI åå¤ç»æ
 
 ```
 
-ç»å½ååº
+登录响应
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|token|string|false|none|JWT ä»¤ç|
-|userId|integer(int64)|false|none|ç¨æ· ID|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|roleCode|string|false|none|ä¸»è§è²ç ï¼è§è²éåç¬¬ä¸ä¸ªï¼å¼å®¹æ§åç«¯ï¼ï¼sales/supervisor/admin|
-|roles|[string]|false|none|è§è²ç éåï¼sales/supervisor/admin|
-|perms|[string]|false|none|æé®æéç éåï¼å¦ user:add|
-|name|string|false|none|å§å|
+|token|string|false|none|JWT 令牌|
+|userId|integer(int64)|false|none|用户 ID|
+|tenantId|integer(int64)|false|none|租户 ID|
+|roleCode|string|false|none|主角色码（角色集合第一个，兼容旧前端）：sales/supervisor/admin|
+|roles|[string]|false|none|角色码集合：sales/supervisor/admin|
+|perms|[string]|false|none|按钮权限码集合，如 user:add|
+|name|string|false|none|姓名|
 
 <h2 id="tocS_ResultLoginResponse">ResultLoginResponse</h2>
 <!-- backwards compatibility -->
@@ -14174,7 +14174,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "token": "string",
     "userId": 0,
@@ -14192,15 +14192,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[LoginResponse](#schemaloginresponse)|false|none|ç»å½ååº|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[LoginResponse](#schemaloginresponse)|false|none|登录响应|
 
 <h2 id="tocS_ReplySuggestion">ReplySuggestion</h2>
 <!-- backwards compatibility -->
@@ -14222,15 +14222,15 @@ AI åå¤ç»æ
 
 ```
 
-æ¨èè¯æ¯
+推荐话术
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|intent|string|false|none|æåï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»|
-|replies|[string]|false|none|æ¨èåå¤è¯æ¯åè¡¨|
-|missingFields|[string]|false|none|ç¼ºå¤±å­æ®µï¼sceneåºæ¯/qtyæ°é/budgeté¢ç®/lead_timeäº¤æ/modelåå·|
+|intent|string|false|none|意向：quote报价/sample样品/selection选型/other其他|
+|replies|[string]|false|none|推荐回复话术列表|
+|missingFields|[string]|false|none|缺失字段：scene场景/qty数量/budget预算/lead_time交期/model型号|
 
 <h2 id="tocS_ResultReplySuggestion">ResultReplySuggestion</h2>
 <!-- backwards compatibility -->
@@ -14242,7 +14242,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "intent": "quote",
     "replies": [
@@ -14256,15 +14256,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[ReplySuggestion](#schemareplysuggestion)|false|none|æ¨èè¯æ¯|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[ReplySuggestion](#schemareplysuggestion)|false|none|推荐话术|
 
 <h2 id="tocS_CustomerProfile">CustomerProfile</h2>
 <!-- backwards compatibility -->
@@ -14292,23 +14292,23 @@ AI åå¤ç»æ
 
 ```
 
-å®¢æ·ç»å
+客户画像
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|leadId|integer(int64)|false|none|çº¿ç´¢ ID|
-|leadStatus|string|false|none|çº¿ç´¢ç¶æï¼newæ°çº¿ç´¢/assignedå·²åé/contactingè·è¿ä¸­/effectiveææ/quotedå·²æ¥ä»·/opportunityåæº/lostæµå¤±|
-|intent|string|false|none|çº¿ç´¢æåï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»|
-|score|integer(int32)|false|none|å®¢æ·ç»¼åè¯åï¼0-100ï¼|
-|customerId|integer(int64)|false|none|å®¢æ· ID|
-|customerName|string|false|none|å®¢æ·åç§°|
-|industry|string|false|none|è¡ä¸|
-|region|string|false|none|å°åº|
-|tags|[string]|false|none|æ ç­¾åè¡¨|
-|latestIntent|string|false|none|æè¿æåï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»|
-|intentConfidence|number|false|none|æåç½®ä¿¡åº¦ï¼0-1ï¼|
+|leadId|integer(int64)|false|none|线索 ID|
+|leadStatus|string|false|none|线索状态：new新线索/assigned已分配/contacting跟进中/effective有效/quoted已报价/opportunity商机/lost流失|
+|intent|string|false|none|线索意向：quote报价/sample样品/selection选型/other其他|
+|score|integer(int32)|false|none|客户综合评分（0-100）|
+|customerId|integer(int64)|false|none|客户 ID|
+|customerName|string|false|none|客户名称|
+|industry|string|false|none|行业|
+|region|string|false|none|地区|
+|tags|[string]|false|none|标签列表|
+|latestIntent|string|false|none|最近意向：quote报价/sample样品/selection选型/other其他|
+|intentConfidence|number|false|none|意向置信度（0-1）|
 
 <h2 id="tocS_ResultCustomerProfile">ResultCustomerProfile</h2>
 <!-- backwards compatibility -->
@@ -14320,7 +14320,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "leadId": 0,
     "leadStatus": "string",
@@ -14340,15 +14340,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[CustomerProfile](#schemacustomerprofile)|false|none|å®¢æ·ç»å|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[CustomerProfile](#schemacustomerprofile)|false|none|客户画像|
 
 <h2 id="tocS_PageResultProduct">PageResultProduct</h2>
 <!-- backwards compatibility -->
@@ -14370,12 +14370,12 @@ AI åå¤ç»æ
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 0,
       "categoryId": 0,
-      "name": "ä¼ä¸ç CRM",
+      "name": "企业版 CRM",
       "sku": "CRM-ENT-001",
-      "spec": "æ åç",
+      "spec": "标准版",
       "price": 1999,
-      "params": "{\"å®¹é\":\"100GB\",\"å¹¶åæ°\":\"500\"}",
-      "attachments": "[{\"name\":\"éåè¡¨.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
+      "params": "{\"容量\":\"100GB\",\"并发数\":\"500\"}",
+      "attachments": "[{\"name\":\"选型表.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
       "description": "string",
       "status": 1
     }
@@ -14384,17 +14384,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[Product](#schemaproduct)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[Product](#schemaproduct)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultProduct">ResultPageResultProduct</h2>
 <!-- backwards compatibility -->
@@ -14406,7 +14406,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -14419,12 +14419,12 @@ AI åå¤ç»æ
         "updatedAt": "2019-08-24T14:15:22Z",
         "tenantId": 0,
         "categoryId": 0,
-        "name": "ä¼ä¸ç CRM",
+        "name": "企业版 CRM",
         "sku": "CRM-ENT-001",
-        "spec": "æ åç",
+        "spec": "标准版",
         "price": 1999,
-        "params": "{\"å®¹é\":\"100GB\",\"å¹¶åæ°\":\"500\"}",
-        "attachments": "[{\"name\":\"éåè¡¨.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
+        "params": "{\"容量\":\"100GB\",\"并发数\":\"500\"}",
+        "attachments": "[{\"name\":\"选型表.xlsx\",\"url\":\"/uploads/xxx.xlsx\"}]",
         "description": "string",
         "status": 1
       }
@@ -14434,15 +14434,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultProduct](#schemapageresultproduct)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultProduct](#schemapageresultproduct)|false|none|分页返回结构|
 
 <h2 id="tocS_ConversationBrief">ConversationBrief</h2>
 <!-- backwards compatibility -->
@@ -14463,18 +14463,18 @@ AI åå¤ç»æ
 
 ```
 
-ä¼è¯æè¦
+会话摘要
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|conversationId|integer(int64)|false|none|ä¼è¯ ID|
-|conversationType|string|false|none|ä¼è¯ç±»åï¼dmç´æ¥ç§ä¿¡/wecom_chatä¼å¾®èå¤©/whatsapp|
-|status|string|false|none|ä¼è¯ç¶æï¼activeè¿è¡ä¸­/transferredå·²è½¬äººå·¥/closedå·²å³é­/archivedå·²å½æ¡£|
-|lastMessageAt|string(date-time)|false|none|æè¿ä¸æ¡æ¶æ¯æ¶é´|
-|lastMessage|string|false|none|æè¿ä¸æ¡æ¶æ¯åå®¹|
-|lastSender|string|false|none|æè¿ä¸æ¡æ¶æ¯åéæ¹ï¼customerå®¢æ·/aiæºå¨äºº/humanäººå·¥/systemç³»ç»|
+|conversationId|integer(int64)|false|none|会话 ID|
+|conversationType|string|false|none|会话类型：dm直接私信/wecom_chat企微聊天/whatsapp|
+|status|string|false|none|会话状态：active进行中/transferred已转人工/closed已关闭/archived已归档|
+|lastMessageAt|string(date-time)|false|none|最近一条消息时间|
+|lastMessage|string|false|none|最近一条消息内容|
+|lastSender|string|false|none|最近一条消息发送方：customer客户/ai机器人/human人工/system系统|
 
 <h2 id="tocS_ResultListConversationBrief">ResultListConversationBrief</h2>
 <!-- backwards compatibility -->
@@ -14486,7 +14486,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "conversationId": 0,
@@ -14501,15 +14501,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[ConversationBrief](#schemaconversationbrief)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[ConversationBrief](#schemaconversationbrief)]|false|none|业务数据|
 
 <h2 id="tocS_PageResultUser">PageResultUser</h2>
 <!-- backwards compatibility -->
@@ -14542,17 +14542,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[User](#schemauser)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[User](#schemauser)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultUser">ResultPageResultUser</h2>
 <!-- backwards compatibility -->
@@ -14564,7 +14564,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -14589,15 +14589,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultUser](#schemapageresultuser)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultUser](#schemapageresultuser)|false|none|分页返回结构|
 
 <h2 id="tocS_ResultListLong">ResultListLong</h2>
 <!-- backwards compatibility -->
@@ -14609,7 +14609,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     0
   ]
@@ -14617,15 +14617,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[integer]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[integer]|false|none|业务数据|
 
 <h2 id="tocS_PageResultTenant">PageResultTenant</h2>
 <!-- backwards compatibility -->
@@ -14659,17 +14659,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[Tenant](#schematenant)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[Tenant](#schematenant)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultTenant">ResultPageResultTenant</h2>
 <!-- backwards compatibility -->
@@ -14681,7 +14681,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -14707,15 +14707,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultTenant](#schemapageresulttenant)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultTenant](#schemapageresulttenant)|false|none|分页返回结构|
 
 <h2 id="tocS_PageResultCustomerTag">PageResultCustomerTag</h2>
 <!-- backwards compatibility -->
@@ -14736,7 +14736,7 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 0,
-      "name": "é«æåå®¢æ·",
+      "name": "高意向客户",
       "color": "#FF5733",
       "remark": "string",
       "status": 1
@@ -14746,17 +14746,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[CustomerTag](#schemacustomertag)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[CustomerTag](#schemacustomertag)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultCustomerTag">ResultPageResultCustomerTag</h2>
 <!-- backwards compatibility -->
@@ -14768,7 +14768,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -14780,7 +14780,7 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "tenantId": 0,
-        "name": "é«æåå®¢æ·",
+        "name": "高意向客户",
         "color": "#FF5733",
         "remark": "string",
         "status": 1
@@ -14791,15 +14791,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultCustomerTag](#schemapageresultcustomertag)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultCustomerTag](#schemapageresultcustomertag)|false|none|分页返回结构|
 
 <h2 id="tocS_PageResultCustomer">PageResultCustomer</h2>
 <!-- backwards compatibility -->
@@ -14820,10 +14820,10 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 0,
-      "name": "ææç§ææéå¬å¸",
-      "industry": "è½¯ä»¶æå¡",
-      "scale": "100-499äºº",
-      "region": "ä¸æµ·",
+      "name": "某某科技有限公司",
+      "industry": "软件服务",
+      "scale": "100-499人",
+      "region": "上海",
       "orgStructure": "string",
       "source": "public_data",
       "enrichmentStatus": 0,
@@ -14836,17 +14836,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[Customer](#schemacustomer)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[Customer](#schemacustomer)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultCustomer">ResultPageResultCustomer</h2>
 <!-- backwards compatibility -->
@@ -14858,7 +14858,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -14870,10 +14870,10 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "tenantId": 0,
-        "name": "ææç§ææéå¬å¸",
-        "industry": "è½¯ä»¶æå¡",
-        "scale": "100-499äºº",
-        "region": "ä¸æµ·",
+        "name": "某某科技有限公司",
+        "industry": "软件服务",
+        "scale": "100-499人",
+        "region": "上海",
         "orgStructure": "string",
         "source": "public_data",
         "enrichmentStatus": 0,
@@ -14887,15 +14887,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultCustomer](#schemapageresultcustomer)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultCustomer](#schemapageresultcustomer)|false|none|分页返回结构|
 
 <h2 id="tocS_PageResultCustomerTagRule">PageResultCustomerTagRule</h2>
 <!-- backwards compatibility -->
@@ -14916,7 +14916,7 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 0,
-      "ruleName": "è¯åé«äº80èªå¨ææ ",
+      "ruleName": "评分高于80自动打标",
       "tagId": 0,
       "conditionField": "score",
       "conditionOp": "gte",
@@ -14928,17 +14928,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[CustomerTagRule](#schemacustomertagrule)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[CustomerTagRule](#schemacustomertagrule)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultCustomerTagRule">ResultPageResultCustomerTagRule</h2>
 <!-- backwards compatibility -->
@@ -14950,7 +14950,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -14962,7 +14962,7 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "tenantId": 0,
-        "ruleName": "è¯åé«äº80èªå¨ææ ",
+        "ruleName": "评分高于80自动打标",
         "tagId": 0,
         "conditionField": "score",
         "conditionOp": "gte",
@@ -14975,15 +14975,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultCustomerTagRule](#schemapageresultcustomertagrule)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultCustomerTagRule](#schemapageresultcustomertagrule)|false|none|分页返回结构|
 
 <h2 id="tocS_PageResultSpeechLibrary">PageResultSpeechLibrary</h2>
 <!-- backwards compatibility -->
@@ -15004,7 +15004,7 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 0,
-      "title": "å¼åºç½-æ åç",
+      "title": "开场白-标准版",
       "category": "general",
       "content": "string",
       "status": 1
@@ -15014,17 +15014,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[SpeechLibrary](#schemaspeechlibrary)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[SpeechLibrary](#schemaspeechlibrary)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultSpeechLibrary">ResultPageResultSpeechLibrary</h2>
 <!-- backwards compatibility -->
@@ -15036,7 +15036,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -15048,7 +15048,7 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "tenantId": 0,
-        "title": "å¼åºç½-æ åç",
+        "title": "开场白-标准版",
         "category": "general",
         "content": "string",
         "status": 1
@@ -15059,15 +15059,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultSpeechLibrary](#schemapageresultspeechlibrary)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultSpeechLibrary](#schemapageresultspeechlibrary)|false|none|分页返回结构|
 
 <h2 id="tocS_PageResultRole">PageResultRole</h2>
 <!-- backwards compatibility -->
@@ -15098,17 +15098,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[Role](#schemarole)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[Role](#schemarole)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultRole">ResultPageResultRole</h2>
 <!-- backwards compatibility -->
@@ -15120,7 +15120,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -15143,15 +15143,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultRole](#schemapageresultrole)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultRole](#schemapageresultrole)|false|none|分页返回结构|
 
 <h2 id="tocS_ResultListRole">ResultListRole</h2>
 <!-- backwards compatibility -->
@@ -15163,7 +15163,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "id": 1,
@@ -15180,15 +15180,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[Role](#schemarole)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[Role](#schemarole)]|false|none|业务数据|
 
 <h2 id="tocS_ResultListProductCategory">ResultListProductCategory</h2>
 <!-- backwards compatibility -->
@@ -15200,14 +15200,14 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "id": 1,
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 0,
-      "name": "CRM äº§åçº¿",
+      "name": "CRM 产品线",
       "parentId": 0,
       "sort": 1,
       "status": 1
@@ -15217,15 +15217,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[ProductCategory](#schemaproductcategory)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[ProductCategory](#schemaproductcategory)]|false|none|业务数据|
 
 <h2 id="tocS_Plan">Plan</h2>
 <!-- backwards compatibility -->
@@ -15250,22 +15250,22 @@ AI åå¤ç»æ
 
 ```
 
-å¥é¤å®ä¹ï¼å¹³å°çº§ï¼ç§æ·è®¢éççæ¬éç½®ï¼
+套餐定义（平台级，租户订阅的版本配置）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|code|string|false|none|å¥é¤ç¼ç ï¼starter/pro/enterprise|
-|name|string|false|none|å¥é¤åç§°|
-|seatCount|integer(int32)|false|none|åå¸­æ°ä¸é|
-|aiQuotaMonth|integer(int64)|false|none|æåº¦ AI è°ç¨é¢åº¦|
-|monthlyPrice|number|false|none|æåä»·ï¼åï¼|
-|description|string|false|none|å¥é¤æè¿°|
-|status|integer(int32)|false|none|ç¶æï¼1ä¸æ¶/0ä¸æ¶|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|code|string|false|none|套餐编码：starter/pro/enterprise|
+|name|string|false|none|套餐名称|
+|seatCount|integer(int32)|false|none|坐席数上限|
+|aiQuotaMonth|integer(int64)|false|none|月度 AI 调用额度|
+|monthlyPrice|number|false|none|月单价（元）|
+|description|string|false|none|套餐描述|
+|status|integer(int32)|false|none|状态：1上架/0下架|
 
 <h2 id="tocS_ResultListPlan">ResultListPlan</h2>
 <!-- backwards compatibility -->
@@ -15277,7 +15277,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "id": 1,
@@ -15296,15 +15296,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[Plan](#schemaplan)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[Plan](#schemaplan)]|false|none|业务数据|
 
 <h2 id="tocS_ResultPlan">ResultPlan</h2>
 <!-- backwards compatibility -->
@@ -15316,7 +15316,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
@@ -15333,15 +15333,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Plan](#schemaplan)|false|none|å¥é¤å®ä¹ï¼å¹³å°çº§ï¼ç§æ·è®¢éççæ¬éç½®ï¼|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Plan](#schemaplan)|false|none|套餐定义（平台级，租户订阅的版本配置）|
 
 <h2 id="tocS_ResultListMenu">ResultListMenu</h2>
 <!-- backwards compatibility -->
@@ -15353,7 +15353,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "id": 1,
@@ -15378,15 +15378,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[Menu](#schemamenu)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[Menu](#schemamenu)]|false|none|业务数据|
 
 <h2 id="tocS_OperLog">OperLog</h2>
 <!-- backwards compatibility -->
@@ -15402,9 +15402,9 @@ AI åå¤ç»æ
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
   "userId": 0,
-  "userName": "å¼ ä¸",
-  "module": "å­å¸ç®¡ç",
-  "operation": "åå»ºå­å¸ç±»å",
+  "userName": "张三",
+  "module": "字典管理",
+  "operation": "创建字典类型",
   "method": "string",
   "requestUrl": "/api/dicts/types",
   "httpMethod": "POST",
@@ -15417,28 +15417,28 @@ AI åå¤ç»æ
 
 ```
 
-æä½æ¥å¿
+操作日志
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|userId|integer(int64)|false|none|æä½äººç¨æ· ID|
-|userName|string|false|none|æä½äººå§å|
-|module|string|false|none|ä¸å¡æ¨¡å|
-|operation|string|false|none|æä½åå®¹|
-|method|string|false|none|æ§è¡æ¹æ³ï¼å¨éå®åï¼|
-|requestUrl|string|false|none|è¯·æ±å°å|
-|httpMethod|string|false|none|è¯·æ±æ¹å¼|
-|requestParams|string|false|none|è¯·æ±åæ°ï¼JSONï¼ææå­æ®µå·²è±æï¼|
-|result|integer(int32)|false|none|ç»æï¼1 æå / 0 å¤±è´¥|
-|errorMsg|string|false|none|å¼å¸¸ä¿¡æ¯|
-|ip|string|false|none|æ¥æº IP|
-|durationMs|integer(int64)|false|none|èæ¶ï¼æ¯«ç§ï¼|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|userId|integer(int64)|false|none|操作人用户 ID|
+|userName|string|false|none|操作人姓名|
+|module|string|false|none|业务模块|
+|operation|string|false|none|操作内容|
+|method|string|false|none|执行方法（全限定名）|
+|requestUrl|string|false|none|请求地址|
+|httpMethod|string|false|none|请求方式|
+|requestParams|string|false|none|请求参数（JSON，敏感字段已脱敏）|
+|result|integer(int32)|false|none|结果：1 成功 / 0 失败|
+|errorMsg|string|false|none|异常信息|
+|ip|string|false|none|来源 IP|
+|durationMs|integer(int64)|false|none|耗时（毫秒）|
 
 <h2 id="tocS_PageResultOperLog">PageResultOperLog</h2>
 <!-- backwards compatibility -->
@@ -15460,9 +15460,9 @@ AI åå¤ç»æ
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 0,
       "userId": 0,
-      "userName": "å¼ ä¸",
-      "module": "å­å¸ç®¡ç",
-      "operation": "åå»ºå­å¸ç±»å",
+      "userName": "张三",
+      "module": "字典管理",
+      "operation": "创建字典类型",
       "method": "string",
       "requestUrl": "/api/dicts/types",
       "httpMethod": "POST",
@@ -15477,17 +15477,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[OperLog](#schemaoperlog)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[OperLog](#schemaoperlog)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultOperLog">ResultPageResultOperLog</h2>
 <!-- backwards compatibility -->
@@ -15499,7 +15499,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -15512,9 +15512,9 @@ AI åå¤ç»æ
         "updatedAt": "2019-08-24T14:15:22Z",
         "tenantId": 0,
         "userId": 0,
-        "userName": "å¼ ä¸",
-        "module": "å­å¸ç®¡ç",
-        "operation": "åå»ºå­å¸ç±»å",
+        "userName": "张三",
+        "module": "字典管理",
+        "operation": "创建字典类型",
         "method": "string",
         "requestUrl": "/api/dicts/types",
         "httpMethod": "POST",
@@ -15530,15 +15530,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultOperLog](#schemapageresultoperlog)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultOperLog](#schemapageresultoperlog)|false|none|分页返回结构|
 
 <h2 id="tocS_LoginLog">LoginLog</h2>
 <!-- backwards compatibility -->
@@ -15558,27 +15558,27 @@ AI åå¤ç»æ
   "ip": "127.0.0.1",
   "userAgent": "string",
   "status": 1,
-  "message": "ç»å½æå"
+  "message": "登录成功"
 }
 
 ```
 
-ç»å½æ¥å¿
+登录日志
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· IDï¼ç»å½å¤±è´¥æ¶å¯è½ä¸ºç©ºï¼|
-|userId|integer(int64)|false|none|ç¨æ· IDï¼ç»å½å¤±è´¥æ¶ä¸ºç©ºï¼|
-|mobile|string|false|none|ç»å½ææºå·|
-|ip|string|false|none|æ¥æº IP|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID（登录失败时可能为空）|
+|userId|integer(int64)|false|none|用户 ID（登录失败时为空）|
+|mobile|string|false|none|登录手机号|
+|ip|string|false|none|来源 IP|
 |userAgent|string|false|none|User-Agent|
-|status|integer(int32)|false|none|ç»æï¼1 æå / 0 å¤±è´¥|
-|message|string|false|none|ç»ææè¿°|
+|status|integer(int32)|false|none|结果：1 成功 / 0 失败|
+|message|string|false|none|结果描述|
 
 <h2 id="tocS_PageResultLoginLog">PageResultLoginLog</h2>
 <!-- backwards compatibility -->
@@ -15604,24 +15604,24 @@ AI åå¤ç»æ
       "ip": "127.0.0.1",
       "userAgent": "string",
       "status": 1,
-      "message": "ç»å½æå"
+      "message": "登录成功"
     }
   ]
 }
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[LoginLog](#schemaloginlog)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[LoginLog](#schemaloginlog)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultLoginLog">ResultPageResultLoginLog</h2>
 <!-- backwards compatibility -->
@@ -15633,7 +15633,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -15650,7 +15650,7 @@ AI åå¤ç»æ
         "ip": "127.0.0.1",
         "userAgent": "string",
         "status": 1,
-        "message": "ç»å½æå"
+        "message": "登录成功"
       }
     ]
   }
@@ -15658,15 +15658,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultLoginLog](#schemapageresultloginlog)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultLoginLog](#schemapageresultloginlog)|false|none|分页返回结构|
 
 <h2 id="tocS_PageResultLead">PageResultLead</h2>
 <!-- backwards compatibility -->
@@ -15704,17 +15704,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[Lead](#schemalead)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[Lead](#schemalead)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultLead">ResultPageResultLead</h2>
 <!-- backwards compatibility -->
@@ -15726,7 +15726,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -15756,15 +15756,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultLead](#schemapageresultlead)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultLead](#schemapageresultlead)|false|none|分页返回结构|
 
 <h2 id="tocS_PageResultLeadAssignRule">PageResultLeadAssignRule</h2>
 <!-- backwards compatibility -->
@@ -15785,9 +15785,9 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 0,
-      "ruleName": "åä¸åºåçº¿ç´¢åé",
+      "ruleName": "华东区域线索分配",
       "ruleType": "region",
-      "matchValue": "åä¸",
+      "matchValue": "华东",
       "targetUserId": 0,
       "targetGroupIds": "string",
       "sort": 1,
@@ -15798,17 +15798,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[LeadAssignRule](#schemaleadassignrule)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[LeadAssignRule](#schemaleadassignrule)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultLeadAssignRule">ResultPageResultLeadAssignRule</h2>
 <!-- backwards compatibility -->
@@ -15820,7 +15820,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -15832,9 +15832,9 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "tenantId": 0,
-        "ruleName": "åä¸åºåçº¿ç´¢åé",
+        "ruleName": "华东区域线索分配",
         "ruleType": "region",
-        "matchValue": "åä¸",
+        "matchValue": "华东",
         "targetUserId": 0,
         "targetGroupIds": "string",
         "sort": 1,
@@ -15846,15 +15846,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultLeadAssignRule](#schemapageresultleadassignrule)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultLeadAssignRule](#schemapageresultleadassignrule)|false|none|分页返回结构|
 
 <h2 id="tocS_JobInfo">JobInfo</h2>
 <!-- backwards compatibility -->
@@ -15873,7 +15873,7 @@ AI åå¤ç»æ
 
 ```
 
-ä¸å¡æ°æ®
+业务数据
 
 ### Properties
 
@@ -15894,7 +15894,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "code": "string",
@@ -15907,15 +15907,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[JobInfo](#schemajobinfo)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[JobInfo](#schemajobinfo)]|false|none|业务数据|
 
 <h2 id="tocS_JobLog">JobLog</h2>
 <!-- backwards compatibility -->
@@ -15930,7 +15930,7 @@ AI åå¤ç»æ
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "jobCode": "channelTokenRefresh",
-  "jobName": "æ¸ éä»¤çå·æ°",
+  "jobName": "渠道令牌刷新",
   "triggerType": "cron",
   "result": 1,
   "errorMsg": "string",
@@ -15939,21 +15939,21 @@ AI åå¤ç»æ
 
 ```
 
-å®æ¶ä»»å¡æ§è¡è®°å½
+定时任务执行记录
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|jobCode|string|false|none|ä»»å¡ç¼ç |
-|jobName|string|false|none|ä»»å¡åç§°|
-|triggerType|string|false|none|è§¦åæ¹å¼ï¼cron å®æ¶ / manual æå¨|
-|result|integer(int32)|false|none|ç»æï¼1 æå / 0 å¤±è´¥|
-|errorMsg|string|false|none|å¼å¸¸ä¿¡æ¯|
-|durationMs|integer(int64)|false|none|èæ¶ï¼æ¯«ç§ï¼|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|jobCode|string|false|none|任务编码|
+|jobName|string|false|none|任务名称|
+|triggerType|string|false|none|触发方式：cron 定时 / manual 手动|
+|result|integer(int32)|false|none|结果：1 成功 / 0 失败|
+|errorMsg|string|false|none|异常信息|
+|durationMs|integer(int64)|false|none|耗时（毫秒）|
 
 <h2 id="tocS_PageResultJobLog">PageResultJobLog</h2>
 <!-- backwards compatibility -->
@@ -15974,7 +15974,7 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "jobCode": "channelTokenRefresh",
-      "jobName": "æ¸ éä»¤çå·æ°",
+      "jobName": "渠道令牌刷新",
       "triggerType": "cron",
       "result": 1,
       "errorMsg": "string",
@@ -15985,17 +15985,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[JobLog](#schemajoblog)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[JobLog](#schemajoblog)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultJobLog">ResultPageResultJobLog</h2>
 <!-- backwards compatibility -->
@@ -16007,7 +16007,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -16019,7 +16019,7 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "jobCode": "channelTokenRefresh",
-        "jobName": "æ¸ éä»¤çå·æ°",
+        "jobName": "渠道令牌刷新",
         "triggerType": "cron",
         "result": 1,
         "errorMsg": "string",
@@ -16031,15 +16031,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultJobLog](#schemapageresultjoblog)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultJobLog](#schemapageresultjoblog)|false|none|分页返回结构|
 
 <h2 id="tocS_IdentityMapping">IdentityMapping</h2>
 <!-- backwards compatibility -->
@@ -16063,21 +16063,21 @@ AI åå¤ç»æ
 
 ```
 
-èº«ä»½å°å®ä½æ å°ï¼identity â lead/contact/customerï¼
+身份到实体映射（identity → lead/contact/customer）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|identityId|integer(int64)|false|none|èº«ä»½ ID|
-|entityType|string|false|none|å®ä½ç±»åï¼leadçº¿ç´¢/contactèç³»äºº/customerå®¢æ·|
-|entityId|integer(int64)|false|none|å®ä½ ID|
-|confidence|number|false|none|å¹éç½®ä¿¡åº¦ï¼0-1ï¼é»è®¤ 1ï¼|
-|source|string|false|none|æ¥æºï¼å¦ manualæå¨/autoèªå¨å¹éï¼|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|identityId|integer(int64)|false|none|身份 ID|
+|entityType|string|false|none|实体类型：lead线索/contact联系人/customer客户|
+|entityId|integer(int64)|false|none|实体 ID|
+|confidence|number|false|none|匹配置信度（0-1，默认 1）|
+|source|string|false|none|来源（如 manual手动/auto自动匹配）|
 
 <h2 id="tocS_ResultListIdentityMapping">ResultListIdentityMapping</h2>
 <!-- backwards compatibility -->
@@ -16089,7 +16089,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "id": 1,
@@ -16107,15 +16107,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[IdentityMapping](#schemaidentitymapping)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[IdentityMapping](#schemaidentitymapping)]|false|none|业务数据|
 
 <h2 id="tocS_Identity">Identity</h2>
 <!-- backwards compatibility -->
@@ -16139,21 +16139,21 @@ AI åå¤ç»æ
 
 ```
 
-èº«ä»½ï¼è·¨æ¸ éåå¹¶æ ¸å¿ï¼ï¼ææºå·/é®ç®±/ç¤¾åªID/ä¼å¾®ID/WhatsApp/ä¼ä¸åå
+身份（跨渠道合并核心）：手机号/邮箱/社媒ID/企微ID/WhatsApp/企业域名
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|identityType|string|false|none|èº«ä»½ç±»åï¼mobileææºå·/emailé®ç®±/socialç¤¾åªID/wecomä¼å¾®ID/whatsapp/domainä¼ä¸åå|
-|identityValue|string|false|none|èº«ä»½å¼ï¼å¦ææºå·ãé®ç®±å°åãç¤¾åª/ä¼å¾®/WhatsApp IDãä¼ä¸ååï¼|
-|status|integer(int32)|false|none|ç¶æï¼1 ææ / 0 å¤±æ|
-|consent|integer(int32)|false|none|åæè®°å½ï¼0 æªåæ / 1 å·²åæï¼åè§ï¼|
-|consentTime|string(date-time)|false|none|åææ¶é´|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|identityType|string|false|none|身份类型：mobile手机号/email邮箱/social社媒ID/wecom企微ID/whatsapp/domain企业域名|
+|identityValue|string|false|none|身份值（如手机号、邮箱地址、社媒/企微/WhatsApp ID、企业域名）|
+|status|integer(int32)|false|none|状态：1 有效 / 0 失效|
+|consent|integer(int32)|false|none|同意记录：0 未同意 / 1 已同意（合规）|
+|consentTime|string(date-time)|false|none|同意时间|
 
 <h2 id="tocS_ResultIdentity">ResultIdentity</h2>
 <!-- backwards compatibility -->
@@ -16165,7 +16165,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "id": 1,
     "createdAt": "2019-08-24T14:15:22Z",
@@ -16181,15 +16181,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[Identity](#schemaidentity)|false|none|èº«ä»½ï¼è·¨æ¸ éåå¹¶æ ¸å¿ï¼ï¼ææºå·/é®ç®±/ç¤¾åªID/ä¼å¾®ID/WhatsApp/ä¼ä¸åå|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[Identity](#schemaidentity)|false|none|身份（跨渠道合并核心）：手机号/邮箱/社媒ID/企微ID/WhatsApp/企业域名|
 
 <h2 id="tocS_PageResultFollowUp">PageResultFollowUp</h2>
 <!-- backwards compatibility -->
@@ -16213,7 +16213,7 @@ AI åå¤ç»æ
       "leadId": 0,
       "customerId": 0,
       "userId": 0,
-      "content": "å®¢æ·å¯¹æ¥ä»·æ¹æ¡ææåï¼çº¦ä¸å¨é¢è°",
+      "content": "客户对报价方案有意向，约下周面谈",
       "method": "wechat",
       "nextTime": "2019-08-24T14:15:22Z"
     }
@@ -16222,17 +16222,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[FollowUp](#schemafollowup)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[FollowUp](#schemafollowup)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultFollowUp">ResultPageResultFollowUp</h2>
 <!-- backwards compatibility -->
@@ -16244,7 +16244,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -16259,7 +16259,7 @@ AI åå¤ç»æ
         "leadId": 0,
         "customerId": 0,
         "userId": 0,
-        "content": "å®¢æ·å¯¹æ¥ä»·æ¹æ¡ææåï¼çº¦ä¸å¨é¢è°",
+        "content": "客户对报价方案有意向，约下周面谈",
         "method": "wechat",
         "nextTime": "2019-08-24T14:15:22Z"
       }
@@ -16269,15 +16269,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultFollowUp](#schemapageresultfollowup)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultFollowUp](#schemapageresultfollowup)|false|none|分页返回结构|
 
 <h2 id="tocS_FileRecord">FileRecord</h2>
 <!-- backwards compatibility -->
@@ -16292,7 +16292,7 @@ AI åå¤ç»æ
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "tenantId": 0,
-  "fileName": "äº§åæå.pdf",
+  "fileName": "产品手册.pdf",
   "filePath": "string",
   "fileSize": 0,
   "contentType": "application/pdf",
@@ -16301,21 +16301,21 @@ AI åå¤ç»æ
 
 ```
 
-æä»¶è®°å½
+文件记录
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|fileName|string|false|none|åå§æä»¶å|
-|filePath|string|false|none|å­å¨ keyï¼æ¬å°ä¸ºç¸å¯¹è·¯å¾ï¼MinIO ä¸ºå¯¹è±¡åï¼|
-|fileSize|integer(int64)|false|none|æä»¶å¤§å°ï¼å­èï¼|
-|contentType|string|false|none|åå®¹ç±»å|
-|storageType|string|false|none|å­å¨ç±»åï¼local æ¬å°å­å¨ / minio å¯¹è±¡å­å¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|tenantId|integer(int64)|false|none|租户 ID|
+|fileName|string|false|none|原始文件名|
+|filePath|string|false|none|存储 key（本地为相对路径，MinIO 为对象名）|
+|fileSize|integer(int64)|false|none|文件大小（字节）|
+|contentType|string|false|none|内容类型|
+|storageType|string|false|none|存储类型：local 本地存储 / minio 对象存储|
 
 <h2 id="tocS_PageResultFileRecord">PageResultFileRecord</h2>
 <!-- backwards compatibility -->
@@ -16336,7 +16336,7 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 0,
-      "fileName": "äº§åæå.pdf",
+      "fileName": "产品手册.pdf",
       "filePath": "string",
       "fileSize": 0,
       "contentType": "application/pdf",
@@ -16347,17 +16347,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[FileRecord](#schemafilerecord)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[FileRecord](#schemafilerecord)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultFileRecord">ResultPageResultFileRecord</h2>
 <!-- backwards compatibility -->
@@ -16369,7 +16369,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -16381,7 +16381,7 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "tenantId": 0,
-        "fileName": "äº§åæå.pdf",
+        "fileName": "产品手册.pdf",
         "filePath": "string",
         "fileSize": 0,
         "contentType": "application/pdf",
@@ -16393,15 +16393,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultFileRecord](#schemapageresultfilerecord)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultFileRecord](#schemapageresultfilerecord)|false|none|分页返回结构|
 
 <h2 id="tocS_PageResultDocument">PageResultDocument</h2>
 <!-- backwards compatibility -->
@@ -16422,29 +16422,29 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 0,
-      "title": "AI å¤å¼ç³»ç»äº§åæå",
+      "title": "AI 外呼系统产品手册",
       "docType": "product_brochure",
       "fileUrl": "/uploads/xxx.pdf",
       "version": 1,
       "status": 0,
-      "tags": "[\"AI\",\"å¤å¼\"]"
+      "tags": "[\"AI\",\"外呼\"]"
     }
   ]
 }
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[Document](#schemadocument)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[Document](#schemadocument)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultDocument">ResultPageResultDocument</h2>
 <!-- backwards compatibility -->
@@ -16456,7 +16456,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -16468,12 +16468,12 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "tenantId": 0,
-        "title": "AI å¤å¼ç³»ç»äº§åæå",
+        "title": "AI 外呼系统产品手册",
         "docType": "product_brochure",
         "fileUrl": "/uploads/xxx.pdf",
         "version": 1,
         "status": 0,
-        "tags": "[\"AI\",\"å¤å¼\"]"
+        "tags": "[\"AI\",\"外呼\"]"
       }
     ]
   }
@@ -16481,15 +16481,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultDocument](#schemapageresultdocument)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultDocument](#schemapageresultdocument)|false|none|分页返回结构|
 
 <h2 id="tocS_PageResultDictType">PageResultDictType</h2>
 <!-- backwards compatibility -->
@@ -16510,7 +16510,7 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "dictType": "lead_status",
-      "dictName": "çº¿ç´¢ç¶æ",
+      "dictName": "线索状态",
       "status": 1,
       "remark": "string"
     }
@@ -16519,17 +16519,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[DictType](#schemadicttype)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[DictType](#schemadicttype)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultDictType">ResultPageResultDictType</h2>
 <!-- backwards compatibility -->
@@ -16541,7 +16541,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -16553,7 +16553,7 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "dictType": "lead_status",
-        "dictName": "çº¿ç´¢ç¶æ",
+        "dictName": "线索状态",
         "status": 1,
         "remark": "string"
       }
@@ -16563,15 +16563,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultDictType](#schemapageresultdicttype)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultDictType](#schemapageresultdicttype)|false|none|分页返回结构|
 
 <h2 id="tocS_ResultListDictType">ResultListDictType</h2>
 <!-- backwards compatibility -->
@@ -16583,14 +16583,14 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "id": 1,
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "dictType": "lead_status",
-      "dictName": "çº¿ç´¢ç¶æ",
+      "dictName": "线索状态",
       "status": 1,
       "remark": "string"
     }
@@ -16599,15 +16599,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[DictType](#schemadicttype)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[DictType](#schemadicttype)]|false|none|业务数据|
 
 <h2 id="tocS_PageResultDictData">PageResultDictData</h2>
 <!-- backwards compatibility -->
@@ -16628,7 +16628,7 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "dictType": "lead_status",
-      "label": "å·²åé",
+      "label": "已分配",
       "value": "1",
       "sort": 0,
       "status": 1,
@@ -16639,17 +16639,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[DictData](#schemadictdata)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[DictData](#schemadictdata)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultDictData">ResultPageResultDictData</h2>
 <!-- backwards compatibility -->
@@ -16661,7 +16661,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -16673,7 +16673,7 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "dictType": "lead_status",
-        "label": "å·²åé",
+        "label": "已分配",
         "value": "1",
         "sort": 0,
         "status": 1,
@@ -16685,15 +16685,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultDictData](#schemapageresultdictdata)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultDictData](#schemapageresultdictdata)|false|none|分页返回结构|
 
 <h2 id="tocS_ResultListDictData">ResultListDictData</h2>
 <!-- backwards compatibility -->
@@ -16705,14 +16705,14 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "id": 1,
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "dictType": "lead_status",
-      "label": "å·²åé",
+      "label": "已分配",
       "value": "1",
       "sort": 0,
       "status": 1,
@@ -16723,15 +16723,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[DictData](#schemadictdata)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[DictData](#schemadictdata)]|false|none|业务数据|
 
 <h2 id="tocS_DashboardTrend">DashboardTrend</h2>
 <!-- backwards compatibility -->
@@ -16750,16 +16750,16 @@ AI åå¤ç»æ
 
 ```
 
-çæ¿æ¯æ¥è¶å¿ï¼çº¿ç´¢é/ä¼è¯é/AI è§£å³éææ¥èå
+看板每日趋势：线索量/会话量/AI 解决量按日聚合
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|date|string(date)|false|none|ç»è®¡æ¥æ|
-|leadCount|integer(int64)|false|none|æ°å¢çº¿ç´¢æ°|
-|conversationCount|integer(int64)|false|none|æ°å¢ä¼è¯æ°|
-|aiResolvedCount|integer(int64)|false|none|AI è§£å³ä¼è¯æ°ï¼å½æ¥ä¼è¯åå»è½¬äººå·¥ä¼è¯ï¼|
+|date|string(date)|false|none|统计日期|
+|leadCount|integer(int64)|false|none|新增线索数|
+|conversationCount|integer(int64)|false|none|新增会话数|
+|aiResolvedCount|integer(int64)|false|none|AI 解决会话数（当日会话减去转人工会话）|
 
 <h2 id="tocS_ResultListDashboardTrend">ResultListDashboardTrend</h2>
 <!-- backwards compatibility -->
@@ -16771,7 +16771,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "date": "2026-08-03",
@@ -16784,15 +16784,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[DashboardTrend](#schemadashboardtrend)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[DashboardTrend](#schemadashboardtrend)]|false|none|业务数据|
 
 <h2 id="tocS_ResultListSalesWorkloadStat">ResultListSalesWorkloadStat</h2>
 <!-- backwards compatibility -->
@@ -16804,7 +16804,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "userId": 0,
@@ -16819,15 +16819,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[SalesWorkloadStat](#schemasalesworkloadstat)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[SalesWorkloadStat](#schemasalesworkloadstat)]|false|none|业务数据|
 
 <h2 id="tocS_SalesWorkloadStat">SalesWorkloadStat</h2>
 <!-- backwards compatibility -->
@@ -16848,18 +16848,18 @@ AI åå¤ç»æ
 
 ```
 
-çæ¿éå®å·¥ä½éç»è®¡ï¼æéå®èååéçº¿ç´¢/è·è¿/æäº¤/ä¼è¯é
+看板销售工作量统计：按销售聚合分配线索/跟进/成交/会话量
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|userId|integer(int64)|false|none|éå®ç¨æ· ID|
-|userName|string|false|none|éå®å§å|
-|assignedLeadCount|integer(int64)|false|none|åéçº¿ç´¢æ°|
-|followUpCount|integer(int64)|false|none|è·è¿è®°å½æ°|
-|wonCount|integer(int64)|false|none|æäº¤çº¿ç´¢æ°ï¼status=wonï¼|
-|conversationCount|integer(int64)|false|none|äººå·¥æ¥å¾ä¼è¯æ°|
+|userId|integer(int64)|false|none|销售用户 ID|
+|userName|string|false|none|销售姓名|
+|assignedLeadCount|integer(int64)|false|none|分配线索数|
+|followUpCount|integer(int64)|false|none|跟进记录数|
+|wonCount|integer(int64)|false|none|成交线索数（status=won）|
+|conversationCount|integer(int64)|false|none|人工接待会话数|
 
 <h2 id="tocS_DashboardOverview">DashboardOverview</h2>
 <!-- backwards compatibility -->
@@ -16888,21 +16888,21 @@ AI åå¤ç»æ
 
 ```
 
-çæ¿æ»è§ï¼çº¿ç´¢é/ä¼è¯é/è½¬äººå·¥æ°/ååºæ¶æ/ææå¯¹è¯ç/æååå¸
+看板总览：线索量/会话量/转人工数/响应时效/有效对话率/意向分布
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tenantId|integer(int64)|false|none|ç§æ· ID|
-|from|string(date-time)|false|none|ç»è®¡èµ·å§æ¶é´|
-|to|string(date-time)|false|none|ç»è®¡æªæ­¢æ¶é´|
-|leadCount|integer(int64)|false|none|çº¿ç´¢é|
-|conversationCount|integer(int64)|false|none|æ°å¢ä¼è¯æ°|
-|transferCount|integer(int64)|false|none|è½¬äººå·¥æ°|
-|avgResponseSec|number(double)|false|none|å¹³åååºæ¶æï¼ç§ï¼ï¼å®¢æ·é¦æ¡æ¶æ¯å° AI é¦æ¡åå¤|
-|effectiveRate|number(double)|false|none|ææå¯¹è¯çï¼0-1ï¼ï¼â¥3 æ¡æ¶æ¯çä¼è¯å æ¯|
-|intentDistribution|[[IntentCount](#schemaintentcount)]|false|none|æååå¸|
+|tenantId|integer(int64)|false|none|租户 ID|
+|from|string(date-time)|false|none|统计起始时间|
+|to|string(date-time)|false|none|统计截止时间|
+|leadCount|integer(int64)|false|none|线索量|
+|conversationCount|integer(int64)|false|none|新增会话数|
+|transferCount|integer(int64)|false|none|转人工数|
+|avgResponseSec|number(double)|false|none|平均响应时效（秒）：客户首条消息到 AI 首条回复|
+|effectiveRate|number(double)|false|none|有效对话率（0-1）：≥3 条消息的会话占比|
+|intentDistribution|[[IntentCount](#schemaintentcount)]|false|none|意向分布|
 
 <h2 id="tocS_IntentCount">IntentCount</h2>
 <!-- backwards compatibility -->
@@ -16919,14 +16919,14 @@ AI åå¤ç»æ
 
 ```
 
-æååå¸æç»
+意向分布明细
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|intent|string|false|none|æåï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»/unknownæªç¥|
-|count|integer(int64)|false|none|çº¿ç´¢æ°|
+|intent|string|false|none|意向：quote报价/sample样品/selection选型/other其他/unknown未知|
+|count|integer(int64)|false|none|线索数|
 
 <h2 id="tocS_ResultDashboardOverview">ResultDashboardOverview</h2>
 <!-- backwards compatibility -->
@@ -16938,7 +16938,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "tenantId": 0,
     "from": "2019-08-24T14:15:22Z",
@@ -16959,15 +16959,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[DashboardOverview](#schemadashboardoverview)|false|none|çæ¿æ»è§ï¼çº¿ç´¢é/ä¼è¯é/è½¬äººå·¥æ°/ååºæ¶æ/ææå¯¹è¯ç/æååå¸|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[DashboardOverview](#schemadashboardoverview)|false|none|看板总览：线索量/会话量/转人工数/响应时效/有效对话率/意向分布|
 
 <h2 id="tocS_ChannelConversionStat">ChannelConversionStat</h2>
 <!-- backwards compatibility -->
@@ -16987,17 +16987,17 @@ AI åå¤ç»æ
 
 ```
 
-çæ¿æ¸ éè½¬åæ°æ®ï¼ææ¸ éè´¦å·èåäºä»¶æ°/çº¿ç´¢æ°/è½¬åç
+看板渠道转化数据：按渠道账号聚合事件数/线索数/转化率
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|channelAccountId|integer(int64)|false|none|æ¸ éè´¦å· ID|
-|accountName|string|false|none|æ¸ éè´¦å·åç§°|
-|eventCount|integer(int64)|false|none|æ¸ éäºä»¶æ°|
-|leadCount|integer(int64)|false|none|æ å°çº¿ç´¢æ°|
-|conversionRate|number(double)|false|none|è½¬åçï¼çº¿ç´¢æ°/äºä»¶æ°ï¼0-1ï¼|
+|channelAccountId|integer(int64)|false|none|渠道账号 ID|
+|accountName|string|false|none|渠道账号名称|
+|eventCount|integer(int64)|false|none|渠道事件数|
+|leadCount|integer(int64)|false|none|映射线索数|
+|conversionRate|number(double)|false|none|转化率（线索数/事件数，0-1）|
 
 <h2 id="tocS_ResultListChannelConversionStat">ResultListChannelConversionStat</h2>
 <!-- backwards compatibility -->
@@ -17009,7 +17009,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "channelAccountId": 0,
@@ -17023,15 +17023,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[ChannelConversionStat](#schemachannelconversionstat)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[ChannelConversionStat](#schemachannelconversionstat)]|false|none|业务数据|
 
 <h2 id="tocS_PageResultConversation">PageResultConversation</h2>
 <!-- backwards compatibility -->
@@ -17065,17 +17065,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[Conversation](#schemaconversation)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[Conversation](#schemaconversation)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultConversation">ResultPageResultConversation</h2>
 <!-- backwards compatibility -->
@@ -17087,7 +17087,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -17113,15 +17113,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultConversation](#schemapageresultconversation)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultConversation](#schemapageresultconversation)|false|none|分页返回结构|
 
 <h2 id="tocS_ResultTransferEvaluation">ResultTransferEvaluation</h2>
 <!-- backwards compatibility -->
@@ -17133,7 +17133,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "shouldTransfer": true,
     "intent": "selection",
@@ -17144,15 +17144,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[TransferEvaluation](#schematransferevaluation)|false|none|è½¬äººå·¥è¯ä¼°ç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[TransferEvaluation](#schematransferevaluation)|false|none|转人工评估结果|
 
 <h2 id="tocS_TransferEvaluation">TransferEvaluation</h2>
 <!-- backwards compatibility -->
@@ -17171,16 +17171,16 @@ AI åå¤ç»æ
 
 ```
 
-è½¬äººå·¥è¯ä¼°ç»æ
+转人工评估结果
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|shouldTransfer|boolean|false|none|æ¯å¦å»ºè®®è½¬äººå·¥|
-|intent|string|false|none|æåï¼quoteæ¥ä»·/sampleæ ·å/selectionéå/otherå¶ä»|
-|confidence|number|false|none|ç½®ä¿¡åº¦ï¼0-1ï¼|
-|reason|string|false|none|å¤å®åå|
+|shouldTransfer|boolean|false|none|是否建议转人工|
+|intent|string|false|none|意向：quote报价/sample样品/selection选型/other其他|
+|confidence|number|false|none|置信度（0-1）|
+|reason|string|false|none|判定原因|
 
 <h2 id="tocS_PageResultMessage">PageResultMessage</h2>
 <!-- backwards compatibility -->
@@ -17215,17 +17215,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[Message](#schemamessage)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[Message](#schemamessage)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultMessage">ResultPageResultMessage</h2>
 <!-- backwards compatibility -->
@@ -17237,7 +17237,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -17264,15 +17264,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultMessage](#schemapageresultmessage)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultMessage](#schemapageresultmessage)|false|none|分页返回结构|
 
 <h2 id="tocS_PageResultConfig">PageResultConfig</h2>
 <!-- backwards compatibility -->
@@ -17293,8 +17293,8 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "configKey": "system.siteName",
-      "configValue": "AI éå®çº¿ç´¢ç³»ç»",
-      "configName": "ç«ç¹åç§°",
+      "configValue": "AI 销售线索系统",
+      "configName": "站点名称",
       "configType": 2,
       "remark": "string"
     }
@@ -17303,17 +17303,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[Config](#schemaconfig)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[Config](#schemaconfig)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultConfig">ResultPageResultConfig</h2>
 <!-- backwards compatibility -->
@@ -17325,7 +17325,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -17337,8 +17337,8 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "configKey": "system.siteName",
-        "configValue": "AI éå®çº¿ç´¢ç³»ç»",
-        "configName": "ç«ç¹åç§°",
+        "configValue": "AI 销售线索系统",
+        "configName": "站点名称",
         "configType": 2,
         "remark": "string"
       }
@@ -17348,15 +17348,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultConfig](#schemapageresultconfig)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultConfig](#schemapageresultconfig)|false|none|分页返回结构|
 
 <h2 id="tocS_PageResultCompetitor">PageResultCompetitor</h2>
 <!-- backwards compatibility -->
@@ -17377,13 +17377,13 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 0,
-      "name": "ææäº CRM",
+      "name": "某某云 CRM",
       "category": "CRM",
       "officialUrl": "https://www.example.com",
       "description": "string",
-      "strengths": "[\"åè½å¨é¢\",\"ä»·æ ¼ä½\"]",
-      "weaknesses": "[\"å®æ½å¤æ\",\"å®åå·®\"]",
-      "defenseTactics": "[{\"scenario\":\"æ¯ä»·æ ¼\",\"tactic\":\"å¼ºè°æ»æ¥æææ¬\"}]",
+      "strengths": "[\"功能全面\",\"价格低\"]",
+      "weaknesses": "[\"实施复杂\",\"售后差\"]",
+      "defenseTactics": "[{\"scenario\":\"比价格\",\"tactic\":\"强调总拥有成本\"}]",
       "status": 1
     }
   ]
@@ -17391,17 +17391,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[Competitor](#schemacompetitor)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[Competitor](#schemacompetitor)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultCompetitor">ResultPageResultCompetitor</h2>
 <!-- backwards compatibility -->
@@ -17413,7 +17413,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -17425,13 +17425,13 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "tenantId": 0,
-        "name": "ææäº CRM",
+        "name": "某某云 CRM",
         "category": "CRM",
         "officialUrl": "https://www.example.com",
         "description": "string",
-        "strengths": "[\"åè½å¨é¢\",\"ä»·æ ¼ä½\"]",
-        "weaknesses": "[\"å®æ½å¤æ\",\"å®åå·®\"]",
-        "defenseTactics": "[{\"scenario\":\"æ¯ä»·æ ¼\",\"tactic\":\"å¼ºè°æ»æ¥æææ¬\"}]",
+        "strengths": "[\"功能全面\",\"价格低\"]",
+        "weaknesses": "[\"实施复杂\",\"售后差\"]",
+        "defenseTactics": "[{\"scenario\":\"比价格\",\"tactic\":\"强调总拥有成本\"}]",
         "status": 1
       }
     ]
@@ -17440,15 +17440,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultCompetitor](#schemapageresultcompetitor)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultCompetitor](#schemapageresultcompetitor)|false|none|分页返回结构|
 
 <h2 id="tocS_ResultListCompetitorProduct">ResultListCompetitorProduct</h2>
 <!-- backwards compatibility -->
@@ -17460,7 +17460,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "id": 1,
@@ -17468,25 +17468,25 @@ AI åå¤ç»æ
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 0,
       "competitorId": 0,
-      "productName": "ç«åäºç",
-      "spec": "æè°ç",
+      "productName": "竞品云版",
+      "spec": "旗舰版",
       "price": 2999,
-      "params": "{\"å¹¶åæ°\":\"300\",\"å­å¨\":\"50GB\"}"
+      "params": "{\"并发数\":\"300\",\"存储\":\"50GB\"}"
     }
   ]
 }
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[CompetitorProduct](#schemacompetitorproduct)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[CompetitorProduct](#schemacompetitorproduct)]|false|none|业务数据|
 
 <h2 id="tocS_Channel">Channel</h2>
 <!-- backwards compatibility -->
@@ -17501,7 +17501,7 @@ AI åå¤ç»æ
   "createdAt": "2019-08-24T14:15:22Z",
   "updatedAt": "2019-08-24T14:15:22Z",
   "code": "douyin",
-  "name": "æé³",
+  "name": "抖音",
   "type": "short_video",
   "configSchema": "string",
   "status": 1
@@ -17509,20 +17509,20 @@ AI åå¤ç»æ
 
 ```
 
-æ¸ éå®ä¹ï¼å¹³å°çº§ï¼æé³/è§é¢å·/TikTok/ä¼ä¸å¾®ä¿¡/WhatsAppï¼
+渠道定义（平台级，抖音/视频号/TikTok/企业微信/WhatsApp）
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|integer(int64)|false|none|ä¸»é® ID|
-|createdAt|string(date-time)|false|none|åå»ºæ¶é´|
-|updatedAt|string(date-time)|false|none|æ´æ°æ¶é´|
-|code|string|false|none|æ¸ éç¼ç ï¼douyinæé³/video_channelè§é¢å·/tiktok TikTok/wecomä¼ä¸å¾®ä¿¡/whatsapp WhatsApp|
-|name|string|false|none|æ¸ éåç§°|
-|type|string|false|none|æ¸ éç±»åï¼short_videoç­è§é¢/socialç¤¾äº¤åªä½/imå³æ¶éè®¯|
-|configSchema|string|false|none|éç½®é¡¹ schemaï¼JSONBï¼ï¼å®ä¹è¯¥æ¸ éæ¥å¥æééç½®é¡¹ï¼å¦ appId/secret ç­é®ï¼ç JSON ç»æ|
-|status|integer(int32)|false|none|ç¶æï¼1å¯ç¨/0åç¨|
+|id|integer(int64)|false|none|主键 ID|
+|createdAt|string(date-time)|false|none|创建时间|
+|updatedAt|string(date-time)|false|none|更新时间|
+|code|string|false|none|渠道编码：douyin抖音/video_channel视频号/tiktok TikTok/wecom企业微信/whatsapp WhatsApp|
+|name|string|false|none|渠道名称|
+|type|string|false|none|渠道类型：short_video短视频/social社交媒体/im即时通讯|
+|configSchema|string|false|none|配置项 schema（JSONB），定义该渠道接入所需配置项（如 appId/secret 等键）的 JSON 结构|
+|status|integer(int32)|false|none|状态：1启用/0停用|
 
 <h2 id="tocS_ResultListChannel">ResultListChannel</h2>
 <!-- backwards compatibility -->
@@ -17534,14 +17534,14 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": [
     {
       "id": 1,
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "code": "douyin",
-      "name": "æé³",
+      "name": "抖音",
       "type": "short_video",
       "configSchema": "string",
       "status": 1
@@ -17551,15 +17551,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[[Channel](#schemachannel)]|false|none|ä¸å¡æ°æ®|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[[Channel](#schemachannel)]|false|none|业务数据|
 
 <h2 id="tocS_PageResultChannelQrCode">PageResultChannelQrCode</h2>
 <!-- backwards compatibility -->
@@ -17580,7 +17580,7 @@ AI åå¤ç»æ
       "createdAt": "2019-08-24T14:15:22Z",
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 1,
-      "name": "æé³å¼æµæ´»ç ",
+      "name": "抖音引流活码",
       "channelAccountId": 1,
       "scene": "1:1",
       "qrUrl": "https://example.com/landing?from=qr",
@@ -17593,17 +17593,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[ChannelQrCode](#schemachannelqrcode)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[ChannelQrCode](#schemachannelqrcode)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultChannelQrCode">ResultPageResultChannelQrCode</h2>
 <!-- backwards compatibility -->
@@ -17615,7 +17615,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -17627,7 +17627,7 @@ AI åå¤ç»æ
         "createdAt": "2019-08-24T14:15:22Z",
         "updatedAt": "2019-08-24T14:15:22Z",
         "tenantId": 1,
-        "name": "æé³å¼æµæ´»ç ",
+        "name": "抖音引流活码",
         "channelAccountId": 1,
         "scene": "1:1",
         "qrUrl": "https://example.com/landing?from=qr",
@@ -17641,15 +17641,15 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultChannelQrCode](#schemapageresultchannelqrcode)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultChannelQrCode](#schemapageresultchannelqrcode)|false|none|分页返回结构|
 
 <h2 id="tocS_PageResultChannelAccount">PageResultChannelAccount</h2>
 <!-- backwards compatibility -->
@@ -17671,7 +17671,7 @@ AI åå¤ç»æ
       "updatedAt": "2019-08-24T14:15:22Z",
       "tenantId": 1,
       "channelId": 1,
-      "accountName": "åçå®æ¹å·",
+      "accountName": "品牌官方号",
       "externalId": "douyin_open_id_xxx",
       "authConfig": "string",
       "healthStatus": 1,
@@ -17682,17 +17682,17 @@ AI åå¤ç»æ
 
 ```
 
-åé¡µè¿åç»æ
+分页返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|page|integer(int64)|false|none|å½åé¡µï¼ä» 1 å¼å§ï¼|
-|size|integer(int64)|false|none|æ¯é¡µæ¡æ°|
-|total|integer(int64)|false|none|æ»æ¡æ°|
-|pages|integer(int64)|false|none|æ»é¡µæ°|
-|records|[[ChannelAccount](#schemachannelaccount)]|false|none|æ°æ®åè¡¨|
+|page|integer(int64)|false|none|当前页（从 1 开始）|
+|size|integer(int64)|false|none|每页条数|
+|total|integer(int64)|false|none|总条数|
+|pages|integer(int64)|false|none|总页数|
+|records|[[ChannelAccount](#schemachannelaccount)]|false|none|数据列表|
 
 <h2 id="tocS_ResultPageResultChannelAccount">ResultPageResultChannelAccount</h2>
 <!-- backwards compatibility -->
@@ -17704,7 +17704,7 @@ AI åå¤ç»æ
 ```json
 {
   "code": 200,
-  "message": "æä½æå",
+  "message": "操作成功",
   "data": {
     "page": 1,
     "size": 20,
@@ -17717,7 +17717,7 @@ AI åå¤ç»æ
         "updatedAt": "2019-08-24T14:15:22Z",
         "tenantId": 1,
         "channelId": 1,
-        "accountName": "åçå®æ¹å·",
+        "accountName": "品牌官方号",
         "externalId": "douyin_open_id_xxx",
         "authConfig": "string",
         "healthStatus": 1,
@@ -17729,13 +17729,13 @@ AI åå¤ç»æ
 
 ```
 
-ç»ä¸ API è¿åç»æ
+统一 API 返回结构
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|code|integer(int32)|false|none|ä¸å¡ç ï¼200 æåï¼å¶ä½ä¸ºå¤±è´¥ï¼400 åæ°éè¯¯/401 æªç»å½/403 æ æé/404 ä¸å­å¨/500 ç³»ç»éè¯¯ï¼ä¸å¡éè¯¯ç  1000+ï¼|
-|message|string|false|none|æç¤ºä¿¡æ¯|
-|data|[PageResultChannelAccount](#schemapageresultchannelaccount)|false|none|åé¡µè¿åç»æ|
+|code|integer(int32)|false|none|业务码：200 成功，其余为失败（400 参数错误/401 未登录/403 无权限/404 不存在/500 系统错误，业务错误码 1000+）|
+|message|string|false|none|提示信息|
+|data|[PageResultChannelAccount](#schemapageresultchannelaccount)|false|none|分页返回结构|
 
