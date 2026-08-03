@@ -1,10 +1,12 @@
 <div align="center">
 
+<img src="docs/images/aicrm-logo.svg" width="300" alt="AiCRM Logo"/>
+
 # AiCRM
 
 **AI 驱动的多渠道获客销售中台**
 
-打通「渠道获客 → AI 接待 → 线索转化」全链路，让销售团队的每一次触达都有迹可循、有 AI 可依。
+从公域流量到私域客户：一次接入，AI 接待，持续转化。
 
 [![Release](https://img.shields.io/badge/Release-v0.1.0-blue.svg)](https://github.com/your-org/aicrm/releases)
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/technologies/downloads/)
@@ -13,6 +15,7 @@
 [![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
 [![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.x-ff6600.svg)](https://www.rabbitmq.com/)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB.svg)](https://www.python.org/)
+[![CI](https://img.shields.io/badge/CI-build%20passing-brightgreen.svg)](https://github.com/your-org/aicrm/actions)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](#开源协议)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#参与贡献)
 [![Changelog](https://img.shields.io/badge/Changelog-keep--a--changelog-important.svg)](CHANGELOG.md)
@@ -29,22 +32,26 @@
 - [技术栈](#技术栈)
 - [快速开始](#快速开始)
 - [接口文档](#接口文档)
+- [文档与资源](#文档与资源)
 - [项目结构](#项目结构)
-- [文档索引](#文档索引)
+- [路线图](#路线图)
+- [社区与支持](#社区与支持)
 - [社区与治理](#社区与治理)
 - [参与贡献](#参与贡献)
 - [开源协议](#开源协议)
 
 ## 项目简介
 
-AiCRM 是一套 **AI 驱动的多渠道获客销售中台**，面向需要从公域渠道规模化获客并持续转化客户的销售团队：
+AiCRM 是一套面向渠道型销售团队的 **AI 获客销售中台**，把「公域获客 → AI 接待 → 线索转化」沉淀为可规模化、可追踪、可自动化的标准链路：
 
-- **多渠道统一接入**：抖音、视频号、企业微信三大渠道的评论、私信、表单事件统一 Webhook 接入，幂等去重、令牌自动刷新；
-- **AI 贯穿销售全流程**：意向识别、RAG 知识问答、字段抽取、对话摘要、自动转人工，AI 能力以独立 Python 服务提供，可替换任意 LLM Provider；
+- **多渠道统一接入**：抖音、视频号、企业微信的评论 / 私信 / 表单事件统一 Webhook 收敛，幂等去重、令牌自动刷新；
+- **AI 贯穿销售全流程**：意向识别、RAG 知识问答、字段抽取、对话摘要、自动转人工，AI 能力以独立 Python 服务提供，LLM Provider 可插拔（mock / openai / dashscope）；
 - **自动化运营引擎**：线索自动分配与回收重分配、自动标签规则、定时任务（渠道同步 / 令牌刷新 / 评论拉取）全部内置；
 - **多租户即开即用**：租户 / 套餐 / 用户 / 角色 / 菜单 / 权限完整体系，内置操作与登录审计、文件管理、代码生成器。
 
-> 目标用户：SaaS 服务商、渠道型销售团队、需要将"公域流量"沉淀为"私域客户"的成长型公司。
+> **适用场景**：SaaS 服务商、渠道型销售团队、需要将「公域流量」沉淀为「私域客户」的成长型公司。
+>
+> **边界说明**：AiCRM 提供获客与客户管理能力，**不提供任何绕过平台规则的功能**；本仓库交付后端核心服务（Java 业务服务 + Python AI 服务）与完整接口文档，管理端 Web 前端由接入方基于 OpenAPI 文档自建或共建。
 
 ## 功能特性
 
@@ -123,18 +130,17 @@ AiCRM 是一套 **AI 驱动的多渠道获客销售中台**，面向需要从公
 | RabbitMQ | 3.x | 否 | 未启动时自动降级 |
 | Python | 3.11+ | 否 | 仅运行 AI 能力服务时需要 |
 
-### 第一步：启动基础设施
+### 第一步：启动基础设施并初始化数据库
+
+Docker 方式（推荐，自动执行 `db/init.sql` 建表）：
 
 ```bash
 docker compose up -d
 ```
 
 > 默认编排 PostgreSQL 16（用户 `aicrm` / 密码 `aicrm_dev_123` / 库 `aicrm`），Redis 复用本机 6379。
-> 若使用本机已有 PostgreSQL，请跳过本步并按提示手动建库建用户（见下方备注）。
 
-### 第二步：初始化数据库
-
-Docker 方式首次启动会自动执行 `db/init.sql`；本机 PostgreSQL 手动初始化：
+本机已有 PostgreSQL 时手动初始化：
 
 ```bash
 psql -U postgres -c "CREATE USER aicrm WITH PASSWORD 'aicrm_dev_123';"
@@ -142,7 +148,7 @@ psql -U postgres -c "CREATE DATABASE aicrm OWNER aicrm;"
 psql -U aicrm -d aicrm -f java/aicrm-admin-boot/src/main/resources/db/init.sql
 ```
 
-### 第三步：启动后端
+### 第二步：启动后端
 
 ```bash
 cd java
@@ -150,9 +156,9 @@ mvn -DskipTests package
 java -jar aicrm-admin-boot/target/aicrm.jar
 ```
 
-启动成功后在浏览器访问 **http://localhost:8080/doc.html** 即可看到完整接口文档。
+启动成功后访问 **http://localhost:8080/doc.html** 即可在线调试全部接口。
 
-### 第四步（可选）：启动 AI 能力服务
+### 第三步（可选）：启动 AI 能力服务
 
 ```bash
 cd python
@@ -197,11 +203,26 @@ curl -X POST http://localhost:8080/api/auth/login \
 | `docs/offline-api-doc.md` | Markdown 版接口文档 |
 | `docs/openapi.json` | 标准 OpenAPI 3.0 定义，可直接导入 Apifox / JMeter / Postman |
 
+## 文档与资源
+
+| 文档 | 说明 |
+| --- | --- |
+| [本地接口文档配置说明](docs/api-doc-setup-guide.md) | 双入口地址 / 开关 / 常见问题 |
+| [接口注解开发规范](docs/api-annotation-guide.md) | `@Tag / @Operation / @Schema / @ApiResponse` 用法约定 |
+| [接口文档迭代维护规范](docs/api-doc-maintenance-guide.md) | 变更流程 / 评审检查项 / 离线文档重新生成 |
+| [开发规范](docs/development-standards.md) | Git 分支 / 提交 / 接口 / 代码规范 |
+| [错误码对照表](docs/error-code-table.md) | 全量错误码与边界场景对照 |
+| [Mock 链路说明](docs/mock-chain-guide.md) | 评论 → 私信 → 加企微 → 会话全流程 Mock |
+| [压测接口清单](docs/performance-testing-list.md) | 核心接口 + JMeter 导入建议 |
+| [生产环境配置校验单](docs/production-config-check.md) | 生产文档关闭核查 / 网关拦截规则 |
+| [WebSocket 接入指南](docs/websocket-guide.md) | 实时消息推送接入说明 |
+| [客户对接确认单](docs/customer-onboarding-confirmation.md) | 客户侧对接交付物清单 |
+
 ## 项目结构
 
 ```
 .
-├── docs/                     # 项目文档（规范 / 错误码 / Mock / 压测 / 维护等）
+├── docs/                     # 项目文档（规范 / 错误码 / Mock / 压测 / 维护 / 离线文档 / Logo）
 ├── java/                     # Java 后端（Maven 多模块）
 │   ├── aicrm-common          #   通用模块：Result / ResultCode / JWT / 租户上下文
 │   ├── aicrm-dao             #   数据访问：Entity / Mapper（MyBatis-Plus）
@@ -221,19 +242,25 @@ curl -X POST http://localhost:8080/api/auth/login \
 └── LICENSE                   # Apache-2.0 开源协议
 ```
 
-## 文档索引
+## 路线图
 
-| 文档 | 说明 |
+当前版本（v0.1.0）为 MVP 里程碑，以下能力已列入规划，欢迎参与共建：
+
+- WebSocket 实时消息推送（替代当前轮询方案）
+- 管理端 Web 前端（基于 OpenAPI 文档的完整管理界面）
+- 抖音 / 视频号 / 企微真实 OAuth 授权与令牌刷新联调
+- 企微侧边栏能力增强（客户画像 / 话术推荐）
+- 知识库检索强化（混合检索 / Rerank 重排）
+
+> 路线图随社区反馈动态调整，建议与讨论请在 [Issues](https://github.com/your-org/aicrm/issues) / Discussions 中提出。
+
+## 社区与支持
+
+| 渠道 | 用途 |
 | --- | --- |
-| [本地接口文档配置说明](docs/api-doc-setup-guide.md) | 双入口地址 / 开关 / 常见问题 |
-| [接口注解开发规范](docs/api-annotation-guide.md) | `@Tag / @Operation / @Schema / @ApiResponse` 用法约定 |
-| [接口文档迭代维护规范](docs/api-doc-maintenance-guide.md) | 变更流程 / 评审检查项 / 离线文档重新生成 |
-| [错误码对照表](docs/error-code-table.md) | 全量错误码与边界场景对照 |
-| [Mock 链路说明](docs/mock-chain-guide.md) | 评论 → 私信 → 加企微 → 会话全流程 Mock |
-| [压测接口清单](docs/performance-testing-list.md) | 核心接口 + JMeter 导入建议 |
-| [生产环境配置校验单](docs/production-config-check.md) | 生产文档关闭核查 / 网关拦截规则 |
-| [WebSocket 接入指南](docs/websocket-guide.md) | 实时消息推送接入说明 |
-| [客户对接确认单](docs/customer-onboarding-confirmation.md) | 客户侧对接交付物清单 |
+| GitHub Issues | Bug 报告 · 功能建议（请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md)） |
+| GitHub Discussions | 使用交流 · 方案咨询 · 最佳实践 |
+| 交流群（微信 / 钉钉） | 发布后补充，欢迎在 Discussions 中留言获取 |
 
 ## 社区与治理
 
@@ -271,6 +298,6 @@ curl -X POST http://localhost:8080/api/auth/login \
 
 **AiCRM** · AI 获客销售中台
 
-如果这个项目对你有帮助，欢迎 Star 支持。
+Copyright © 2026 AiCRM Project Contributors · [Apache-2.0](./LICENSE)
 
 </div>
