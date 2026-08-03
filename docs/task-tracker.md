@@ -29,7 +29,7 @@
 | 任务编号 | 任务内容 | 责任人 | 交付物 | 验收标准 | 状态 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- |
 | 8.1 | 本地开箱即用的接口文档配置：Knife4j + 原生 Swagger UI 双支持，dev 环境默认开启 | 技术负责人 | 文档配置 + 配置说明 | 本地启动即有两个文档入口，无需额外参数 | 已完成 | application.yml 补 swagger-ui 调试增强（display-request-duration/persist-authorization/try-it-out/filter/排序）；dev 默认开启（AICRM_DOC_ENABLED 默认 true），prod 强制关闭；浏览器实测双入口均渲染正常：doc.html（Knife4j v4.5.0，中文分组+接口列表）、swagger-ui.html（8 分组下拉 + 158 接口操作），控制台无 JS 错误；说明文档 docs/api-doc-setup-guide.md（入口/配置位置/常见问题含版本兼容与中文乱码 FAQ） |
-| 8.2 | 标准开源项目 README.md 模板（适配 GitHub / Gitee，可直接放项目根目录） | 技术负责人 | README.md | 根目录 README 可读性完整，快速开始可操作 | 已完成 | 根目录 README.md：项目简介/功能特性/技术栈/模块结构/快速开始（Docker 或本机 PG 初始化 + Java 启动 + Python AI 服务）/接口文档双入口与离线包/目录结构/文档索引/环境变量/License；相对路径链接适配 GitHub/Gitee |
+| 8.2 | 标准开源项目 README.md 模板（适配 GitHub / Gitee，可直接放项目根目录） | 技术负责人 | README.md | 根目录 README 可读性完整，快速开始可操作 | 已完成 | 根目录 README.md：项目简介/功能特性/技术栈/模块结构/快速开始（Docker 或本机 PG 初始化 + Java 启动 + Python AI 服务）/接口文档双入口与离线包/目录结构/文档索引/环境变量/License；相对路径链接适配 GitHub/Gitee；已按大厂开源项目风格重写（shields.io 徽章行/ASCII 架构图/贡献指南/免责声明），配套新增根目录 LICENSE（Apache-2.0） |
 
 ### 阶段 7：生产交付与文档归档（对应 5.1 ~ 5.4）
 
