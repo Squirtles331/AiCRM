@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * <p>
  * 事件约定：
  * - 交换器：aicrm.events（topic）
- * - 路由键：channel.event.* / ai.analysis.* / workflow.*
+ * - 路由键：channel.event.* / workflow.*
  */
 @Slf4j
 @Component

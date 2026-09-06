@@ -100,7 +100,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         if (exists == null) {
             throw new BusinessException(ResultCode.TENANT_NOT_FOUND);
         }
-        // 切换套餐：校验套餐有效，未显式指定坐席/额度时按新套餐默认带出
+        // 切换套餐：校验套餐有效，未显式指定坐席数时按新套餐默认带出
         if (StringUtils.hasText(tenant.getPlanCode())) {
             Plan plan = resolvePlan(tenant.getPlanCode());
             tenant.setPlanCode(plan.getCode());

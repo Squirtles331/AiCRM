@@ -43,6 +43,6 @@ public class Document extends BaseEntity {
 
     /** 标签（JSONB） */
     @TableField(typeHandler = JsonbTypeHandler.class)
-    @Schema(description = "标签（JSON 数组字符串）", example = "[\"AI\",\"外呼\"]")
+    @Schema(description = "标签（JSON 数组字符串）", example = "[\"产品\",\"手册\"]")
     private String tags;
 }

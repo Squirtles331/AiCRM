@@ -28,7 +28,7 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("AiCRM 接口文档")
                         .description("""
-                                AI获客销售系统（AiCRM）核心业务接口文档。
+销售线索系统（AiCRM）核心业务接口文档。
 
                                 统一返回结构：`{ code, message, data }`，code=200 表示成功；
                                 分页接口 data 为 `PageResult{ page, size, total, pages, records }`；

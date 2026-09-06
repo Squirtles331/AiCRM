@@ -72,7 +72,7 @@ public class ConversationController {
 
     @Operation(summary = "会话消息分页（历史漫游）",
             description = "会话管理 - 消息分页查询（权限 message:list），可按发送方过滤，消息按 ID 升序返回。\n\n"
-                    + "senderType 枚举：customer客户/ai机器人/human人工/system系统。")
+                    + "senderType 枚举：customer客户/human人工/system系统。")
     @RequirePermission(perms = "message:list")
     @GetMapping("/{id}/messages")
     public Result<PageResult<Message>> messages(

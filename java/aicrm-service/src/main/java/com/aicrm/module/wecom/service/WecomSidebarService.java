@@ -43,7 +43,7 @@ public interface WecomSidebarService {
             @Schema(description = "客户名称") String customerName,
             @Schema(description = "行业") String industry,
             @Schema(description = "地区") String region,
-             @Schema(description = "标签列表") List<String> tags) {
+            @Schema(description = "标签列表") List<String> tags) {
     }
 
     /** 会话摘要 */
@@ -54,13 +54,13 @@ public interface WecomSidebarService {
             @Schema(description = "会话状态：active进行中/transferred已转人工/closed已关闭/archived已归档") String status,
             @Schema(description = "最近一条消息时间", example = "2026-08-03 14:30:00") LocalDateTime lastMessageAt,
             @Schema(description = "最近一条消息内容") String lastMessage,
-             @Schema(description = "最近一条消息发送方：customer客户/human人工/system系统") String lastSender) {
+            @Schema(description = "最近一条消息发送方：customer客户/human人工/system系统") String lastSender) {
     }
 
     /** 人工话术 */
     @Schema(description = "按人工维护意向匹配的固定话术")
     record ReplySuggestion(
-             @Schema(description = "意向：quote报价/sample样品/selection选型/other其他", example = "quote") String intent,
-             @Schema(description = "回复话术列表") List<String> replies) {
+            @Schema(description = "意向：quote报价/sample样品/selection选型/other其他", example = "quote") String intent,
+            @Schema(description = "回复话术列表") List<String> replies) {
     }
 }
