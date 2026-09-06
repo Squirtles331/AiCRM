@@ -22,7 +22,7 @@ public class Document extends BaseEntity {
     private Long tenantId;
 
     /** 标题 */
-    @Schema(description = "标题", example = "AI 外呼系统产品手册")
+    @Schema(description = "标题", example = "销售线索系统产品手册")
     private String title;
 
     /** 类型：product_brochure/case/whitepaper/selection_table */

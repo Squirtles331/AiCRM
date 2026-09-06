@@ -1,9 +1,9 @@
 -- ============================================================
--- AI获客销售系统（AiCRM）核心表初始化脚本
+-- 销售线索系统（AiCRM）核心表初始化脚本
 -- 数据库：PostgreSQL 16+
 -- 说明：本脚本仅包含 Java 服务框架阶段的核心表（M0/M1 起步）
 --       customer/contact/identity/conversation/product/competitor/
---       knowledge/workflow/risk/audit 等表在对应模块实施时补充
+--       workflow/risk/audit 等表在对应模块实施时补充
 -- 用法：在 aicrm 库内执行（docker compose 启动时自动执行本脚本）
 -- ============================================================
 
@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS sys_plan (
     code            VARCHAR(50)   NOT NULL UNIQUE,
     name            VARCHAR(100)  NOT NULL,
     seat_count      INT           NOT NULL DEFAULT 5,
-    ai_quota_month  BIGINT        NOT NULL DEFAULT 100000,
     monthly_price   NUMERIC(12,2),
     description     VARCHAR(500),
     status          SMALLINT      NOT NULL DEFAULT 1,
@@ -24,13 +23,12 @@ CREATE TABLE IF NOT EXISTS sys_plan (
 COMMENT ON TABLE sys_plan IS '套餐定义（平台级，无租户隔离）';
 COMMENT ON COLUMN sys_plan.code IS '套餐编码：starter/pro/enterprise';
 COMMENT ON COLUMN sys_plan.seat_count IS '坐席数上限';
-COMMENT ON COLUMN sys_plan.ai_quota_month IS '月度 AI 调用额度';
 
 -- 默认套餐（平台初始化数据）
-INSERT INTO sys_plan (code, name, seat_count, ai_quota_month, monthly_price, description) VALUES
-('starter',    '初创版', 5,   100000,  199,  '适合初创团队的基础套餐'),
-('pro',        '专业版', 20,  500000,  999,  '适合成长型团队的标准套餐'),
-('enterprise', '企业版', 100, 2000000, 3999, '适合规模化团队的高级套餐')
+INSERT INTO sys_plan (code, name, seat_count, monthly_price, description) VALUES
+('starter',    '初创版', 5,   199,  '适合初创团队的基础套餐'),
+('pro',        '专业版', 20,  999,  '适合成长型团队的标准套餐'),
+('enterprise', '企业版', 100, 3999, '适合规模化团队的高级套餐')
 ON CONFLICT (code) DO NOTHING;
 
 -- ---------- 租户 ----------
@@ -39,7 +37,6 @@ CREATE TABLE IF NOT EXISTS tenant (
     name            VARCHAR(200) NOT NULL,
     plan_code       VARCHAR(50)  NOT NULL DEFAULT 'starter',
     seat_count      INT          NOT NULL DEFAULT 5,
-    ai_quota_month  BIGINT       NOT NULL DEFAULT 100000,
     expire_at       TIMESTAMPTZ,
     contact_name    VARCHAR(100),
     contact_mobile  VARCHAR(20),
@@ -473,63 +470,14 @@ CREATE TABLE IF NOT EXISTS message (
     content             TEXT,
     msg_type            VARCHAR(20)  NOT NULL DEFAULT 'text',
     attachments         JSONB,
-    ai_generated        BOOLEAN      NOT NULL DEFAULT FALSE,
-    quoted_doc_ids      JSONB,
     raw                 JSONB,
     created_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
     deleted             SMALLINT     NOT NULL DEFAULT 0
 );
 COMMENT ON TABLE message IS '消息';
-COMMENT ON COLUMN message.sender_type IS 'customer/ai/human/system';
+COMMENT ON COLUMN message.sender_type IS 'customer/human/system';
 CREATE INDEX idx_message_conversation ON message(conversation_id, created_at);
-
--- ---------- 意向与 AI 结果 ----------
-CREATE TABLE IF NOT EXISTS intent_analysis (
-    id                  BIGSERIAL PRIMARY KEY,
-    tenant_id           BIGINT       NOT NULL REFERENCES tenant(id),
-    conversation_id     BIGINT       NOT NULL REFERENCES conversation(id),
-    intent              VARCHAR(50)  NOT NULL,
-    confidence          NUMERIC(5,4) NOT NULL,
-    model_version       VARCHAR(50),
-    evidence            TEXT,
-    created_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    deleted             SMALLINT     NOT NULL DEFAULT 0
-);
-COMMENT ON TABLE intent_analysis IS '意向分析结果';
-COMMENT ON COLUMN intent_analysis.intent IS 'quote/sample/selection/other';
-CREATE INDEX idx_intent_analysis_conversation ON intent_analysis(conversation_id);
-
-CREATE TABLE IF NOT EXISTS extracted_field (
-    id                  BIGSERIAL PRIMARY KEY,
-    tenant_id           BIGINT       NOT NULL REFERENCES tenant(id),
-    lead_id             BIGINT       NOT NULL REFERENCES lead(id),
-    field_key           VARCHAR(50)  NOT NULL,
-    field_value         VARCHAR(500),
-    confidence          NUMERIC(5,4) NOT NULL,
-    source_conversation_id BIGINT,
-    created_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    deleted             SMALLINT     NOT NULL DEFAULT 0
-);
-COMMENT ON TABLE extracted_field IS '抽取字段（scene/qty/budget/lead_time/model）';
-CREATE INDEX idx_extracted_field_lead ON extracted_field(lead_id);
-
-CREATE TABLE IF NOT EXISTS ai_generation_log (
-    id                  BIGSERIAL PRIMARY KEY,
-    tenant_id           BIGINT       NOT NULL REFERENCES tenant(id),
-    service             VARCHAR(50),
-    prompt_hash         VARCHAR(64),
-    model               VARCHAR(50),
-    input_tokens        INT,
-    output_tokens       INT,
-    latency_ms          INT,
-    status              VARCHAR(20)  NOT NULL DEFAULT 'success',
-    created_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    updated_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    deleted             SMALLINT     NOT NULL DEFAULT 0
-);
-COMMENT ON TABLE ai_generation_log IS 'AI 生成日志（成本核算与审计）';
-CREATE INDEX idx_ai_log_tenant_time ON ai_generation_log(tenant_id, created_at);
 
 -- ---------- 资料/文档（资料包中心） ----------
 CREATE TABLE IF NOT EXISTS document (
@@ -564,7 +512,7 @@ CREATE TABLE IF NOT EXISTS metric_daily (
     UNIQUE (tenant_id, stat_date, metric_key, dimension)
 );
 COMMENT ON TABLE metric_daily IS '看板日聚合指标';
-COMMENT ON COLUMN metric_daily.metric_key IS 'lead_count/response_time/effective_rate/intent_accuracy/conversion_rate';
+COMMENT ON COLUMN metric_daily.metric_key IS 'lead_count/response_time/effective_rate/conversion_rate';
 
 -- ---------- 菜单（平台级，无租户隔离） ----------
 CREATE TABLE IF NOT EXISTS sys_menu (
@@ -794,9 +742,7 @@ COMMENT ON TABLE sys_config IS '系统参数配置';
 COMMENT ON COLUMN sys_config.config_type IS '1内置/2自定义';
 
 INSERT INTO sys_config (config_key, config_value, config_name, remark) VALUES
-('system.lead.autoAssign', 'true', '线索自动分配开关', 'true/false'),
-('system.conversation.aiReply', 'true', 'AI 自动接待开关', 'true/false'),
-('system.ai.defaultModel', 'gpt-4o-mini', '默认 AI 模型', 'AI 对话默认模型')
+('system.lead.autoAssign', 'true', '线索自动分配开关', 'true/false')
 ON CONFLICT (config_key) DO NOTHING;
 
 -- ---------- 文件记录（租户级） ----------

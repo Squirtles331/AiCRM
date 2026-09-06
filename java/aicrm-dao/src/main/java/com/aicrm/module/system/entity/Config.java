@@ -20,7 +20,7 @@ public class Config extends BaseEntity {
     private String configKey;
 
     /** 参数值 */
-    @Schema(description = "参数值", example = "AI 销售线索系统")
+    @Schema(description = "参数值", example = "销售线索系统")
     private String configValue;
 
     /** 参数名称 */
