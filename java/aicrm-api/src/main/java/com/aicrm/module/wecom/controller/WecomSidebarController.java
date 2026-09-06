@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 企微侧边栏业务接口（3.3.5）：客户画像 / 历史会话 / 推荐话术 / 产品资料快捷发送
+ * 企微侧边栏业务接口（3.3.5）：客户画像 / 历史会话 / 人工话术 / 产品资料快捷发送
  */
 @Tag(name = "企微侧边栏")
 @RestController
@@ -28,7 +28,7 @@ public class WecomSidebarController {
     private final WecomSidebarService wecomSidebarService;
 
     @Operation(summary = "客户画像",
-            description = "企微侧边栏 - 客户画像（权限 wecom:sidebar）：按企微外部用户 ID 聚合身份→线索→客户信息、标签、最近意向。")
+            description = "企微侧边栏 - 客户画像（权限 wecom:sidebar）：按企微外部用户 ID 聚合身份、线索、客户信息和标签。")
     @RequirePermission(perms = "wecom:sidebar")
     @GetMapping("/profile")
     public Result<WecomSidebarService.CustomerProfile> profile(
@@ -45,14 +45,14 @@ public class WecomSidebarController {
         return Result.ok(wecomSidebarService.history(externalUserId));
     }
 
-    @Operation(summary = "推荐话术",
-            description = "企微侧边栏 - 推荐话术（权限 wecom:sidebar）：按意向返回建议话术与缺失字段；intent 不传时取线索最近意向。\n\n"
+    @Operation(summary = "人工话术",
+            description = "企微侧边栏 - 人工话术（权限 wecom:sidebar）：按人工维护的线索意向返回固定话术；intent 不传时取线索意向。\n\n"
                     + "intent 枚举：quote报价/sample样品/selection选型/other其他。")
     @RequirePermission(perms = "wecom:sidebar")
     @GetMapping("/reply-suggestions")
     public Result<WecomSidebarService.ReplySuggestion> replySuggestions(
             @Parameter(description = "企微外部用户 ID", required = true) @RequestParam String externalUserId,
-            @Parameter(description = "意向：quote报价/sample样品/selection选型/other其他（可空，默认取线索最近意向）") @RequestParam(required = false) String intent) {
+            @Parameter(description = "意向：quote报价/sample样品/selection选型/other其他（可空，默认取线索意向）") @RequestParam(required = false) String intent) {
         return Result.ok(wecomSidebarService.replySuggestions(externalUserId, intent));
     }
 

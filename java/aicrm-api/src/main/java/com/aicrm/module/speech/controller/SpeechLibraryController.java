@@ -50,7 +50,7 @@ public class SpeechLibraryController {
         return Result.ok(speechLibraryService.detail(id));
     }
 
-    @Operation(summary = "创建话术", description = "新增话术（通用/场景分类），场景：话术库管理维护；权限：speech:add。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "创建话术", description = "新增话术（通用/场景分类），场景：话术库管理维护；权限：speech:add。")
     @ApiResponse(responseCode = "400", description = "话术标题/内容不能为空")
     @OperLog(module = "话术库", operation = "创建话术")
     @RequirePermission(perms = "speech:add")
@@ -59,7 +59,7 @@ public class SpeechLibraryController {
         return Result.ok(speechLibraryService.create(speech));
     }
 
-    @Operation(summary = "更新话术", description = "修改话术标题/分类/内容，场景：话术库管理维护；权限：speech:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "更新话术", description = "修改话术标题/分类/内容，场景：话术库管理维护；权限：speech:edit。")
     @ApiResponse(responseCode = "400", description = "话术内容不能为空")
     @ApiResponse(responseCode = "404", description = "话术不存在")
     @OperLog(module = "话术库", operation = "更新话术")
@@ -70,7 +70,7 @@ public class SpeechLibraryController {
         return Result.ok(speechLibraryService.update(speech));
     }
 
-    @Operation(summary = "删除话术", description = "删除话术，场景：话术库管理维护；权限：speech:delete。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "删除话术", description = "删除话术，场景：话术库管理维护；权限：speech:delete。")
     @ApiResponse(responseCode = "404", description = "话术不存在")
     @OperLog(module = "话术库", operation = "删除话术")
     @RequirePermission(perms = "speech:delete")
@@ -80,7 +80,7 @@ public class SpeechLibraryController {
         return Result.ok();
     }
 
-    @Operation(summary = "话术启停", description = "启用/停用话术，停用后不可被一键发送检索，场景：话术库上下架管理；权限：speech:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "话术启停", description = "启用/停用话术，停用后不可被一键发送检索，场景：话术库上下架管理；权限：speech:edit。")
     @ApiResponse(responseCode = "404", description = "话术不存在")
     @OperLog(module = "话术库", operation = "话术启停")
     @RequirePermission(perms = "speech:edit")

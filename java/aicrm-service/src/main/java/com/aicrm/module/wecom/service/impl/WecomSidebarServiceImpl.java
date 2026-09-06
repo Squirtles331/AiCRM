@@ -5,17 +5,12 @@ import com.aicrm.module.conversation.entity.Conversation;
 import com.aicrm.module.conversation.entity.Message;
 import com.aicrm.module.conversation.mapper.ConversationMapper;
 import com.aicrm.module.conversation.mapper.MessageMapper;
-import com.aicrm.module.conversation.service.AiChatService;
 import com.aicrm.module.customer.entity.Customer;
 import com.aicrm.module.customer.mapper.CustomerMapper;
 import com.aicrm.module.identity.entity.Identity;
 import com.aicrm.module.identity.entity.IdentityMapping;
 import com.aicrm.module.identity.mapper.IdentityMapper;
 import com.aicrm.module.identity.mapper.IdentityMappingMapper;
-import com.aicrm.module.intent.entity.ExtractedField;
-import com.aicrm.module.intent.entity.IntentAnalysis;
-import com.aicrm.module.intent.mapper.ExtractedFieldMapper;
-import com.aicrm.module.intent.mapper.IntentAnalysisMapper;
 import com.aicrm.module.lead.entity.Lead;
 import com.aicrm.module.lead.mapper.LeadMapper;
 import com.aicrm.module.product.entity.Product;
@@ -31,12 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 企微侧边栏业务服务实现（3.3.5）
@@ -53,32 +44,25 @@ public class WecomSidebarServiceImpl implements WecomSidebarService {
     private final CustomerMapper customerMapper;
     private final CustomerTagMapper tagMapper;
     private final CustomerTagRelMapper tagRelMapper;
-    private final IntentAnalysisMapper intentAnalysisMapper;
     private final ConversationMapper conversationMapper;
     private final MessageMapper messageMapper;
-    private final ExtractedFieldMapper extractedFieldMapper;
     private final ProductService productService;
-    private final AiChatService aiChatService;
 
     @Override
     public CustomerProfile profile(String externalUserId) {
         Lead lead = resolveLead(externalUserId);
         if (lead == null) {
-            return new CustomerProfile(null, null, null, null, null, null, null, null,
-                    List.of(), null, null);
+            return new CustomerProfile(null, null, null, null, null, null, null, null, List.of());
         }
         Customer customer = lead.getCustomerId() == null ? null : customerMapper.selectById(lead.getCustomerId());
         List<String> tags = listTags(lead.getCustomerId());
-        IntentAnalysis latest = latestIntentByLead(lead.getId());
         return new CustomerProfile(
                 lead.getId(), lead.getStatus(), lead.getIntent(), lead.getScore(),
                 customer == null ? null : customer.getId(),
                 customer == null ? null : customer.getName(),
                 customer == null ? null : customer.getIndustry(),
                 customer == null ? null : customer.getRegion(),
-                tags,
-                latest == null ? null : latest.getIntent(),
-                latest == null ? null : latest.getConfidence());
+                tags);
     }
 
     @Override
@@ -108,15 +92,14 @@ public class WecomSidebarServiceImpl implements WecomSidebarService {
     @Override
     public ReplySuggestion replySuggestions(String externalUserId, String intent) {
         Lead lead = resolveLead(externalUserId);
-        List<String> missingFields = computeMissingFields(lead);
-        List<String> replies = new ArrayList<>();
-        replies.add(aiChatService.suggestReply(intent));
-        replies.add("如需人工介入请点击右上角转人工，我已将上下文同步给同事。");
         String resolvedIntent = intent;
         if (!StringUtils.hasText(resolvedIntent) && lead != null) {
             resolvedIntent = lead.getIntent();
         }
-        return new ReplySuggestion(resolvedIntent, replies, missingFields);
+        List<String> replies = List.of(
+                suggestReply(resolvedIntent),
+                "如需进一步协助，请告诉我具体需求，我会继续为您处理。");
+        return new ReplySuggestion(resolvedIntent, replies);
     }
 
     @Override
@@ -166,34 +149,15 @@ public class WecomSidebarServiceImpl implements WecomSidebarService {
         return tagMapper.selectBatchIds(tagIds).stream().map(CustomerTag::getName).toList();
     }
 
-    private IntentAnalysis latestIntentByLead(Long leadId) {
-        Conversation conversation = conversationMapper.selectOne(new LambdaQueryWrapper<Conversation>()
-                .eq(Conversation::getLeadId, leadId)
-                .orderByDesc(Conversation::getId)
-                .last("LIMIT 1"));
-        if (conversation == null) {
-            return null;
+    private String suggestReply(String intent) {
+        if (!StringUtils.hasText(intent)) {
+            return "您好，我是您的人工顾问，请告诉我您希望了解的产品或服务。";
         }
-        return intentAnalysisMapper.selectOne(new LambdaQueryWrapper<IntentAnalysis>()
-                .eq(IntentAnalysis::getConversationId, conversation.getId())
-                .orderByDesc(IntentAnalysis::getId)
-                .last("LIMIT 1"));
-    }
-
-    /** 报价前标准字段与已抽取字段差集 */
-    private List<String> computeMissingFields(Lead lead) {
-        List<String> required = List.of("scene", "qty", "budget", "lead_time", "model");
-        if (lead == null) {
-            return new ArrayList<>(required);
-        }
-        List<ExtractedField> collected = extractedFieldMapper.selectList(new LambdaQueryWrapper<ExtractedField>()
-                .eq(ExtractedField::getLeadId, lead.getId()));
-        Set<String> keys = new LinkedHashSet<>();
-        for (ExtractedField f : collected) {
-            if (f.getFieldKey() != null && f.getFieldValue() != null && !f.getFieldValue().isBlank()) {
-                keys.add(f.getFieldKey());
-            }
-        }
-        return required.stream().filter(k -> !keys.contains(k)).toList();
+        return switch (intent) {
+            case "quote" -> "您好，我是您的人工顾问。为准确报价，请提供应用场景、采购数量、预算范围和期望交期。";
+            case "sample" -> "您好，已了解您的样品需求，请提供收货地址、联系人和联系电话。";
+            case "selection" -> "您好，已了解您的选型需求，请补充应用场景与工况要求，我来为您推荐合适型号。";
+            default -> "您好，我是您的人工顾问，请描述您的具体需求，我会为您处理。";
+        };
     }
 }

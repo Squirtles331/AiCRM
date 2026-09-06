@@ -6,10 +6,10 @@ import lombok.Data;
 import java.time.LocalDate;
 
 /**
- * 看板每日趋势（3.4.5）：线索量/会话量/AI 解决量按日聚合
+ * 看板每日趋势（3.4.5）：线索量/会话量/转人工量按日聚合
  */
 @Data
-@Schema(description = "看板每日趋势：线索量/会话量/AI 解决量按日聚合")
+@Schema(description = "看板每日趋势：线索量/会话量/转人工量按日聚合")
 public class DashboardTrend {
 
     /** 统计日期 */
@@ -24,7 +24,7 @@ public class DashboardTrend {
     @Schema(description = "新增会话数")
     private Long conversationCount;
 
-    /** AI 解决会话数（当日会话 - 转人工会话） */
-    @Schema(description = "AI 解决会话数（当日会话减去转人工会话）")
-    private Long aiResolvedCount;
+    /** 转人工会话数 */
+    @Schema(description = "转人工会话数")
+    private Long transferCount;
 }

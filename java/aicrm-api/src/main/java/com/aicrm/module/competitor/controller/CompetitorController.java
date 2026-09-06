@@ -52,7 +52,7 @@ public class CompetitorController {
         return Result.ok(competitorService.detail(id));
     }
 
-    @Operation(summary = "创建竞品", description = "新增竞品主体档案，场景：竞品库管理维护；权限：competitor:add。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "创建竞品", description = "新增竞品主体档案，场景：竞品库管理维护；权限：competitor:add。")
     @OperLog(module = "竞品库", operation = "创建竞品")
     @RequirePermission(perms = "competitor:add")
     @PostMapping
@@ -60,7 +60,7 @@ public class CompetitorController {
         return Result.ok(competitorService.create(competitor));
     }
 
-    @Operation(summary = "更新竞品（优劣势/攻防话术）", description = "修改竞品档案（含优劣势/攻防话术），场景：竞品库管理维护；权限：competitor:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "更新竞品（优劣势/攻防话术）", description = "修改竞品档案（含优劣势/攻防话术），场景：竞品库管理维护；权限：competitor:edit。")
     @ApiResponse(responseCode = "400", description = "竞品名称不能为空/竞品不存在")
     @OperLog(module = "竞品库", operation = "更新竞品")
     @RequirePermission(perms = "competitor:edit")
@@ -70,7 +70,7 @@ public class CompetitorController {
         return Result.ok(competitorService.update(competitor));
     }
 
-    @Operation(summary = "删除竞品", description = "删除竞品档案（含关联竞品产品），场景：竞品库管理维护；权限：competitor:delete。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "删除竞品", description = "删除竞品档案（含关联竞品产品），场景：竞品库管理维护；权限：competitor:delete。")
     @ApiResponse(responseCode = "404", description = "竞品不存在")
     @OperLog(module = "竞品库", operation = "删除竞品")
     @RequirePermission(perms = "competitor:delete")
@@ -80,7 +80,7 @@ public class CompetitorController {
         return Result.ok();
     }
 
-    @Operation(summary = "竞品启停", description = "启用/停用竞品，停用后不可被知识检索，场景：竞品库上下架管理；权限：competitor:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "竞品启停", description = "启用/停用竞品，场景：竞品库上下架管理；权限：competitor:edit。")
     @ApiResponse(responseCode = "404", description = "竞品不存在")
     @OperLog(module = "竞品库", operation = "竞品启停")
     @RequirePermission(perms = "competitor:edit")
@@ -99,7 +99,7 @@ public class CompetitorController {
         return Result.ok(competitorService.listProducts(id));
     }
 
-    @Operation(summary = "新增竞品产品参数", description = "为指定竞品新增产品参数，场景：竞品库管理维护；权限：competitor:add。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "新增竞品产品参数", description = "为指定竞品新增产品参数，场景：竞品库管理维护；权限：competitor:add。")
     @OperLog(module = "竞品库", operation = "新增竞品产品")
     @RequirePermission(perms = "competitor:add")
     @PostMapping("/{id}/products")
@@ -108,7 +108,7 @@ public class CompetitorController {
         return Result.ok(competitorService.createProduct(product));
     }
 
-    @Operation(summary = "更新竞品产品参数", description = "修改竞品产品参数，场景：竞品库管理维护；权限：competitor:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "更新竞品产品参数", description = "修改竞品产品参数，场景：竞品库管理维护；权限：competitor:edit。")
     @ApiResponse(responseCode = "400", description = "竞品产品名称不能为空")
     @ApiResponse(responseCode = "404", description = "竞品产品不存在")
     @OperLog(module = "竞品库", operation = "更新竞品产品")
@@ -120,7 +120,7 @@ public class CompetitorController {
         return Result.ok(competitorService.updateProduct(product));
     }
 
-    @Operation(summary = "删除竞品产品", description = "删除竞品产品参数，场景：竞品库管理维护；权限：competitor:delete。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "删除竞品产品", description = "删除竞品产品参数，场景：竞品库管理维护；权限：competitor:delete。")
     @ApiResponse(responseCode = "404", description = "竞品产品不存在")
     @OperLog(module = "竞品库", operation = "删除竞品产品")
     @RequirePermission(perms = "competitor:delete")

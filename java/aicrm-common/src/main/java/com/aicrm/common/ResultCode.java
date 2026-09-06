@@ -40,9 +40,6 @@ public enum ResultCode {
 
     RISK_BLOCKED(1501, "触发风控规则，操作被拦截"),
 
-    AI_SERVICE_ERROR(1601, "AI 服务调用失败"),
-    AI_TIMEOUT(1602, "AI 服务调用超时"),
-
     FILE_UPLOAD_ERROR(1701, "文件上传失败"),
     FILE_TOO_LARGE(1702, "文件大小超出限制");
 

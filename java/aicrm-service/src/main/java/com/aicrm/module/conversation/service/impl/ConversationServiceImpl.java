@@ -97,9 +97,6 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
         if (message.getMsgType() == null) {
             message.setMsgType("text");
         }
-        if (message.getAiGenerated() == null) {
-            message.setAiGenerated(false);
-        }
         messageMapper.insert(message);
 
         // 更新会话最后消息时间

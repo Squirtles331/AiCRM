@@ -46,7 +46,7 @@ public class ProductController {
         return Result.ok(categoryService.listTree());
     }
 
-    @Operation(summary = "创建分类", description = "新增产品分类节点，场景：产品库分类体系维护；权限：product:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "创建分类", description = "新增产品分类节点，场景：产品库分类体系维护；权限：product:edit。")
     @ApiResponse(responseCode = "400", description = "分类名称不能为空")
     @OperLog(module = "产品库", operation = "创建产品分类")
     @RequirePermission(perms = "product:edit")
@@ -55,7 +55,7 @@ public class ProductController {
         return Result.ok(categoryService.create(category));
     }
 
-    @Operation(summary = "更新分类", description = "修改产品分类名称/父级/排序/状态，场景：产品库分类体系维护；权限：product:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "更新分类", description = "修改产品分类名称/父级/排序/状态，场景：产品库分类体系维护；权限：product:edit。")
     @ApiResponse(responseCode = "404", description = "产品分类不存在")
     @OperLog(module = "产品库", operation = "更新产品分类")
     @RequirePermission(perms = "product:edit")
@@ -65,7 +65,7 @@ public class ProductController {
         return Result.ok(categoryService.update(category));
     }
 
-    @Operation(summary = "删除分类", description = "删除产品分类节点（存在子分类/关联产品时按业务规则处理），场景：产品库分类体系维护；权限：product:delete。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "删除分类", description = "删除产品分类节点（存在子分类/关联产品时按业务规则处理），场景：产品库分类体系维护；权限：product:delete。")
     @ApiResponse(responseCode = "400", description = "存在子分类/分类下存在产品，不能删除")
     @OperLog(module = "产品库", operation = "删除产品分类")
     @RequirePermission(perms = "product:delete")
@@ -75,7 +75,7 @@ public class ProductController {
         return Result.ok();
     }
 
-    @Operation(summary = "分类启停", description = "启用/停用产品分类，停用后下级不再展示，场景：产品库分类体系维护；权限：product:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "分类启停", description = "启用/停用产品分类，停用后下级不再展示，场景：产品库分类体系维护；权限：product:edit。")
     @ApiResponse(responseCode = "404", description = "产品分类不存在")
     @OperLog(module = "产品库", operation = "产品分类启停")
     @RequirePermission(perms = "product:edit")
@@ -105,7 +105,7 @@ public class ProductController {
         return Result.ok(productService.detail(id));
     }
 
-    @Operation(summary = "创建产品", description = "新增产品资料（含参数/附件），场景：产品库管理维护；权限：product:add。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "创建产品", description = "新增产品资料（含参数/附件），场景：产品库管理维护；权限：product:add。")
     @ApiResponse(responseCode = "400", description = "产品名称不能为空")
     @OperLog(module = "产品库", operation = "创建产品")
     @RequirePermission(perms = "product:add")
@@ -114,7 +114,7 @@ public class ProductController {
         return Result.ok(productService.create(product));
     }
 
-    @Operation(summary = "更新产品（含参数/附件）", description = "修改产品资料（含参数/附件），场景：产品库管理维护；权限：product:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "更新产品（含参数/附件）", description = "修改产品资料（含参数/附件），场景：产品库管理维护；权限：product:edit。")
     @ApiResponse(responseCode = "400", description = "产品名称不能为空")
     @ApiResponse(responseCode = "404", description = "产品不存在")
     @OperLog(module = "产品库", operation = "更新产品")
@@ -125,7 +125,7 @@ public class ProductController {
         return Result.ok(productService.update(product));
     }
 
-    @Operation(summary = "删除产品", description = "删除产品资料，场景：产品库管理维护；权限：product:delete。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "删除产品", description = "删除产品资料，场景：产品库管理维护；权限：product:delete。")
     @ApiResponse(responseCode = "404", description = "产品不存在")
     @OperLog(module = "产品库", operation = "删除产品")
     @RequirePermission(perms = "product:delete")
@@ -135,7 +135,7 @@ public class ProductController {
         return Result.ok();
     }
 
-    @Operation(summary = "产品上下架", description = "上架/下架产品，下架后不可被快捷发送检索，场景：产品库上下架管理；权限：product:edit。⚠️ 异步联动：本操作会触发 RabbitMQ 通知（exchange=aicrm.events，routingKey=knowledge.sync），Python 侧消费后更新向量数据；MQ 不可用时仅记录日志降级，不影响本接口返回")
+    @Operation(summary = "产品上下架", description = "上架/下架产品，下架后不可被快捷发送检索，场景：产品库上下架管理；权限：product:edit。")
     @ApiResponse(responseCode = "404", description = "产品不存在")
     @OperLog(module = "产品库", operation = "产品上下架")
     @RequirePermission(perms = "product:edit")

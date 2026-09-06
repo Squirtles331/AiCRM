@@ -41,7 +41,7 @@ public class DashboardController {
         return Result.ok(dashboardService.getOverview(tenantId, from, to));
     }
 
-    @Operation(summary = "每日趋势（线索量/会话量/AI 解决量按日聚合）", description = "按日聚合线索/会话/AI 解决量趋势，场景：趋势分析与运营复盘")
+    @Operation(summary = "每日趋势（线索量/会话量/转人工量按日聚合）", description = "按日聚合线索、会话和转人工量趋势，场景：趋势分析与运营复盘")
     @GetMapping("/trend")
     public Result<List<DashboardTrend>> trend(
             @Parameter(description = "租户 ID", required = true) @RequestParam Long tenantId,

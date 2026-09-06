@@ -25,8 +25,8 @@ public class Message extends BaseEntity {
     @Schema(description = "会话 ID", example = "100")
     private Long conversationId;
 
-    /** 发送方：customer/ai/human/system */
-    @Schema(description = "发送方：customer客户/ai机器人/human人工/system系统", example = "customer")
+    /** 发送方：customer/human/system */
+    @Schema(description = "发送方：customer客户/human人工/system系统", example = "customer")
     private String senderType;
 
     /** 消息内容 */
@@ -41,15 +41,6 @@ public class Message extends BaseEntity {
     @Schema(description = "附件 ID 列表（JSONB 字符串）", example = "[]")
     @TableField(typeHandler = JsonbTypeHandler.class)
     private String attachments;
-
-    /** 是否 AI 生成 */
-    @Schema(description = "是否 AI 生成", example = "false")
-    private Boolean aiGenerated;
-
-    /** 引用知识文档 ID（溯源，JSONB） */
-    @Schema(description = "引用知识文档 ID（溯源，JSONB 字符串）", example = "[]")
-    @TableField(typeHandler = JsonbTypeHandler.class)
-    private String quotedDocIds;
 
     /** 原始消息（JSONB） */
     @Schema(description = "原始消息（JSONB 字符串）", example = "{}")

@@ -24,7 +24,7 @@ public interface DashboardService {
     DashboardOverview getOverview(Long tenantId, LocalDateTime from, LocalDateTime to);
 
     /**
-     * 每日趋势：线索量/会话量/AI 解决量按日聚合（缺失日期补 0）
+     * 每日趋势：线索量/会话量/转人工量按日聚合（缺失日期补 0）
      */
     List<DashboardTrend> getTrend(Long tenantId, LocalDateTime from, LocalDateTime to);
 

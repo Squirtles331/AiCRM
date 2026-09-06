@@ -133,7 +133,7 @@ public class DashboardServiceImpl implements DashboardService {
             item.setDate(cursor);
             item.setLeadCount(leadByDay.getOrDefault(day, 0L));
             item.setConversationCount(conv);
-            item.setAiResolvedCount(Math.max(0, conv - transferByDay.getOrDefault(day, 0L)));
+            item.setTransferCount(transferByDay.getOrDefault(day, 0L));
             trend.add(item);
             cursor = cursor.plusDays(1);
         }
@@ -288,7 +288,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .doubleValue();
     }
 
-    /** 响应时效：客户首条消息 → AI 首条回复（秒）；有效对话率：≥3 条消息会话占比 */
+    /** 响应时效：客户首条消息到人工首条回复（秒）；有效对话率：至少 3 条消息会话占比。 */
     private void computeMessageMetrics(DashboardOverview overview, Long tenantId, List<Conversation> conversations) {
         if (conversations.isEmpty()) {
             overview.setAvgResponseSec(null);
@@ -319,22 +319,22 @@ public class DashboardServiceImpl implements DashboardService {
             if (msgs.size() >= EFFECTIVE_MESSAGE_THRESHOLD) {
                 effectiveCount++;
             }
-            // 响应时效：首个客户消息 → 其后首个 AI 回复
+            // 响应时效：首个客户消息到其后首个人工回复
             LocalDateTime firstCustomerAt = null;
-            LocalDateTime firstAiAt = null;
+            LocalDateTime firstHumanAt = null;
             for (Message m : msgs) {
                 if ("customer".equals(m.getSenderType()) && firstCustomerAt == null) {
                     firstCustomerAt = m.getCreatedAt();
                 }
-                if ("ai".equals(m.getSenderType()) && firstAiAt == null
+                if ("human".equals(m.getSenderType()) && firstHumanAt == null
                         && firstCustomerAt != null
                         && m.getCreatedAt() != null
                         && !m.getCreatedAt().isBefore(firstCustomerAt)) {
-                    firstAiAt = m.getCreatedAt();
+                    firstHumanAt = m.getCreatedAt();
                 }
             }
-            if (firstCustomerAt != null && firstAiAt != null) {
-                responseTotalSec += Duration.between(firstCustomerAt, firstAiAt).getSeconds();
+            if (firstCustomerAt != null && firstHumanAt != null) {
+                responseTotalSec += Duration.between(firstCustomerAt, firstHumanAt).getSeconds();
                 responseCount++;
             }
         }
@@ -349,7 +349,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .doubleValue());
     }
 
-    /** 意向分布：按 lead.intent 分组计数 */
+    /** 人工维护的意向分布：按 lead.intent 分组计数。 */
     private List<DashboardOverview.IntentCount> queryIntentDistribution(Long tenantId, LocalDateTime start, LocalDateTime end) {
         List<Map<String, Object>> rows = leadMapper.selectMaps(new QueryWrapper<Lead>()
                 .select("intent", "count(*) AS cnt")

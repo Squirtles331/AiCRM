@@ -29,7 +29,7 @@ public interface ConversationService extends IService<Conversation> {
     Conversation detail(Long id);
 
     /**
-     * 关闭会话（status=closed，人工/AI 接待结束）
+     * 关闭会话（status=closed，人工接待结束）
      */
     Conversation close(Long id);
 

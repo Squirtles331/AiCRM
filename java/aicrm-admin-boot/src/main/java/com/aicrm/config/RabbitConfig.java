@@ -54,16 +54,6 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue aiAnalysisQueue() {
-        return buildQueue(MqConstants.QUEUE_AI_ANALYSIS);
-    }
-
-    @Bean
-    public Binding aiAnalysisBinding() {
-        return BindingBuilder.bind(aiAnalysisQueue()).to(eventExchange()).with(MqConstants.ROUTING_AI_ANALYSIS);
-    }
-
-    @Bean
     public Queue workflowQueue() {
         return buildQueue(MqConstants.QUEUE_WORKFLOW);
     }

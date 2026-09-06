@@ -80,7 +80,6 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         tenant.setName(request.getName());
         tenant.setPlanCode(plan.getCode());
         tenant.setSeatCount(request.getSeatCount() != null ? request.getSeatCount() : plan.getSeatCount());
-        tenant.setAiQuotaMonth(request.getAiQuotaMonth() != null ? request.getAiQuotaMonth() : plan.getAiQuotaMonth());
         tenant.setExpireAt(request.getExpireAt());
         tenant.setContactName(request.getContactName());
         tenant.setContactMobile(request.getContactMobile());
@@ -107,9 +106,6 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
             tenant.setPlanCode(plan.getCode());
             if (tenant.getSeatCount() == null) {
                 tenant.setSeatCount(plan.getSeatCount());
-            }
-            if (tenant.getAiQuotaMonth() == null) {
-                tenant.setAiQuotaMonth(plan.getAiQuotaMonth());
             }
         }
         this.updateById(tenant);

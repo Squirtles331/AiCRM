@@ -7,7 +7,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.concurrent.Executor;
 
 /**
- * 异步线程池（事件处理 / AI 回调 / 消息发送等）
+ * 异步线程池（事件处理 / 消息发送等）
  */
 @Configuration
 public class AsyncConfig implements AsyncConfigurer {

@@ -4,17 +4,16 @@ import com.aicrm.common.PageResult;
 import com.aicrm.module.product.entity.Product;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 企微侧边栏业务服务（3.3.5）：客户画像 / 历史会话 / 推荐话术 / 产品资料
+ * 企微侧边栏业务服务（3.3.5）：客户画像 / 历史会话 / 人工话术 / 产品资料
  */
 public interface WecomSidebarService {
 
     /**
-     * 客户画像：按企微外部用户 ID 聚合身份→线索→客户信息、标签、最近意向
+     * 客户画像：按企微外部用户 ID 聚合身份→线索→客户信息和标签
      */
     CustomerProfile profile(String externalUserId);
 
@@ -24,7 +23,7 @@ public interface WecomSidebarService {
     List<ConversationBrief> history(String externalUserId);
 
     /**
-     * 推荐话术：按意向返回建议话术与缺失字段
+     * 人工话术：按人工维护的线索意向返回固定话术
      */
     ReplySuggestion replySuggestions(String externalUserId, String intent);
 
@@ -44,9 +43,7 @@ public interface WecomSidebarService {
             @Schema(description = "客户名称") String customerName,
             @Schema(description = "行业") String industry,
             @Schema(description = "地区") String region,
-            @Schema(description = "标签列表") List<String> tags,
-            @Schema(description = "最近意向：quote报价/sample样品/selection选型/other其他", example = "quote") String latestIntent,
-            @Schema(description = "意向置信度（0-1）", example = "0.82") BigDecimal intentConfidence) {
+             @Schema(description = "标签列表") List<String> tags) {
     }
 
     /** 会话摘要 */
@@ -57,14 +54,13 @@ public interface WecomSidebarService {
             @Schema(description = "会话状态：active进行中/transferred已转人工/closed已关闭/archived已归档") String status,
             @Schema(description = "最近一条消息时间", example = "2026-08-03 14:30:00") LocalDateTime lastMessageAt,
             @Schema(description = "最近一条消息内容") String lastMessage,
-            @Schema(description = "最近一条消息发送方：customer客户/ai机器人/human人工/system系统") String lastSender) {
+             @Schema(description = "最近一条消息发送方：customer客户/human人工/system系统") String lastSender) {
     }
 
-    /** 推荐话术 */
-    @Schema(description = "推荐话术")
+    /** 人工话术 */
+    @Schema(description = "按人工维护意向匹配的固定话术")
     record ReplySuggestion(
-            @Schema(description = "意向：quote报价/sample样品/selection选型/other其他", example = "quote") String intent,
-            @Schema(description = "推荐回复话术列表") List<String> replies,
-            @Schema(description = "缺失字段：scene场景/qty数量/budget预算/lead_time交期/model型号") List<String> missingFields) {
+             @Schema(description = "意向：quote报价/sample样品/selection选型/other其他", example = "quote") String intent,
+             @Schema(description = "回复话术列表") List<String> replies) {
     }
 }

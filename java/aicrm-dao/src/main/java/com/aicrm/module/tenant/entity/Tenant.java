@@ -29,10 +29,6 @@ public class Tenant extends BaseEntity {
     @Schema(description = "坐席数上限")
     private Integer seatCount;
 
-    /** 月度 AI 调用额度 */
-    @Schema(description = "月度 AI 调用额度")
-    private Long aiQuotaMonth;
-
     /** 到期时间，为空表示长期有效 */
     @Schema(description = "到期时间，为空表示长期有效")
     private LocalDateTime expireAt;

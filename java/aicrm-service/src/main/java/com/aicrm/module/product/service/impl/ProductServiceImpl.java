@@ -4,7 +4,6 @@ import com.aicrm.common.PageResult;
 import com.aicrm.common.ResultCode;
 import com.aicrm.common.context.TenantContext;
 import com.aicrm.common.exception.BusinessException;
-import com.aicrm.module.ai.notify.KnowledgeSyncNotifier;
 import com.aicrm.module.product.entity.Product;
 import com.aicrm.module.product.mapper.ProductMapper;
 import com.aicrm.module.product.service.ProductService;
@@ -24,8 +23,6 @@ import org.springframework.util.StringUtils;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements ProductService {
-
-    private final KnowledgeSyncNotifier knowledgeSyncNotifier;
 
     @Override
     public PageResult<Product> page(String keyword, Long categoryId, Integer status, long page, long size) {
@@ -53,7 +50,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         product.setTenantId(TenantContext.getTenantId());
         this.save(product);
         log.info("产品创建 id={}, name={}", product.getId(), product.getName());
-        knowledgeSyncNotifier.notify("product", product.getId(), "create", buildDocContent(product));
         return product;
     }
 
@@ -62,7 +58,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         requireProduct(product.getId());
         this.updateById(product);
         Product saved = requireProduct(product.getId());
-        knowledgeSyncNotifier.notify("product", saved.getId(), "update", buildDocContent(saved));
         return saved;
     }
 
@@ -70,7 +65,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     public void delete(Long id) {
         requireProduct(id);
         this.removeById(id);
-        knowledgeSyncNotifier.notify("product", id, "delete", null);
     }
 
     @Override
@@ -79,24 +73,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         this.update(null, new LambdaUpdateWrapper<Product>()
                 .eq(Product::getId, id)
                 .set(Product::getStatus, status));
-        // 上下架同样影响向量检索范围，通知同步
-        knowledgeSyncNotifier.notify("product", id, "update", buildDocContent(requireProduct(id)));
-    }
-
-    /** 向量化文本：名称 + 规格 + 描述 */
-    private String buildDocContent(Product product) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("产品：").append(product.getName());
-        if (StringUtils.hasText(product.getSpec())) {
-            sb.append("，规格：").append(product.getSpec());
-        }
-        if (product.getPrice() != null) {
-            sb.append("，参考价：").append(product.getPrice()).append("元");
-        }
-        if (StringUtils.hasText(product.getDescription())) {
-            sb.append("。").append(product.getDescription());
-        }
-        return sb.toString();
     }
 
     private Product requireProduct(Long id) {

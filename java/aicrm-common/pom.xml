@@ -46,12 +46,6 @@
             <artifactId>postgresql</artifactId>
         </dependency>
 
-        <!-- PGVector 向量支持（VectorTypeHandler 依赖 PGvector 类型） -->
-        <dependency>
-            <groupId>com.pgvector</groupId>
-            <artifactId>pgvector</artifactId>
-        </dependency>
-
         <!-- JWT（JwtUtil 签发/校验令牌） -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

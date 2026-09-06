@@ -26,10 +26,6 @@ public class TenantCreateRequest {
     @Schema(description = "坐席数上限，为空按套餐默认")
     private Integer seatCount;
 
-    /** 月度 AI 调用额度，为空按套餐默认 */
-    @Schema(description = "月度 AI 调用额度，为空按套餐默认")
-    private Long aiQuotaMonth;
-
     /** 到期时间，为空表示长期有效 */
     @Schema(description = "到期时间，为空表示长期有效")
     private LocalDateTime expireAt;

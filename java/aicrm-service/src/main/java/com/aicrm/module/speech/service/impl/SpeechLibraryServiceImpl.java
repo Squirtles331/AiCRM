@@ -4,7 +4,6 @@ import com.aicrm.common.PageResult;
 import com.aicrm.common.ResultCode;
 import com.aicrm.common.context.TenantContext;
 import com.aicrm.common.exception.BusinessException;
-import com.aicrm.module.ai.notify.KnowledgeSyncNotifier;
 import com.aicrm.module.speech.entity.SpeechLibrary;
 import com.aicrm.module.speech.mapper.SpeechLibraryMapper;
 import com.aicrm.module.speech.service.SpeechLibraryService;
@@ -25,7 +24,6 @@ import org.springframework.util.StringUtils;
 public class SpeechLibraryServiceImpl implements SpeechLibraryService {
 
     private final SpeechLibraryMapper speechLibraryMapper;
-    private final KnowledgeSyncNotifier knowledgeSyncNotifier;
 
     @Override
     public PageResult<SpeechLibrary> page(String keyword, String category, Integer status, long page, long size) {
@@ -61,7 +59,6 @@ public class SpeechLibraryServiceImpl implements SpeechLibraryService {
         }
         speech.setTenantId(TenantContext.getTenantId());
         speechLibraryMapper.insert(speech);
-        knowledgeSyncNotifier.notify("speech", speech.getId(), "create", buildDocContent(speech));
         return speech;
     }
 
@@ -73,7 +70,6 @@ public class SpeechLibraryServiceImpl implements SpeechLibraryService {
         }
         speechLibraryMapper.updateById(speech);
         SpeechLibrary saved = requireSpeech(speech.getId());
-        knowledgeSyncNotifier.notify("speech", saved.getId(), "update", buildDocContent(saved));
         return saved;
     }
 
@@ -81,7 +77,6 @@ public class SpeechLibraryServiceImpl implements SpeechLibraryService {
     public void delete(Long id) {
         requireSpeech(id);
         speechLibraryMapper.deleteById(id);
-        knowledgeSyncNotifier.notify("speech", id, "delete", null);
     }
 
     @Override
@@ -90,13 +85,6 @@ public class SpeechLibraryServiceImpl implements SpeechLibraryService {
         speechLibraryMapper.update(null, new LambdaUpdateWrapper<SpeechLibrary>()
                 .eq(SpeechLibrary::getId, id)
                 .set(SpeechLibrary::getStatus, status));
-        knowledgeSyncNotifier.notify("speech", id, "update", buildDocContent(requireSpeech(id)));
-    }
-
-    /** 向量化文本：场景分类 + 标题 + 话术内容 */
-    private String buildDocContent(SpeechLibrary speech) {
-        return "话术（" + (StringUtils.hasText(speech.getCategory()) ? speech.getCategory() : "general")
-                + "）：" + speech.getTitle() + "。" + speech.getContent();
     }
 
     private SpeechLibrary requireSpeech(Long id) {

@@ -20,17 +20,11 @@ public final class MqConstants {
 
     /** 渠道事件：新线索/新互动触发 */
     public static final String QUEUE_CHANNEL_EVENT = "aicrm.queue.channel.event";
-    /** AI 分析完成回写 */
-    public static final String QUEUE_AI_ANALYSIS = "aicrm.queue.ai.analysis";
     /** 工作流执行 */
     public static final String QUEUE_WORKFLOW = "aicrm.queue.workflow";
 
     /** 渠道事件路由键：channel.event.new 等 */
     public static final String ROUTING_CHANNEL_EVENT = "channel.event.*";
-    /** AI 分析完成回写路由键 */
-    public static final String ROUTING_AI_ANALYSIS = "ai.analysis.*";
     /** 工作流执行路由键 */
     public static final String ROUTING_WORKFLOW = "workflow.*";
-    /** 知识库向量同步路由键（通知 Python 侧更新向量数据） */
-    public static final String ROUTING_KNOWLEDGE_SYNC = "knowledge.sync";
 }

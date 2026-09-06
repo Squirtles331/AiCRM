@@ -29,10 +29,6 @@ public class Plan extends BaseEntity {
     @Schema(description = "坐席数上限")
     private Integer seatCount;
 
-    /** 月度 AI 调用额度 */
-    @Schema(description = "月度 AI 调用额度")
-    private Long aiQuotaMonth;
-
     /** 月单价（元） */
     @Schema(description = "月单价（元）")
     private BigDecimal monthlyPrice;

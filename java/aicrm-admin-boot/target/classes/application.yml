@@ -41,11 +41,6 @@ mybatis-plus:
 
 # 业务自定义配置
 aicrm:
-  # AI 能力服务（Python FastAPI）地址
-  ai-service:
-    base-url: http://localhost:8100
-    # 同步调用超时（毫秒）
-    timeout-ms: 10000
   # 风控频控默认配置
   risk:
     # 同一联系人单渠道每日消息上限

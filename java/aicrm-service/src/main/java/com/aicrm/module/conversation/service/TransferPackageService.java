@@ -8,7 +8,7 @@ import com.aicrm.module.conversation.dto.TransferPackage;
 public interface TransferPackageService {
 
     /**
-     * 转人工并生成交接包（摘要/意向/缺失字段/推荐回复）
+     * 转人工并生成交接包（基础会话信息、人工维护的线索意向和最近消息）
      *
      * @param conversationId 会话 ID
      * @param operatorId     接手坐席 ID

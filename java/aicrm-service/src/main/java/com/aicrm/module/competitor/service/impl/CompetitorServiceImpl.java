@@ -4,7 +4,6 @@ import com.aicrm.common.PageResult;
 import com.aicrm.common.ResultCode;
 import com.aicrm.common.context.TenantContext;
 import com.aicrm.common.exception.BusinessException;
-import com.aicrm.module.ai.notify.KnowledgeSyncNotifier;
 import com.aicrm.module.competitor.entity.Competitor;
 import com.aicrm.module.competitor.entity.CompetitorProduct;
 import com.aicrm.module.competitor.mapper.CompetitorMapper;
@@ -30,7 +29,6 @@ public class CompetitorServiceImpl implements CompetitorService {
 
     private final CompetitorMapper competitorMapper;
     private final CompetitorProductMapper productMapper;
-    private final KnowledgeSyncNotifier knowledgeSyncNotifier;
 
     // ---------- 竞品主体 ----------
 
@@ -58,7 +56,6 @@ public class CompetitorServiceImpl implements CompetitorService {
         }
         competitor.setTenantId(TenantContext.getTenantId());
         competitorMapper.insert(competitor);
-        knowledgeSyncNotifier.notify("competitor", competitor.getId(), "create", buildDocContent(competitor));
         return competitor;
     }
 
@@ -67,7 +64,6 @@ public class CompetitorServiceImpl implements CompetitorService {
         requireCompetitor(competitor.getId());
         competitorMapper.updateById(competitor);
         Competitor saved = requireCompetitor(competitor.getId());
-        knowledgeSyncNotifier.notify("competitor", saved.getId(), "update", buildDocContent(saved));
         return saved;
     }
 
@@ -77,7 +73,6 @@ public class CompetitorServiceImpl implements CompetitorService {
         competitorMapper.deleteById(id);
         productMapper.delete(new LambdaQueryWrapper<CompetitorProduct>()
                 .eq(CompetitorProduct::getCompetitorId, id));
-        knowledgeSyncNotifier.notify("competitor", id, "delete", null);
     }
 
     @Override
@@ -86,26 +81,6 @@ public class CompetitorServiceImpl implements CompetitorService {
         competitorMapper.update(null, new LambdaUpdateWrapper<Competitor>()
                 .eq(Competitor::getId, id)
                 .set(Competitor::getStatus, status));
-        knowledgeSyncNotifier.notify("competitor", id, "update", buildDocContent(requireCompetitor(id)));
-    }
-
-    /** 向量化文本：竞品名称 + 品类 + 描述 + 优劣势 */
-    private String buildDocContent(Competitor competitor) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("竞品：").append(competitor.getName());
-        if (StringUtils.hasText(competitor.getCategory())) {
-            sb.append("，品类：").append(competitor.getCategory());
-        }
-        if (StringUtils.hasText(competitor.getDescription())) {
-            sb.append("。").append(competitor.getDescription());
-        }
-        if (StringUtils.hasText(competitor.getStrengths())) {
-            sb.append("。优势：").append(competitor.getStrengths());
-        }
-        if (StringUtils.hasText(competitor.getWeaknesses())) {
-            sb.append("。劣势：").append(competitor.getWeaknesses());
-        }
-        return sb.toString();
     }
 
     // ---------- 竞品产品 ----------

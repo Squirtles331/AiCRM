@@ -12,7 +12,7 @@
 
     <artifactId>aicrm-service</artifactId>
     <name>aicrm-service</name>
-    <description>业务逻辑层：Service/Impl + AI 客户端 + 消息消费者 + 业务 DTO</description>
+    <description>业务逻辑层：Service/Impl + 消息消费者 + 业务 DTO</description>
 
     <dependencies>
         <dependency>
@@ -20,7 +20,7 @@
             <artifactId>aicrm-dao</artifactId>
         </dependency>
 
-        <!-- Web（RestClient 调用 Python AI 服务） -->
+        <!-- Web（渠道 RestClient / 文件上传 / 请求上下文） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

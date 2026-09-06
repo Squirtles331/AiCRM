@@ -16,7 +16,7 @@
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>aicrm</name>
-    <description>AI获客销售系统 - 核心业务服务（Java 后端，多模块工程）</description>
+    <description>销售线索系统 - 核心业务服务（Java 后端，多模块工程）</description>
 
     <modules>
         <module>aicrm-common</module>
@@ -38,7 +38,6 @@
         <knife4j.version>4.5.0</knife4j.version>
         <swagger-annotations.version>2.2.22</swagger-annotations.version>
         <jjwt.version>0.12.5</jjwt.version>
-        <pgvector.version>0.1.6</pgvector.version>
         <!-- 内部模块版本 -->
         <aicrm.version>0.1.0-SNAPSHOT</aicrm.version>
     </properties>
@@ -122,11 +121,6 @@
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.pgvector</groupId>
-                <artifactId>pgvector</artifactId>
-                <version>${pgvector.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

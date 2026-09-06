@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * AI获客销售系统 - 核心业务服务启动类
+ * 销售线索系统 - 核心业务服务启动类
  * <p>
  * Java 17 + Spring Boot 3.2
  */
