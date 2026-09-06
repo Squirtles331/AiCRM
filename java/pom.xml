@@ -19,7 +19,11 @@
     <description>销售线索系统 - 核心业务服务（Java 后端，多模块工程）</description>
 
     <modules>
+        <module>aicrm-shared-kernel</module>
         <module>aicrm-common</module>
+        <module>aicrm-platform</module>
+        <module>aicrm-sales</module>
+        <module>aicrm-web</module>
         <module>aicrm-dao</module>
         <module>aicrm-service</module>
         <module>aicrm-api</module>
@@ -38,6 +42,8 @@
         <knife4j.version>4.5.0</knife4j.version>
         <swagger-annotations.version>2.2.22</swagger-annotations.version>
         <jjwt.version>0.12.5</jjwt.version>
+        <archunit.version>1.2.1</archunit.version>
+        <testcontainers.version>1.19.8</testcontainers.version>
         <!-- 内部模块版本 -->
         <aicrm.version>0.1.0-SNAPSHOT</aicrm.version>
     </properties>
@@ -45,6 +51,26 @@
     <dependencyManagement>
         <dependencies>
             <!-- 内部模块 -->
+            <dependency>
+                <groupId>com.aicrm</groupId>
+                <artifactId>aicrm-shared-kernel</artifactId>
+                <version>${aicrm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aicrm</groupId>
+                <artifactId>aicrm-platform</artifactId>
+                <version>${aicrm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aicrm</groupId>
+                <artifactId>aicrm-sales</artifactId>
+                <version>${aicrm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aicrm</groupId>
+                <artifactId>aicrm-web</artifactId>
+                <version>${aicrm.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.aicrm</groupId>
                 <artifactId>aicrm-common</artifactId>
@@ -111,6 +137,28 @@
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-api</artifactId>
                 <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.archunit</groupId>
+                <artifactId>archunit-junit5</artifactId>
+                <version>${archunit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
