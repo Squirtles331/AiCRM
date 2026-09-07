@@ -20,15 +20,10 @@
 
     <modules>
         <module>aicrm-shared-kernel</module>
-        <module>aicrm-common</module>
         <module>aicrm-platform</module>
         <module>aicrm-sales</module>
         <module>aicrm-web</module>
-        <module>aicrm-dao</module>
-        <module>aicrm-service</module>
-        <module>aicrm-api</module>
         <module>aicrm-admin-boot</module>
-        <module>aicrm-generator</module>
     </modules>
 
     <properties>
@@ -36,11 +31,8 @@
         <spring-boot.version>3.2.5</spring-boot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <mybatis-plus.version>3.5.7</mybatis-plus.version>
         <redisson.version>3.27.2</redisson.version>
-        <!-- Knife4j 4.5.0 官方配套 springdoc 2.3.0，2.5.0 会导致 NoSuchMethodError: getGroupConfigs() -->
         <springdoc.version>2.3.0</springdoc.version>
-        <knife4j.version>4.5.0</knife4j.version>
         <swagger-annotations.version>2.2.22</swagger-annotations.version>
         <jjwt.version>0.12.5</jjwt.version>
         <archunit.version>1.2.1</archunit.version>
@@ -73,43 +65,7 @@
                 <artifactId>aicrm-web</artifactId>
                 <version>${aicrm.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.aicrm</groupId>
-                <artifactId>aicrm-common</artifactId>
-                <version>${aicrm.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.aicrm</groupId>
-                <artifactId>aicrm-dao</artifactId>
-                <version>${aicrm.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.aicrm</groupId>
-                <artifactId>aicrm-service</artifactId>
-                <version>${aicrm.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.aicrm</groupId>
-                <artifactId>aicrm-api</artifactId>
-                <version>${aicrm.version}</version>
-            </dependency>
-
             <!-- 三方组件版本统一 -->
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-                <version>${mybatis-plus.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-annotation</artifactId>
-                <version>${mybatis-plus.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-core</artifactId>
-                <version>${mybatis-plus.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson-spring-boot-starter</artifactId>
@@ -124,11 +80,6 @@
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
-                <version>${knife4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>

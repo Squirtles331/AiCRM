@@ -33,7 +33,7 @@ class DatabaseStageGateTest {
     void emptyDatabaseMigratesThroughFrozenVersion() throws Exception {
         resetAndMigrate();
 
-        assertEquals("8", scalar("select max(version) from flyway_schema_history where success"));
+        assertEquals("9", scalar("select max(version) from flyway_schema_history where success"));
         assertEquals("19", scalar("select count(*) from information_schema.tables "
                 + "where table_schema = 'public' and table_name like 'crm_%'"));
         assertEquals("4", scalar("select count(*) from pg_constraint "
@@ -42,7 +42,7 @@ class DatabaseStageGateTest {
     }
 
     @Test
-    void legacyTenantAndUsersUpgradeInOrder() throws Exception {
+    void predecessorTablesAreRemovedWithoutImportingTheirData() throws Exception {
         clean();
         migrateTo("1");
         execute("create table tenant (id bigint primary key, name varchar(200), status smallint, "
@@ -50,16 +50,16 @@ class DatabaseStageGateTest {
         execute("create table users (id bigint primary key, tenant_id bigint, name varchar(100), "
                 + "mobile varchar(32), email varchar(200), role_code varchar(50), status smallint, "
                 + "created_at timestamptz, updated_at timestamptz, deleted smallint)");
-        execute("insert into tenant values (91, 'legacy', 1, now(), now(), 0)");
-        execute("insert into users values (92, 91, 'legacy-user', '13800000000', "
-                + "'legacy@example.com', 'admin', 1, now(), now(), 0)");
+        execute("insert into tenant values (91, 'predecessor', 1, now(), now(), 0)");
+        execute("insert into users values (92, 91, 'predecessor-user', '13800000000', "
+                + "'predecessor@example.com', 'admin', 1, now(), now(), 0)");
 
         migrate();
 
-        assertEquals("legacy", scalar("select name from crm_tenant where id = 91"));
-        assertEquals("1", scalar("select count(*) from crm_user where id = 92 and department_id is not null"));
-        assertEquals("1", scalar("select count(*) from crm_user_role where tenant_id = 91 and user_id = 92"));
-        assertTrue(Integer.parseInt(scalar("select count(*) from crm_permission where tenant_id = 91")) >= 20);
+        assertEquals("0", scalar("select count(*) from information_schema.tables where table_schema='public' "
+                + "and table_name in ('tenant','users')"));
+        assertEquals("0", scalar("select count(*) from crm_tenant where id=91"));
+        assertEquals("0", scalar("select count(*) from crm_user where id=92"));
     }
 
     @Test

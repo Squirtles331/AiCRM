@@ -11,7 +11,7 @@ class ModuleBoundaryTest {
     void controllersDoNotAccessMappersOrJdbcSalesAdapter() {
         JavaClasses classes = new ClassFileImporter().importPackages("com.aicrm");
 
-        noClasses().that().resideInAPackage("..controller..")
+        noClasses().that().haveSimpleNameEndingWith("Controller")
                 .should().dependOnClassesThat().resideInAnyPackage(
                         "..mapper..", "com.aicrm.sales.infrastructure..")
                 .check(classes);

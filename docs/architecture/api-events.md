@@ -12,6 +12,7 @@
 
 | 方法与路径 | 用途 | 权限 |
 |---|---|---|
+| `POST /api/v1/auth/login` | 租户、用户名、密码登录 | 匿名；仅签发身份 JWT，权限从数据库加载 |
 | `GET /api/v1/leads/private` | 线索私海 | `lead:read:own/any` + 数据范围 |
 | `GET /api/v1/leads/public` | 线索公海 | 已登录用户 |
 | `POST /api/v1/leads` | 创建私海或公海线索 | `lead:create` |
@@ -45,3 +46,9 @@
 事件信封固定包含 `eventId,eventType,eventVersion,tenantId,aggregateType,aggregateId,operationId,occurredAt,traceId,payload`。新增可选字段保持同版本，删除/改义或类型变化必须升 `eventVersion` 并提供兼容期。
 
 事件先写 `crm_outbox_event`，提交后再投递 RabbitMQ；消费者以 Inbox 或业务幂等键去重。消息不是事实源，失败必须可重试和对账。消费者不得通过事件反查另一个租户的数据。
+
+RabbitMQ 使用持久化 Topic Exchange `crm.events`。领域事件路由键为 `crm.{aggregateType小写}.{eventType小写}`，例如 `crm.lead.leadcreated`；消息 `messageId` 等于 Outbox ID。信封中的所有 ID 均为字符串，`payload` 为 JSON 对象而不是转义后的 JSON 字符串。发布端必须等待 Broker Confirm，未确认时保留数据库事件并进入退避重试。
+
+## 4. 单轨约束
+
+`/api/leads`、`/api/customers`、`/api/auth/login` 等旧路径必须返回 404，且不得提供重定向、适配 DTO 或双写。尚未进入领域阶段门的能力视为未提供；必须先完成领域设计与 Flyway 迁移，再以新的 `/api/v1` 契约交付。

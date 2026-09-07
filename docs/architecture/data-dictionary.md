@@ -1,6 +1,6 @@
 # 第一里程碑数据字典（冻结版）
 
-版本：`M1-DB-1.1`；状态：待团队评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V8` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
+版本：`M1-DB-1.3`；状态：已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V9` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
 
 ## 1. 类型与通用字段组
 
@@ -16,7 +16,7 @@
 |---|---|---|
 | `crm_tenant` | `id BIGINT N`；`name VARCHAR(200) N`；`status SMALLINT N DEFAULT 1`；`AUDIT_MUTABLE` | PK `id`；`status IN (0,1)` |
 | `crm_department` | `id BIGINT N`；`tenant_id BIGINT N`；`parent_id BIGINT NULL`；`code VARCHAR(64) N`；`name VARCHAR(100) N`；`path VARCHAR(1000) N`；`status SMALLINT N DEFAULT 1`；`AUDIT_MUTABLE` | PK；活跃 `(tenant_id,code)` 唯一；父部门复合 FK 保证同租户；`(tenant_id,parent_id)` 索引 |
-| `crm_user` | `id BIGINT N`；`tenant_id BIGINT N`；`department_id BIGINT N`；`username VARCHAR(100) N`；`name VARCHAR(100) N`；`mobile VARCHAR(32) NULL`；`email VARCHAR(200) NULL`；`status SMALLINT N DEFAULT 1`；`AUDIT_MUTABLE` | PK；部门复合 FK；活跃用户名/手机号/邮箱租户内唯一；`status IN (0,1)`；部门索引 |
+| `crm_user` | `id BIGINT N`；`tenant_id BIGINT N`；`department_id BIGINT N`；`username VARCHAR(100) N`；`password_hash VARCHAR(100) NULL`；`name VARCHAR(100) N`；`mobile VARCHAR(32) NULL`；`email VARCHAR(200) NULL`；`status SMALLINT N DEFAULT 1`；`AUDIT_MUTABLE` | PK；部门复合 FK；活跃用户名/手机号/邮箱租户内唯一；`status IN (0,1)`；部门索引。`password_hash` 仅接受 BCrypt，系统任务用户保持 NULL 且不可登录 |
 | `crm_role` | `id BIGINT N`；`tenant_id BIGINT N`；`code VARCHAR(64) N`；`name VARCHAR(100) N`；`status SMALLINT N DEFAULT 1`；`data_scope VARCHAR(32) N DEFAULT 'SELF'`；`AUDIT_MUTABLE` | PK；活跃 `(tenant_id,code)` 唯一；`data_scope` 为 `SELF/DEPARTMENT/DEPARTMENT_AND_SUB/ALL` |
 | `crm_permission` | `tenant_id BIGINT N`；`code VARCHAR(100) N`；`name VARCHAR(200) N`；`resource_type VARCHAR(64) N`；`action VARCHAR(64) N`；`status SMALLINT N DEFAULT 1`；`description VARCHAR(500) NULL`；`AUDIT_MUTABLE` | PK `(tenant_id,code)`；权限随新租户自动初始化 |
 | `crm_user_role` | `tenant_id BIGINT N`；`user_id BIGINT N`；`role_id BIGINT N`；`AUDIT_MUTABLE` | PK `(tenant_id,user_id,role_id)`；用户和角色复合 FK 保证同租户 |

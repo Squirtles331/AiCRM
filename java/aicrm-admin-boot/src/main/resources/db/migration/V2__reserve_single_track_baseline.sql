@@ -1,0 +1,1 @@
+-- Reserved migration number. The single-track architecture does not import predecessor tables.

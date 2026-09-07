@@ -74,7 +74,7 @@ ALTER TABLE crm_audit_log
     ADD CONSTRAINT fk_crm_audit_actor_tenant
         FOREIGN KEY (tenant_id, actor_user_id) REFERENCES crm_user(tenant_id, id);
 
--- Normalize legacy ownership rows before tightening the invariant.
+-- Normalize earlier ownership rows before tightening the invariant.
 UPDATE crm_lead l
 SET owner_dept_id = u.department_id
 FROM crm_user u

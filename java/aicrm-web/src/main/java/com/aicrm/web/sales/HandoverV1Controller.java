@@ -9,6 +9,8 @@ import com.aicrm.sales.application.BatchHandoverResult;
 import com.aicrm.sales.application.SalesCommands;
 import com.aicrm.web.api.ApiResponse;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/handovers")
+@Tag(name = "CRM V1 - 资源交接")
 public class HandoverV1Controller {
     private final SalesCommandService commandService;
 
@@ -25,6 +28,7 @@ public class HandoverV1Controller {
     }
 
     @PostMapping
+    @Operation(summary = "交接指定线索或客户")
     public ApiResponse<?> handover(@Valid @RequestBody SalesApiDtos.HandoverRequest request,
                                     @RequestHeader("Idempotency-Key") String idempotencyKey) {
         SalesCommands.Handover command = new SalesCommands.Handover(request.resourceId(), request.version(),
@@ -39,6 +43,7 @@ public class HandoverV1Controller {
     }
 
     @PostMapping("/batch")
+    @Operation(summary = "批量离职交接")
     public ApiResponse<BatchHandoverResult> batchHandover(@Valid @RequestBody SalesApiDtos.BatchHandoverRequest request,
                                                             @RequestHeader("Idempotency-Key") String idempotencyKey) {
         BatchHandoverResult result = commandService.handoverAll(ActorContext.require(),

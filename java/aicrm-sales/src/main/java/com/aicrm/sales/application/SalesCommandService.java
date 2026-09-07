@@ -51,7 +51,7 @@ public class SalesCommandService {
     @Transactional
     public Lead createLead(Actor actor, SalesCommands.CreateLead command, String idempotencyKey) {
         require(actor, "lead:create");
-        return idempotencyService.execute(actor, "lead:create", idempotencyKey, Lead.class, () -> {
+        return idempotencyService.execute(actor, "lead:create", idempotencyKey, command, Lead.class, () -> {
             OwnershipType ownership = command.publicPoolId() == null ? OwnershipType.PRIVATE : OwnershipType.PUBLIC;
             if (ownership == OwnershipType.PUBLIC) {
                 requireActivePool(actor, command.publicPoolId(), PublicPool.ResourceType.LEAD);
@@ -63,7 +63,7 @@ public class SalesCommandService {
                     ownership, ownership == OwnershipType.PRIVATE ? actor.userId() : null, null,
                     command.publicPoolId(), null, ownership == OwnershipType.PUBLIC ? now : null,
                     null, null, 0, now, now);
-            repository.insertLead(lead, actor.userId());
+            lead = repository.insertLead(lead, actor.userId());
             journal(actor, "CREATE", "LEAD", lead.id(), null, lead, null, lead.publicPoolId(), "创建线索", "LeadCreated");
             return lead;
         });
@@ -72,7 +72,7 @@ public class SalesCommandService {
     @Transactional
     public Customer createCustomer(Actor actor, SalesCommands.CreateCustomer command, String idempotencyKey) {
         require(actor, "customer:create");
-        return idempotencyService.execute(actor, "customer:create", idempotencyKey, Customer.class, () -> {
+        return idempotencyService.execute(actor, "customer:create", idempotencyKey, command, Customer.class, () -> {
             OwnershipType ownership = command.publicPoolId() == null ? OwnershipType.PRIVATE : OwnershipType.PUBLIC;
             if (ownership == OwnershipType.PUBLIC) {
                 requireActivePool(actor, command.publicPoolId(), PublicPool.ResourceType.CUSTOMER);
@@ -82,7 +82,7 @@ public class SalesCommandService {
                     required(command.name(), "客户名称"), trim(command.industry()), trim(command.region()), "ACTIVE", ownership,
                     ownership == OwnershipType.PRIVATE ? actor.userId() : null, null, command.publicPoolId(),
                     ownership == OwnershipType.PUBLIC ? now : null, null, null, 0, now, now);
-            repository.insertCustomer(customer, actor.userId());
+            customer = repository.insertCustomer(customer, actor.userId());
             journal(actor, "CREATE", "CUSTOMER", customer.id(), null, customer, null, customer.publicPoolId(),
                     "创建客户", "CustomerCreated");
             return customer;
@@ -208,7 +208,7 @@ public class SalesCommandService {
 
     @Transactional
     public Customer convertLead(Actor actor, SalesCommands.ConvertLead command, String idempotencyKey) {
-        return idempotencyService.execute(actor, "lead:convert", idempotencyKey, Customer.class, () -> {
+        return idempotencyService.execute(actor, "lead:convert", idempotencyKey, command, Customer.class, () -> {
             Lead before = lead(actor, command.leadId());
             requireLeadWrite(actor, before);
             requireMutable(before);
@@ -226,7 +226,7 @@ public class SalesCommandService {
 
     @Transactional
     public void mergeCustomers(Actor actor, SalesCommands.MergeCustomers command, String idempotencyKey) {
-        idempotencyService.execute(actor, "customer:merge", idempotencyKey, MergeResult.class, () -> {
+        idempotencyService.execute(actor, "customer:merge", idempotencyKey, command, MergeResult.class, () -> {
             Customer source = customer(actor, command.sourceCustomerId());
             Customer target = customer(actor, command.targetCustomerId());
             if (source.id() == target.id()) {
@@ -282,7 +282,7 @@ public class SalesCommandService {
     @Transactional
     public Lead handoverLead(Actor actor, SalesCommands.Handover command, String idempotencyKey) {
         require(actor, "lead:handover");
-        return idempotencyService.execute(actor, "lead:handover", idempotencyKey, Lead.class, () -> {
+        return idempotencyService.execute(actor, "lead:handover", idempotencyKey, command, Lead.class, () -> {
             Lead before = lead(actor, command.resourceId());
             if (before.ownershipType() != OwnershipType.PRIVATE || before.ownerUserId() == null
                     || before.ownerUserId() != command.fromUserId()) {
@@ -309,7 +309,7 @@ public class SalesCommandService {
     @Transactional
     public Customer handoverCustomer(Actor actor, SalesCommands.Handover command, String idempotencyKey) {
         require(actor, "customer:handover");
-        return idempotencyService.execute(actor, "customer:handover", idempotencyKey, Customer.class, () -> {
+        return idempotencyService.execute(actor, "customer:handover", idempotencyKey, command, Customer.class, () -> {
             Customer before = customer(actor, command.resourceId());
             if (before.ownershipType() != OwnershipType.PRIVATE || before.ownerUserId() == null
                     || before.ownerUserId() != command.fromUserId()) {
@@ -390,7 +390,7 @@ public class SalesCommandService {
         if (pageSize < 1 || pageSize > 500) {
             throw new DomainException(ErrorCode.VALIDATION_ERROR, "交接分页大小必须在 1 到 500 之间");
         }
-        return idempotencyService.execute(actor, "handover:batch:" + batchNo, idempotencyKey, BatchHandoverResult.class,
+        return idempotencyService.execute(actor, "handover:batch:" + batchNo, idempotencyKey, command, BatchHandoverResult.class,
                 () -> executeBatchHandover(actor, command, batchNo, pageSize));
     }
 
@@ -454,7 +454,7 @@ public class SalesCommandService {
         Customer customer = new Customer(idGenerator.nextId(), actor.tenantId(), "CUS-" + idGenerator.nextId(),
                 required(command.customerName(), "客户名称"), trim(command.industry()), trim(command.region()), "ACTIVE",
                 OwnershipType.PRIVATE, lead.ownerUserId(), lead.ownerDeptId(), null, null, null, null, 0, now, now);
-        repository.insertCustomer(customer, actor.userId());
+        customer = repository.insertCustomer(customer, actor.userId());
         journal(actor, "CREATE", "CUSTOMER", customer.id(), null, customer, null, null, "线索转换创建客户", "CustomerCreated");
         return customer;
     }

@@ -1,14 +1,14 @@
 # 第一里程碑开发前阶段门
 
-版本：`M1-DB-1.1`。评审状态分为 `READY`（已有可执行证据）、`PENDING-RUN`（门禁已实现但当前环境未执行）和 `BLOCKED`。只有全部为 `READY` 且产品、架构、开发、测试共同签字后，才允许开始/继续第一里程碑功能编码。
+版本：`M1-DB-1.3`。评审状态分为 `READY`（已有可执行证据）、`PENDING-RUN`（门禁已实现但当前环境未执行）和 `BLOCKED`。数据库设计阶段门已经通过，允许继续第一里程碑功能编码；产品、架构、开发、测试签字仍是里程碑发布门禁。
 
 | 验收项 | 证据 | 当前状态 |
 |---|---|---|
-| 平台域、销售域表名和字段冻结 | 数据字典 + V1-V8 | READY |
+| 平台域、销售域表名和字段冻结 | 数据字典 + V1-V9 | READY |
 | 类型、默认值、可空性、索引、唯一规则冻结 | 数据字典 + Flyway | READY |
 | 公私海不变量、租户引用、终态保护 | V7 CHECK/复合 FK/触发器 | READY |
 | 空库 Flyway 初始化 | `DatabaseStageGateTest.emptyDatabaseMigratesThroughFrozenVersion` | READY |
-| 旧租户、用户、组织顺序升级 | `legacyTenantAndUsersUpgradeInOrder` | READY |
+| 旧表退出且不导入数据 | `predecessorTablesAreRemovedWithoutImportingTheirData` | READY |
 | 线索、客户、公海测试数据 | `frozenModelSupportsMilestoneTransactionsAndRejectsInvalidOnes` | READY |
 | 租户隔离与四级数据范围 | 同上 `verifyTenantIsolationAndDataScope` | READY |
 | 并发认领、版本冲突、幂等重复 | 同上三个验证方法 | READY |
@@ -22,7 +22,25 @@
 
 本地需运行 Docker，然后执行 `mvn -f java/pom.xml verify`。CI 使用 `.github/workflows/database-stage-gate.yml` 在 PostgreSQL 16 Testcontainers 上执行同一命令。Windows Docker Desktop 如遇 Testcontainers 命名管道兼容问题，应启用 WSL 集成并在 Linux 环境运行，或使用仅绑定回环地址的受控 Docker API 端点；不得关闭数据库测试或人工改库后标记通过。
 
-最近一次完整验收：2026-09-07，Java 全模块 `verify` 通过。Testcontainers 启动 PostgreSQL 16 容器，空库 V1-V7 初始化、V1 基线后的旧租户/用户升级、私海公海约束、租户隔离、并发认领、乐观锁、幂等、线索转换、客户合并、离职交接、审计、Outbox/Inbox、静态契约和 ArchUnit 全部通过。V8 自动回收目标与系统任务操作者迁移已实现，待随本轮集成测试重新验收。
+最近一次完整自动化验收：2026-09-07，Java 五模块 `mvn -f java/pom.xml clean verify` 通过，共执行 18 个测试且无失败。Testcontainers 连接 Docker Desktop 并启动 PostgreSQL 16，验证空库 V1-V9 初始化、旧表删除且不导入数据、旧 URL 返回 404、新登录、真实 HTTP 端口、私海公海约束、租户隔离、功能权限与数据范围、字段脱敏、接口并发认领、请求哈希幂等、线索转换、客户合并、批量离职交接、自动回收、审计、Outbox 领取与失败重试、Inbox 去重、OpenAPI 契约、静态契约和 ArchUnit。
+
+## 第一里程碑发布门进度
+
+| 收尾项 | 当前状态 | 证据或后续动作 |
+|---|---|---|
+| 公海规则与定时自动回收 | READY | V8 + `recyclesExpiredPrivateResourcesUsingVersionedPoolRules` |
+| 批量离职交接 | READY | `/api/v1/handovers/batch` 应用级集成测试 |
+| 单轨接口与旧入口下线 | READY | 聚合工程已删除旧模块；测试断言旧线索、客户、登录路径均返回 404 |
+| `/api/v1` OpenAPI 与接口契约 | READY | `/v3/api-docs/crm-v1` 契约测试 |
+| PostgreSQL 业务集成测试 | READY | 并发认领、幂等、转换、合并、交接及自动回收均通过 |
+| 租户、组织、字段权限和越权 | READY | JWT 服务端权限加载、租户头一致性、SELF 范围、字段明文授权与列表脱敏测试 |
+| Outbox、重试和 Inbox | READY | 数据库租约领取、发布成功/失败退避、Inbox 完成去重与失败重试测试；传输端使用 RabbitMQ 发布确认 |
+| 独立端口真实 HTTP 服务 | READY | `servesTheV1ApiOnARealHttpPort` 在随机真实端口完成创建线索请求 |
+| 真实 RabbitMQ 验收 | PENDING-RUN | 使用 RabbitMQ 容器检查消息信封、Broker Confirm 与重投；当前自动化使用发布端口 mock |
+| 覆盖率硬门禁 | PENDING-RUN | 增加 JaCoCo；核心领域不低于 80%，全工程不低于 70% |
+| 百万级性能验收 | PENDING-RUN | 4C8G、10 租户、百万级销售数据执行 P95 基准 |
+
+第一里程碑尚未正式关闭，不得进入阶段 2 的产品、商机与报价编码。
 
 ## 评审签字
 

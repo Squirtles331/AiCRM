@@ -16,9 +16,13 @@
 
 ## Outbox 发布
 
-发布器以 `FOR UPDATE SKIP LOCKED` 批量领取 `PENDING/FAILED` 且已到 `available_at/next_retry_at` 的记录，置 `PUBLISHING` 并记录租约；发布成功置 `PUBLISHED/published_at`。失败采用带抖动指数退避，建议 1m、5m、30m、2h、12h；达到上限置 `DEAD/dead_lettered_at`，只能由 `outbox:retry` 权限重放。
+发布器以 `FOR UPDATE SKIP LOCKED` 批量领取 `PENDING/FAILED` 且已到 `available_at/next_retry_at` 的记录，置 `PUBLISHING` 并记录租约；发布成功置 `PUBLISHED/published_at`。失败采用分级退避，建议 1m、5m、30m、2h、12h；达到上限置 `DEAD/dead_lettered_at`，只能由 `outbox:retry` 权限重放。
+
+当前实现使用 1m、5m、30m、2h、12h 五级确定性退避，第六次失败进入 `DEAD`；领取时会恢复超过租约时间的 `PUBLISHING` 记录。发布调度默认关闭，需设置 `AICRM_OUTBOX_ENABLED=true`，并可通过 `AICRM_OUTBOX_INTERVAL_MILLIS`、`AICRM_OUTBOX_BATCH_SIZE`、`AICRM_OUTBOX_LEASE_SECONDS` 调整。Broker Confirm 超时或否认均按失败处理。
 
 消息 ID 使用 Outbox `id`。消费者先插入 `crm_inbox_record`，以 `(tenant_id,consumer,message_id)` 去重；存在稳定业务键时同时使用部分唯一索引。消费者允许至少一次投递，不得假设顺序或仅依赖 RabbitMQ 去重。
+
+Inbox 处理器与 `COMPLETED` 更新处于同一个本地数据库事务；处理异常时事务回滚并在独立事务记录 `FAILED`，后续相同消息可重试。相同消息 ID 携带不同载荷哈希必须拒绝，超过五分钟的 `PROCESSING` 记录允许重新领取。
 
 ## 对账
 

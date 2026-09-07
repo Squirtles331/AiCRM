@@ -1,30 +1,4 @@
--- Complete legacy organization adoption before authorization constraints are tightened.
-DO $$
-BEGIN
-    IF to_regclass('public.department') IS NOT NULL THEN
-        EXECUTE $sql$
-            INSERT INTO crm_department (id, tenant_id, parent_id, name, path, status, created_at, updated_at)
-            SELECT d.id, d.tenant_id, d.parent_id, d.name,
-                   COALESCE(NULLIF(d.path, ''), '/' || d.id::text), d.status, d.created_at, d.updated_at
-            FROM department d
-            WHERE COALESCE(d.deleted, 0) = 0
-              AND EXISTS (SELECT 1 FROM crm_tenant t WHERE t.id = d.tenant_id)
-            ON CONFLICT (id) DO NOTHING
-        $sql$;
-    ELSIF to_regclass('public.departments') IS NOT NULL THEN
-        EXECUTE $sql$
-            INSERT INTO crm_department (id, tenant_id, parent_id, name, path, status, created_at, updated_at)
-            SELECT d.id, d.tenant_id, d.parent_id, d.name,
-                   COALESCE(NULLIF(d.path, ''), '/' || d.id::text), d.status, d.created_at, d.updated_at
-            FROM departments d
-            WHERE COALESCE(d.deleted, 0) = 0
-              AND EXISTS (SELECT 1 FROM crm_tenant t WHERE t.id = d.tenant_id)
-            ON CONFLICT (id) DO NOTHING
-        $sql$;
-    END IF;
-END $$;
-
--- Every user belongs to a department. Legacy users without one are placed in a deterministic root department.
+-- Every user belongs to a department. Users without one are placed in a deterministic root department.
 INSERT INTO crm_department (id, tenant_id, name, path, status, created_at, updated_at)
 SELECT -(t.id * 1000 + 1), t.id, '默认部门', '/default', 1, now(), now()
 FROM crm_tenant t
@@ -83,7 +57,7 @@ ALTER TABLE crm_role
     ADD CONSTRAINT ck_crm_role_data_scope
         CHECK (data_scope IN ('SELF', 'DEPARTMENT', 'DEPARTMENT_AND_SUB', 'ALL'));
 
--- V1 permissions were global. Expand each legacy permission into every existing tenant before changing the key.
+-- V1 permissions were global. Expand each permission into every existing tenant before changing the key.
 ALTER TABLE crm_role_permission DROP CONSTRAINT crm_role_permission_permission_code_fkey;
 ALTER TABLE crm_permission DROP CONSTRAINT crm_permission_pkey;
 ALTER TABLE crm_permission

@@ -14,6 +14,8 @@ spring:
       max-file-size: 50MB
       max-request-size: 100MB
   rabbitmq:
+    publisher-confirm-type: correlated
+    publisher-returns: true
     listener:
       simple:
         # 消费失败重试：3 次后进入死信队列
@@ -28,21 +30,6 @@ spring:
     locations: classpath:db/migration
     validate-migration-naming: true
 
-# MyBatis-Plus 全局配置
-mybatis-plus:
-  mapper-locations: classpath*:/mapper/**/*.xml
-  type-aliases-package: com.aicrm.module.**.entity
-  configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
-  global-config:
-    banner: false
-    db-config:
-      id-type: auto
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-
 # 业务自定义配置
 aicrm:
   id:
@@ -55,43 +42,17 @@ aicrm:
       cron: ${AICRM_SALES_RECYCLE_CRON:0 */10 * * * *}
       zone: ${AICRM_SALES_RECYCLE_ZONE:UTC}
       batch-size: ${AICRM_SALES_RECYCLE_BATCH_SIZE:100}
-  # 风控频控默认配置
-  risk:
-    # 同一联系人单渠道每日消息上限
-    daily-message-limit: 20
-    # 评论回复频控：每账号每小时条数
-    comment-per-hour-limit: 30
+  outbox:
+    enabled: ${AICRM_OUTBOX_ENABLED:false}
+    interval-millis: ${AICRM_OUTBOX_INTERVAL_MILLIS:5000}
+    batch-size: ${AICRM_OUTBOX_BATCH_SIZE:100}
+    lease-seconds: ${AICRM_OUTBOX_LEASE_SECONDS:300}
   # JWT 认证
   jwt:
     # 签名密钥（生产环境通过环境变量 AICRM_JWT_SECRET 注入，至少 32 字节）
     secret: ${AICRM_JWT_SECRET:aicrm-dev-secret-change-me-in-production-0123456789abcdef}
     # 令牌有效期（秒），默认 24h
     expire-seconds: 86400
-  # 文件存储：local 本地磁盘 / minio 对象存储
-  storage:
-    type: local
-    local:
-      # 本地存储根目录（相对项目运行目录）
-      path: ./data/upload
-    minio:
-      endpoint: http://localhost:9000
-      access-key: ${MINIO_ACCESS_KEY:minioadmin}
-      secret-key: ${MINIO_SECRET_KEY:minioadmin}
-      bucket: aicrm
-  # 抖音开放平台
-  douyin:
-    base-url: https://open.douyin.com
-    # 调用超时（毫秒）
-    timeout-ms: 10000
-  # 企业微信
-  wecom:
-    base-url: https://qyapi.weixin.qq.com
-    timeout-ms: 10000
-  # 视频号开放平台
-  video-channel:
-    base-url: https://api.weixin.qq.com
-    api-url: https://api.weixin.qq.com
-    timeout-ms: 10000
 
 springdoc:
   # 文档开关：默认开启（开发/测试），生产环境 application-prod.yml 强制关闭；可用环境变量 AICRM_DOC_ENABLED 覆盖
@@ -108,14 +69,6 @@ springdoc:
     filter: true                       # 顶部接口名称/路径过滤
     tags-sorter: alpha                 # 分组按字母排序
     operations-sorter: alpha           # 接口按字母排序
-
-# Knife4j 增强配置
-knife4j:
-  enable: true
-  setting:
-    # 开启全局 Mock：字段级随机数据（配合 @Schema example 使用），前端可先基于 Mock 渲染页面
-    mock: true
-    language: zh_cn
 
 logging:
   level:

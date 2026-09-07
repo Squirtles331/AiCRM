@@ -38,7 +38,7 @@ class SalesReadServiceTest {
     }
 
     private Actor actor(Set<DataScope> scopes) {
-        return new Actor(1L, 101L, 11L, "/11", Set.of("sales"), Set.of("lead:read:own"), scopes);
+        return new Actor(1L, 101L, 11L, "/11", Set.of("sales"), Set.of("lead:read:any"), scopes);
     }
 
     private Lead lead(long ownerUserId, long ownerDeptId) {

@@ -29,9 +29,7 @@ springdoc:
   swagger-ui:
     enabled: false
 
-# 生产环境强制关闭 Knife4j 增强 UI（/doc.html）
-knife4j:
-  enable: false
+# 生产环境强制关闭 OpenAPI 文档入口
   setting:
     mock: false
 

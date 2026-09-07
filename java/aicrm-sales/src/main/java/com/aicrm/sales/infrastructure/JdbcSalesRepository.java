@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,9 +42,9 @@ public class JdbcSalesRepository implements SalesRepository {
                         + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 lead.id(), lead.tenantId(), lead.leadNo(), lead.name(), lead.mobile(), lead.email(), lead.companyName(),
                 lead.sourceType(), lead.sourceRef(), lead.intent(), lead.status().name(), lead.ownershipType().name(),
-                lead.ownerUserId(), lead.ownerDeptId(), lead.publicPoolId(), lead.poolEnteredAt(), lead.version(),
-                actorId, actorId, lead.createdAt(), lead.updatedAt());
-        return lead;
+                lead.ownerUserId(), lead.ownerDeptId(), lead.publicPoolId(), timestamp(lead.poolEnteredAt()), lead.version(),
+                actorId, actorId, timestamp(lead.createdAt()), timestamp(lead.updatedAt()));
+        return findLead(lead.tenantId(), lead.id()).orElseThrow();
     }
 
     @Override
@@ -103,7 +104,7 @@ public class JdbcSalesRepository implements SalesRepository {
                         + "last_follow_up_at = now(), next_follow_up_at = ?, updated_by = ?, updated_at = now(), "
                         + "version = version + 1 where tenant_id = ? and id = ? and version = ? "
                         + "and status in ('NEW', 'FOLLOWING') and deleted_at is null",
-                nextFollowUpAt, actorId, tenantId, leadId, expectedVersion) == 1;
+                timestamp(nextFollowUpAt), actorId, tenantId, leadId, expectedVersion) == 1;
     }
 
     @Override
@@ -111,7 +112,7 @@ public class JdbcSalesRepository implements SalesRepository {
         return jdbcTemplate.query("select * from crm_lead where tenant_id = ? and ownership_type = 'PRIVATE' "
                         + "and status in ('NEW', 'FOLLOWING') and deleted_at is null "
                         + "and coalesce(last_follow_up_at, created_at) <= ? order by id limit ? for update skip locked",
-                leadMapper(), pool.tenantId(), inactiveSince, limit);
+                leadMapper(), pool.tenantId(), timestamp(inactiveSince), limit);
     }
 
     @Override
@@ -134,9 +135,9 @@ public class JdbcSalesRepository implements SalesRepository {
                         + "created_by, updated_by, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 customer.id(), customer.tenantId(), customer.customerNo(), customer.name(), customer.industry(), customer.region(),
                 customer.status(), customer.ownershipType().name(), customer.ownerUserId(), customer.ownerDeptId(),
-                customer.publicPoolId(), customer.poolEnteredAt(), customer.version(), actorId,
-                actorId, customer.createdAt(), customer.updatedAt());
-        return customer;
+                customer.publicPoolId(), timestamp(customer.poolEnteredAt()), customer.version(), actorId,
+                actorId, timestamp(customer.createdAt()), timestamp(customer.updatedAt()));
+        return findCustomer(customer.tenantId(), customer.id()).orElseThrow();
     }
 
     @Override
@@ -204,14 +205,14 @@ public class JdbcSalesRepository implements SalesRepository {
         return jdbcTemplate.update("update crm_customer set last_follow_up_at = now(), next_follow_up_at = ?, "
                         + "updated_by = ?, updated_at = now(), version = version + 1 where tenant_id = ? and id = ? "
                         + "and version = ? and status = 'ACTIVE' and deleted_at is null",
-                nextFollowUpAt, actorId, tenantId, customerId, expectedVersion) == 1;
+                timestamp(nextFollowUpAt), actorId, tenantId, customerId, expectedVersion) == 1;
     }
 
     @Override
     public List<Customer> lockRecyclableCustomers(PublicPool pool, Instant inactiveSince, int limit) {
         return jdbcTemplate.query("select * from crm_customer where tenant_id = ? and ownership_type = 'PRIVATE' "
                         + "and status = 'ACTIVE' and deleted_at is null and coalesce(last_follow_up_at, created_at) <= ? "
-                        + "order by id limit ? for update skip locked", customerMapper(), pool.tenantId(), inactiveSince, limit);
+                        + "order by id limit ? for update skip locked", customerMapper(), pool.tenantId(), timestamp(inactiveSince), limit);
     }
 
     @Override
@@ -246,7 +247,8 @@ public class JdbcSalesRepository implements SalesRepository {
     public void addFollowUp(long id, long tenantId, Long leadId, Long customerId, long actorId,
                             String channel, String content, Instant nextFollowUpAt) {
         jdbcTemplate.update("insert into crm_follow_up (id, tenant_id, lead_id, customer_id, actor_user_id, channel, content, next_follow_up_at) "
-                + "values (?, ?, ?, ?, ?, ?, ?, ?)", id, tenantId, leadId, customerId, actorId, channel, content, nextFollowUpAt);
+                + "values (?, ?, ?, ?, ?, ?, ?, ?)", id, tenantId, leadId, customerId, actorId, channel, content,
+                timestamp(nextFollowUpAt));
     }
 
     @Override
@@ -411,7 +413,11 @@ public class JdbcSalesRepository implements SalesRepository {
     }
 
     private Instant instant(ResultSet rs, String column) throws SQLException {
-        java.sql.Timestamp value = rs.getTimestamp(column);
+        Timestamp value = rs.getTimestamp(column);
         return value == null ? null : value.toInstant();
+    }
+
+    private Timestamp timestamp(Instant value) {
+        return value == null ? null : Timestamp.from(value);
     }
 }
