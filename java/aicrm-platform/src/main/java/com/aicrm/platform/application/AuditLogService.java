@@ -18,11 +18,11 @@ public class AuditLogService {
     }
 
     public void record(Actor actor, String action, String resourceType, long resourceId,
-                       String operationId, String beforeData, String afterData) {
+                       String operationId, String source, String batchNo, String beforeData, String afterData) {
         jdbcTemplate.update("insert into crm_audit_log (id, tenant_id, actor_user_id, action, resource_type, "
-                        + "resource_id, operation_id, before_data, after_data, trace_id, created_by, updated_by) "
-                        + "values (?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?)",
+                        + "resource_id, operation_id, source, batch_no, before_data, after_data, trace_id, created_by, updated_by) "
+                        + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?)",
                 idGenerator.nextId(), actor.tenantId(), actor.userId(), action, resourceType, resourceId,
-                operationId, beforeData, afterData, TraceContext.get(), actor.userId(), actor.userId());
+                operationId, source, batchNo, beforeData, afterData, TraceContext.get(), actor.userId(), actor.userId());
     }
 }

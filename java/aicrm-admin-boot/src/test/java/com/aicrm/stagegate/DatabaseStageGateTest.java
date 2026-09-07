@@ -33,7 +33,7 @@ class DatabaseStageGateTest {
     void emptyDatabaseMigratesThroughFrozenVersion() throws Exception {
         resetAndMigrate();
 
-        assertEquals("7", scalar("select max(version) from flyway_schema_history where success"));
+        assertEquals("8", scalar("select max(version) from flyway_schema_history where success"));
         assertEquals("19", scalar("select count(*) from information_schema.tables "
                 + "where table_schema = 'public' and table_name like 'crm_%'"));
         assertEquals("4", scalar("select count(*) from pg_constraint "
@@ -93,6 +93,8 @@ class DatabaseStageGateTest {
     }
 
     private void verifyPoolAndOwnershipConstraints() {
+        assertEquals("1", scalar("select count(*) from crm_user where tenant_id=1 and username='__system__' and status=1"));
+
         SQLException wrongPoolType = assertThrows(SQLException.class, () ->
                 insertLead(2010, 1, "L-WRONG-POOL", "PUBLIC", null, 1002L, "NEW", null));
         assertEquals("23514", wrongPoolType.getSQLState());
@@ -103,6 +105,10 @@ class DatabaseStageGateTest {
 
         assertThrows(SQLException.class, () -> execute("update crm_public_pool set recycle_after_days=10 "
                 + "where tenant_id=1 and id=1001"));
+        SQLException duplicateAutoRecycleTarget = assertThrows(SQLException.class, () -> execute("insert into crm_public_pool "
+                + "(id,tenant_id,resource_type,code,name,auto_recycle_enabled,recycle_after_days,created_by,updated_by) "
+                + "values (1003,1,'LEAD','SECOND','第二线索公海',true,30,101,101)"));
+        assertEquals("23505", duplicateAutoRecycleTarget.getSQLState());
     }
 
     private void verifyConcurrentClaimAndVersionConflict() throws Exception {

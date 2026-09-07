@@ -48,6 +48,13 @@ aicrm:
   id:
     worker-id: ${AICRM_ID_WORKER_ID:0}
     datacenter-id: ${AICRM_ID_DATACENTER_ID:0}
+  sales:
+    recycle:
+      # 迁移后默认关闭，完成公海规则配置和验收后通过环境变量显式开启。
+      enabled: ${AICRM_SALES_RECYCLE_ENABLED:false}
+      cron: ${AICRM_SALES_RECYCLE_CRON:0 */10 * * * *}
+      zone: ${AICRM_SALES_RECYCLE_ZONE:UTC}
+      batch-size: ${AICRM_SALES_RECYCLE_BATCH_SIZE:100}
   # 风控频控默认配置
   risk:
     # 同一联系人单渠道每日消息上限

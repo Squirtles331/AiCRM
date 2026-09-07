@@ -1,10 +1,10 @@
 # 第一里程碑开发前阶段门
 
-版本：`M1-DB-1.0`。评审状态分为 `READY`（已有可执行证据）、`PENDING-RUN`（门禁已实现但当前环境未执行）和 `BLOCKED`。只有全部为 `READY` 且产品、架构、开发、测试共同签字后，才允许开始/继续第一里程碑功能编码。
+版本：`M1-DB-1.1`。评审状态分为 `READY`（已有可执行证据）、`PENDING-RUN`（门禁已实现但当前环境未执行）和 `BLOCKED`。只有全部为 `READY` 且产品、架构、开发、测试共同签字后，才允许开始/继续第一里程碑功能编码。
 
 | 验收项 | 证据 | 当前状态 |
 |---|---|---|
-| 平台域、销售域表名和字段冻结 | 数据字典 + V1-V7 | READY |
+| 平台域、销售域表名和字段冻结 | 数据字典 + V1-V8 | READY |
 | 类型、默认值、可空性、索引、唯一规则冻结 | 数据字典 + Flyway | READY |
 | 公私海不变量、租户引用、终态保护 | V7 CHECK/复合 FK/触发器 | READY |
 | 空库 Flyway 初始化 | `DatabaseStageGateTest.emptyDatabaseMigratesThroughFrozenVersion` | READY |
@@ -22,7 +22,7 @@
 
 本地需运行 Docker，然后执行 `mvn -f java/pom.xml verify`。CI 使用 `.github/workflows/database-stage-gate.yml` 在 PostgreSQL 16 Testcontainers 上执行同一命令。Windows Docker Desktop 如遇 Testcontainers 命名管道兼容问题，应启用 WSL 集成并在 Linux 环境运行，或使用仅绑定回环地址的受控 Docker API 端点；不得关闭数据库测试或人工改库后标记通过。
 
-最近一次完整验收：2026-09-07，Java 全模块 `verify` 通过。Testcontainers 启动 PostgreSQL 16 容器，空库 V1-V7 初始化、V1 基线后的旧租户/用户升级、私海公海约束、租户隔离、并发认领、乐观锁、幂等、线索转换、客户合并、离职交接、审计、Outbox/Inbox、静态契约和 ArchUnit 全部通过。
+最近一次完整验收：2026-09-07，Java 全模块 `verify` 通过。Testcontainers 启动 PostgreSQL 16 容器，空库 V1-V7 初始化、V1 基线后的旧租户/用户升级、私海公海约束、租户隔离、并发认领、乐观锁、幂等、线索转换、客户合并、离职交接、审计、Outbox/Inbox、静态契约和 ArchUnit 全部通过。V8 自动回收目标与系统任务操作者迁移已实现，待随本轮集成测试重新验收。
 
 ## 评审签字
 

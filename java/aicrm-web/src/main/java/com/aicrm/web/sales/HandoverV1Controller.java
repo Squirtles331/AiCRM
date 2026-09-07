@@ -5,6 +5,7 @@ import com.aicrm.kernel.error.ErrorCode;
 import com.aicrm.kernel.security.ActorContext;
 import com.aicrm.kernel.security.TraceContext;
 import com.aicrm.sales.application.SalesCommandService;
+import com.aicrm.sales.application.BatchHandoverResult;
 import com.aicrm.sales.application.SalesCommands;
 import com.aicrm.web.api.ApiResponse;
 import jakarta.validation.Valid;
@@ -35,5 +36,14 @@ public class HandoverV1Controller {
                     idempotencyKey)), TraceContext.get());
             default -> throw new DomainException(ErrorCode.VALIDATION_ERROR, "resourceType 仅支持 LEAD 或 CUSTOMER");
         };
+    }
+
+    @PostMapping("/batch")
+    public ApiResponse<BatchHandoverResult> batchHandover(@Valid @RequestBody SalesApiDtos.BatchHandoverRequest request,
+                                                            @RequestHeader("Idempotency-Key") String idempotencyKey) {
+        BatchHandoverResult result = commandService.handoverAll(ActorContext.require(),
+                new SalesCommands.BatchHandover(request.batchNo(), request.fromUserId(), request.toUserId(),
+                        request.pageSize(), request.reason()), idempotencyKey);
+        return ApiResponse.success(result, TraceContext.get());
     }
 }

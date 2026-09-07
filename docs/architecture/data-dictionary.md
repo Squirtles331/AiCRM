@@ -1,6 +1,6 @@
 # 第一里程碑数据字典（冻结版）
 
-版本：`M1-DB-1.0`；状态：待团队评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V7` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
+版本：`M1-DB-1.1`；状态：待团队评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V8` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
 
 ## 1. 类型与通用字段组
 
@@ -29,7 +29,7 @@
 
 | 表 | 字段（类型；N=NOT NULL；默认值） | 键、检查与主要索引 |
 |---|---|---|
-| `crm_public_pool` | `id BIGINT N`；`tenant_id BIGINT N`；`resource_type VARCHAR(20) N`；`code VARCHAR(64) N`；`name VARCHAR(100) N`；`status SMALLINT N DEFAULT 1`；`auto_recycle_enabled BOOLEAN N DEFAULT false`；`recycle_after_days INT NULL`；`claim_enabled/assign_enabled/release_enabled BOOLEAN N DEFAULT true`；`rule_version INT N DEFAULT 1`；`effective_from TIMESTAMPTZ N DEFAULT now()`；`AUDIT_MUTABLE` | `resource_type IN (LEAD,CUSTOMER)`；启用记录 `(tenant_id,resource_type,code)` 唯一；版本唯一；停用时三个手工动作均关闭；规则字段不可原地修改，只能停用旧版并新增高版本 |
+| `crm_public_pool` | `id BIGINT N`；`tenant_id BIGINT N`；`resource_type VARCHAR(20) N`；`code VARCHAR(64) N`；`name VARCHAR(100) N`；`status SMALLINT N DEFAULT 1`；`auto_recycle_enabled BOOLEAN N DEFAULT false`；`recycle_after_days INT NULL`；`claim_enabled/assign_enabled/release_enabled BOOLEAN N DEFAULT true`；`rule_version INT N DEFAULT 1`；`effective_from TIMESTAMPTZ N DEFAULT now()`；`AUDIT_MUTABLE` | `resource_type IN (LEAD,CUSTOMER)`；启用记录 `(tenant_id,resource_type,code)` 唯一；版本唯一；每租户、每资源类型最多一个启用的自动回收目标池；停用时三个手工动作均关闭；规则字段不可原地修改，只能停用旧版并新增高版本 |
 | `crm_lead` | `id BIGINT N`；`tenant_id BIGINT N`；`lead_no VARCHAR(32) N`；`name VARCHAR(100) NULL`；`mobile VARCHAR(32) NULL`；`email VARCHAR(200) NULL`；`company_name VARCHAR(200) NULL`；`source_type VARCHAR(64) N`；`source_ref VARCHAR(200) NULL`；`intent VARCHAR(64) NULL`；`status VARCHAR(32) N DEFAULT 'NEW'`；`invalid_reason VARCHAR(500) NULL`；`customer_id BIGINT NULL`；`ownership_type VARCHAR(16) N`；`owner_user_id/owner_dept_id/public_pool_id BIGINT NULL`；`pool_entered_at/last_follow_up_at/next_follow_up_at TIMESTAMPTZ NULL`；`version BIGINT N DEFAULT 0`；`extension JSONB N DEFAULT '{}'`；`AUDIT_MUTABLE` | 活跃 `(tenant_id,lead_no)` 唯一；状态和终态数据检查；公私海互斥；租户+归属+负责人/部门/公海+跟进时间组合索引；复合 FK 保证引用同租户 |
 | `crm_customer` | `id BIGINT N`；`tenant_id BIGINT N`；`customer_no VARCHAR(32) N`；`name VARCHAR(200) N`；`industry/region VARCHAR(100) NULL`；`status VARCHAR(32) N DEFAULT 'ACTIVE'`；归属和时间字段同线索；`version BIGINT N DEFAULT 0`；`extension JSONB N DEFAULT '{}'`；`merged_into_customer_id BIGINT NULL`；`merged_at TIMESTAMPTZ NULL`；`AUDIT_MUTABLE` | 活跃编号和 `lower(name)` 租户内唯一，即首期不允许同名活跃客户；公私海互斥；合并源必须同时设置目标、合并时间和软删除；目标必须同租户且有效 |
 | `crm_contact` | `id BIGINT N`；`tenant_id BIGINT N`；`customer_id BIGINT N`；`source_customer_id BIGINT NULL`；`name VARCHAR(100) N`；`mobile VARCHAR(32) NULL`；`email VARCHAR(200) NULL`；`department/title VARCHAR(100) NULL`；`is_decision_maker BOOLEAN N DEFAULT false`；`extension JSONB N DEFAULT '{}'`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 客户和原客户复合 FK；活跃客户联系人索引。`source_customer_id` 保留合并来源 |
@@ -49,6 +49,8 @@
 | `crm_inbox_record` | `tenant_id BIGINT N`；`consumer VARCHAR(100) N`；`message_id VARCHAR(128) N`；`business_key VARCHAR(200) NULL`；`status VARCHAR(16) N DEFAULT 'PROCESSING'`；`payload_hash VARCHAR(64) NULL`；`attempt_count INT N DEFAULT 1`；`first_received_at/updated_at TIMESTAMPTZ N DEFAULT now()`；`completed_at/failed_at/deleted_at TIMESTAMPTZ NULL`；`last_error VARCHAR(1000) NULL`；`created_by/updated_by/deleted_by BIGINT NULL` | PK `(tenant_id,consumer,message_id)`；业务键部分唯一；状态 `PROCESSING/COMPLETED/FAILED` |
 
 销售聚合的创建、状态或归属变化在提交前必须同时存在 `crm_ownership_history` 和 `crm_audit_log`；业务应用还必须在同一事务写对应 Outbox。数据库以延迟约束触发器强制前两项，事务测试强制三项完整。
+
+每个租户自动拥有用户名为 `__system__` 的启用系统任务用户。它只作为定时回收等非人工操作的审计操作者，不参与普通登录、数据授权或业务负责人分配。
 
 ## 5. 后续对象登记
 

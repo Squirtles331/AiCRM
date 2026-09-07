@@ -15,12 +15,15 @@ import com.aicrm.sales.domain.customer.Contact;
 import com.aicrm.sales.domain.customer.Customer;
 import com.aicrm.sales.domain.lead.Lead;
 import com.aicrm.sales.domain.lead.LeadStatus;
+import com.aicrm.sales.domain.pool.PublicPool;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.Duration;
+import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -50,6 +53,9 @@ public class SalesCommandService {
         require(actor, "lead:create");
         return idempotencyService.execute(actor, "lead:create", idempotencyKey, Lead.class, () -> {
             OwnershipType ownership = command.publicPoolId() == null ? OwnershipType.PRIVATE : OwnershipType.PUBLIC;
+            if (ownership == OwnershipType.PUBLIC) {
+                requireActivePool(actor, command.publicPoolId(), PublicPool.ResourceType.LEAD);
+            }
             Instant now = Instant.now();
             Lead lead = new Lead(idGenerator.nextId(), actor.tenantId(), "LEAD-" + idGenerator.nextId(),
                     required(command.name(), "姓名"), trim(command.mobile()), trim(command.email()), trim(command.companyName()),
@@ -68,6 +74,9 @@ public class SalesCommandService {
         require(actor, "customer:create");
         return idempotencyService.execute(actor, "customer:create", idempotencyKey, Customer.class, () -> {
             OwnershipType ownership = command.publicPoolId() == null ? OwnershipType.PRIVATE : OwnershipType.PUBLIC;
+            if (ownership == OwnershipType.PUBLIC) {
+                requireActivePool(actor, command.publicPoolId(), PublicPool.ResourceType.CUSTOMER);
+            }
             Instant now = Instant.now();
             Customer customer = new Customer(idGenerator.nextId(), actor.tenantId(), "CUS-" + idGenerator.nextId(),
                     required(command.name(), "客户名称"), trim(command.industry()), trim(command.region()), "ACTIVE", ownership,
@@ -85,6 +94,8 @@ public class SalesCommandService {
         require(actor, "lead:claim");
         Lead before = lead(actor, leadId);
         requirePublic(before, "线索不可认领");
+        requirePoolAction(actor, command.publicPoolId(), PublicPool.ResourceType.LEAD, PoolAction.CLAIM);
+        requireCurrentPool(before.publicPoolId(), command.publicPoolId());
         if (command.publicPoolId() == null || !repository.claimLead(actor.tenantId(), leadId, command.publicPoolId(),
                 actor.userId(), command.version())) {
             throw conflict("线索已被认领或版本已变化");
@@ -99,6 +110,8 @@ public class SalesCommandService {
         require(actor, "customer:claim");
         Customer before = customer(actor, customerId);
         requirePublic(before, "客户不可认领");
+        requirePoolAction(actor, command.publicPoolId(), PublicPool.ResourceType.CUSTOMER, PoolAction.CLAIM);
+        requireCurrentPool(before.publicPoolId(), command.publicPoolId());
         if (command.publicPoolId() == null || !repository.claimCustomer(actor.tenantId(), customerId, command.publicPoolId(),
                 actor.userId(), command.version())) {
             throw conflict("客户已被认领或版本已变化");
@@ -113,6 +126,7 @@ public class SalesCommandService {
         Lead before = lead(actor, leadId);
         requireLeadWrite(actor, before);
         requireMutable(before);
+        requirePoolAction(actor, command.publicPoolId(), PublicPool.ResourceType.LEAD, PoolAction.RELEASE);
         if (command.publicPoolId() == null || !repository.moveLead(actor.tenantId(), leadId, command.version(), before.ownerUserId(),
                 actor.userId(), OwnershipType.PUBLIC, null, command.publicPoolId(), null, null)) {
             throw conflict("线索释放失败，记录已变化");
@@ -126,6 +140,7 @@ public class SalesCommandService {
     public Customer releaseCustomer(Actor actor, long customerId, SalesCommands.OwnershipChange command) {
         Customer before = customer(actor, customerId);
         requireCustomerWrite(actor, before);
+        requirePoolAction(actor, command.publicPoolId(), PublicPool.ResourceType.CUSTOMER, PoolAction.RELEASE);
         if (command.publicPoolId() == null || !repository.moveCustomer(actor.tenantId(), customerId, command.version(), before.ownerUserId(),
                 actor.userId(), OwnershipType.PUBLIC, null, command.publicPoolId())) {
             throw conflict("客户释放失败，记录已变化");
@@ -141,6 +156,7 @@ public class SalesCommandService {
         Lead before = lead(actor, leadId);
         if (assignedFromPublic) {
             requirePublic(before, "仅公海线索可分配");
+            requirePoolAction(actor, before.publicPoolId(), PublicPool.ResourceType.LEAD, PoolAction.ASSIGN);
         } else {
             requireLeadWrite(actor, before);
             requireMutable(before);
@@ -162,6 +178,7 @@ public class SalesCommandService {
         Customer before = customer(actor, customerId);
         if (assignedFromPublic) {
             requirePublic(before, "仅公海客户可分配");
+            requirePoolAction(actor, before.publicPoolId(), PublicPool.ResourceType.CUSTOMER, PoolAction.ASSIGN);
         } else {
             requireCustomerWrite(actor, before);
         }
@@ -283,7 +300,8 @@ public class SalesCommandService {
             String operationId = journal(actor, "HANDOVER", "LEAD", before.id(), before, after, null, null,
                     command.reason(), "ResourcesHandedOver");
             repository.addHandover(idGenerator.nextId(), actor.tenantId(), command.fromUserId(), command.toUserId(),
-                    "LEAD", before.id(), operationId, trim(command.reason()), json(before), json(after), TraceContext.get(), actor.userId());
+                    "LEAD", before.id(), operationId, trim(command.reason()), json(before), json(after), null,
+                    TraceContext.get(), actor.userId());
             return after;
         });
     }
@@ -308,9 +326,127 @@ public class SalesCommandService {
             String operationId = journal(actor, "HANDOVER", "CUSTOMER", before.id(), before, after, null, null,
                     command.reason(), "ResourcesHandedOver");
             repository.addHandover(idGenerator.nextId(), actor.tenantId(), command.fromUserId(), command.toUserId(),
-                    "CUSTOMER", before.id(), operationId, trim(command.reason()), json(before), json(after), TraceContext.get(), actor.userId());
+                    "CUSTOMER", before.id(), operationId, trim(command.reason()), json(before), json(after), null,
+                    TraceContext.get(), actor.userId());
             return after;
         });
+    }
+
+    /** Processes one bounded page for a configured automatic-recycle destination pool. */
+    @Transactional
+    public long recycleExpiredPrivateResources(PublicPool pool, int pageSize) {
+        if (!pool.active() || !pool.autoRecycleEnabled() || pool.recycleAfterDays() == null) {
+            return 0;
+        }
+        if (pageSize < 1 || pageSize > 500) {
+            throw new DomainException(ErrorCode.VALIDATION_ERROR, "回收批次大小必须在 1 到 500 之间");
+        }
+        Actor actor = repository.findAutomationActor(pool.tenantId())
+                .orElseThrow(() -> new DomainException(ErrorCode.INTERNAL_ERROR, "租户缺少系统任务操作者"));
+        Instant inactiveSince = Instant.now().minus(Duration.ofDays(pool.recycleAfterDays()));
+        if (pool.resourceType() == PublicPool.ResourceType.LEAD) {
+            long recycled = 0;
+            for (Lead before : repository.lockRecyclableLeads(pool, inactiveSince, pageSize)) {
+                if (repository.moveLead(pool.tenantId(), before.id(), before.version(), before.ownerUserId(), actor.userId(),
+                        OwnershipType.PUBLIC, null, pool.id(), null, null)) {
+                    Lead after = lead(actor, before.id());
+                    journal(actor, "RECYCLE", "LEAD", before.id(), before, after, null, pool.id(),
+                            "超过 " + pool.recycleAfterDays() + " 天未跟进", "LeadRecycled", "SCHEDULER", null);
+                    recycled++;
+                }
+            }
+            return recycled;
+        }
+
+        long recycled = 0;
+        for (Customer before : repository.lockRecyclableCustomers(pool, inactiveSince, pageSize)) {
+            if (repository.moveCustomer(pool.tenantId(), before.id(), before.version(), before.ownerUserId(), actor.userId(),
+                    OwnershipType.PUBLIC, null, pool.id())) {
+                Customer after = customer(actor, before.id());
+                journal(actor, "RECYCLE", "CUSTOMER", before.id(), before, after, null, pool.id(),
+                        "超过 " + pool.recycleAfterDays() + " 天未跟进", "CustomerRecycled", "SCHEDULER", null);
+                recycled++;
+            }
+        }
+        return recycled;
+    }
+
+    /** Transfers all transferable private leads and customers from a departing user in one idempotent command. */
+    @Transactional
+    public BatchHandoverResult handoverAll(Actor actor, SalesCommands.BatchHandover command, String idempotencyKey) {
+        require(actor, "lead:handover");
+        require(actor, "customer:handover");
+        String batchNo = required(command.batchNo(), "批次号");
+        if (command.fromUserId() == command.toUserId()) {
+            throw new DomainException(ErrorCode.VALIDATION_ERROR, "交接双方不能相同");
+        }
+        if (!repository.existsTenantUser(actor.tenantId(), command.fromUserId())) {
+            throw new DomainException(ErrorCode.NOT_FOUND, "交接来源用户不存在或不属于当前租户");
+        }
+        if (!repository.isActiveUser(actor.tenantId(), command.toUserId())) {
+            throw new DomainException(ErrorCode.VALIDATION_ERROR, "交接目标用户不存在、未启用或不属于当前租户");
+        }
+        int pageSize = command.pageSize() == 0 ? 200 : command.pageSize();
+        if (pageSize < 1 || pageSize > 500) {
+            throw new DomainException(ErrorCode.VALIDATION_ERROR, "交接分页大小必须在 1 到 500 之间");
+        }
+        return idempotencyService.execute(actor, "handover:batch:" + batchNo, idempotencyKey, BatchHandoverResult.class,
+                () -> executeBatchHandover(actor, command, batchNo, pageSize));
+    }
+
+    private BatchHandoverResult executeBatchHandover(Actor actor, SalesCommands.BatchHandover command,
+                                                     String batchNo, int pageSize) {
+        boolean sourceDeactivated = repository.deactivateUser(actor.tenantId(), command.fromUserId(), actor.userId());
+        if (sourceDeactivated) {
+            String operationId = "op-" + idGenerator.nextId();
+            auditLogService.record(actor, "USER_EXIT_HANDOVER", "USER", command.fromUserId(), operationId,
+                    "API", batchNo, "{\"status\":\"ACTIVE\"}", "{\"status\":\"INACTIVE\"}");
+        }
+        long leadCount = 0;
+        List<Lead> leads;
+        while (!(leads = repository.lockPrivateLeadsForHandover(actor.tenantId(), command.fromUserId(), pageSize)).isEmpty()) {
+            for (Lead before : leads) {
+                if (before.ownerDeptId() == null || !repository.isDepartmentInActorScope(actor, before.ownerDeptId())) {
+                    throw new DomainException(ErrorCode.FORBIDDEN, "无权交接部分线索");
+                }
+                if (!repository.moveLead(actor.tenantId(), before.id(), before.version(), command.fromUserId(), actor.userId(),
+                        OwnershipType.PRIVATE, command.toUserId(), null, null, null)) {
+                    throw conflict("线索交接发生版本冲突");
+                }
+                Lead after = lead(actor, before.id());
+                String operationId = journal(actor, "HANDOVER", "LEAD", before.id(), before, after, null, null,
+                        command.reason(), "ResourcesHandedOver", "API", batchNo);
+                repository.addHandover(idGenerator.nextId(), actor.tenantId(), command.fromUserId(), command.toUserId(),
+                        "LEAD", before.id(), operationId, trim(command.reason()), json(before), json(after), batchNo,
+                        TraceContext.get(), actor.userId());
+                leadCount++;
+            }
+        }
+
+        long customerCount = 0;
+        List<Customer> customers;
+        while (!(customers = repository.lockPrivateCustomersForHandover(actor.tenantId(), command.fromUserId(), pageSize)).isEmpty()) {
+            for (Customer before : customers) {
+                if (before.ownerDeptId() == null || !repository.isDepartmentInActorScope(actor, before.ownerDeptId())) {
+                    throw new DomainException(ErrorCode.FORBIDDEN, "无权交接部分客户");
+                }
+                if (!repository.moveCustomer(actor.tenantId(), before.id(), before.version(), command.fromUserId(), actor.userId(),
+                        OwnershipType.PRIVATE, command.toUserId(), null)) {
+                    throw conflict("客户交接发生版本冲突");
+                }
+                Customer after = customer(actor, before.id());
+                String operationId = journal(actor, "HANDOVER", "CUSTOMER", before.id(), before, after, null, null,
+                        command.reason(), "ResourcesHandedOver", "API", batchNo);
+                repository.addHandover(idGenerator.nextId(), actor.tenantId(), command.fromUserId(), command.toUserId(),
+                        "CUSTOMER", before.id(), operationId, trim(command.reason()), json(before), json(after), batchNo,
+                        TraceContext.get(), actor.userId());
+                customerCount++;
+            }
+        }
+
+        return new BatchHandoverResult(batchNo, leadCount, customerCount,
+                repository.countPrivateLeads(actor.tenantId(), command.fromUserId())
+                        + repository.countPrivateCustomers(actor.tenantId(), command.fromUserId()));
     }
 
     private Customer createCustomerFromLead(Actor actor, Lead lead, SalesCommands.ConvertLead command) {
@@ -370,6 +506,36 @@ public class SalesCommandService {
         }
     }
 
+    private PublicPool requireActivePool(Actor actor, Long poolId, PublicPool.ResourceType resourceType) {
+        if (poolId == null) {
+            throw new DomainException(ErrorCode.VALIDATION_ERROR, "公海池不能为空");
+        }
+        PublicPool pool = repository.findPublicPool(actor.tenantId(), poolId)
+                .orElseThrow(() -> new DomainException(ErrorCode.NOT_FOUND, "公海池不存在"));
+        if (!pool.active() || pool.resourceType() != resourceType) {
+            throw new DomainException(ErrorCode.CONFLICT, "公海池已停用或资源类型不匹配");
+        }
+        return pool;
+    }
+
+    private void requirePoolAction(Actor actor, Long poolId, PublicPool.ResourceType resourceType, PoolAction action) {
+        PublicPool pool = requireActivePool(actor, poolId, resourceType);
+        boolean allowed = switch (action) {
+            case CLAIM -> pool.claimEnabled();
+            case ASSIGN -> pool.assignEnabled();
+            case RELEASE -> pool.releaseEnabled();
+        };
+        if (!allowed) {
+            throw new DomainException(ErrorCode.CONFLICT, "公海池未开启" + action.label + "操作");
+        }
+    }
+
+    private void requireCurrentPool(Long currentPoolId, Long requestedPoolId) {
+        if (requestedPoolId == null || !requestedPoolId.equals(currentPoolId)) {
+            throw conflict("公海池已变化，请刷新后重试");
+        }
+    }
+
     private void require(Actor actor, String permission) {
         if (!actor.hasPermission(permission)) {
             throw new DomainException(ErrorCode.FORBIDDEN, "缺少权限：" + permission);
@@ -394,18 +560,34 @@ public class SalesCommandService {
 
     private String journal(Actor actor, String action, String resourceType, long resourceId, Object before, Object after,
                            Long fromPoolId, Long toPoolId, String reason, String eventType) {
+        return journal(actor, action, resourceType, resourceId, before, after, fromPoolId, toPoolId, reason, eventType,
+                "API", null);
+    }
+
+    private String journal(Actor actor, String action, String resourceType, long resourceId, Object before, Object after,
+                           Long fromPoolId, Long toPoolId, String reason, String eventType, String source, String batchNo) {
         String operationId = "op-" + idGenerator.nextId();
         String beforeJson = json(before);
         String afterJson = json(after);
         Long fromOwnerId = ownerId(before);
         Long toOwnerId = ownerId(after);
         repository.appendOwnershipHistory(idGenerator.nextId(), actor.tenantId(), resourceType, resourceId, action,
-                fromOwnerId, toOwnerId, fromPoolId, toPoolId, operationId, "API", trim(reason),
-                beforeJson, afterJson, TraceContext.get(), actor.userId());
-        auditLogService.record(actor, action, resourceType, resourceId, operationId, beforeJson, afterJson);
+                fromOwnerId, toOwnerId, fromPoolId, toPoolId, operationId, source, trim(reason),
+                beforeJson, afterJson, batchNo, TraceContext.get(), actor.userId());
+        auditLogService.record(actor, action, resourceType, resourceId, operationId, source, batchNo, beforeJson, afterJson);
         outboxService.append(new DomainEvent(eventType, resourceType, resourceId, actor.tenantId(),
                 json(Map.of("resourceId", String.valueOf(resourceId), "action", action)), Instant.now()), operationId, actor.userId());
         return operationId;
+    }
+
+    private enum PoolAction {
+        CLAIM("认领"), ASSIGN("分配"), RELEASE("释放");
+
+        private final String label;
+
+        PoolAction(String label) {
+            this.label = label;
+        }
     }
 
     private Long ownerId(Object value) {

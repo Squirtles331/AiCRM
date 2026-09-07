@@ -2,6 +2,8 @@ package com.aicrm.web.sales;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import java.time.Instant;
 import java.util.List;
@@ -38,6 +40,10 @@ final class SalesApiDtos {
 
     record HandoverRequest(@NotBlank String resourceType, @NotNull Long resourceId, @NotNull Long version,
                            @NotNull Long fromUserId, @NotNull Long toUserId, String reason) {
+    }
+
+    record BatchHandoverRequest(@NotBlank String batchNo, @NotNull Long fromUserId, @NotNull Long toUserId,
+                                @Min(0) @Max(500) int pageSize, String reason) {
     }
 
     record PageView<T>(List<T> items, long page, long size, long total) {

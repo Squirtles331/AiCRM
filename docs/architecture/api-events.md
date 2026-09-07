@@ -25,6 +25,7 @@
 | `GET/POST /api/v1/customers/{id}/contacts` | 联系人列表与新增 | 客户读/写权限 |
 | `POST /api/v1/customers/{id}/follow-ups` | 记录跟进 | `customer:write:own/any` |
 | `POST /api/v1/handovers` | 指定资源离职交接 | `lead:handover/customer:handover` |
+| `POST /api/v1/handovers/batch` | 批量离职交接，含 `batchNo/fromUserId/toUserId/pageSize` | 同时具备 `lead:handover` 与 `customer:handover` |
 
 命令成功返回更新后的资源摘要及新 `version`；创建返回 201，幂等重放返回原 HTTP 状态和原响应。认领/版本竞争返回 409；池停用返回 422；跨租户 ID 与不存在统一返回 404。批量接口必须返回逐项结果，且 `batchNo` 可用于审计检索。
 

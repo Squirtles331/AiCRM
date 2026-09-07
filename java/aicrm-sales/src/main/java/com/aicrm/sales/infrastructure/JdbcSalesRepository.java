@@ -11,6 +11,7 @@ import com.aicrm.sales.domain.customer.Contact;
 import com.aicrm.sales.domain.customer.Customer;
 import com.aicrm.sales.domain.lead.Lead;
 import com.aicrm.sales.domain.lead.LeadStatus;
+import com.aicrm.sales.domain.pool.PublicPool;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -21,6 +22,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /** PostgreSQL adapter for the sales repository port. */
 @Repository
@@ -105,6 +107,27 @@ public class JdbcSalesRepository implements SalesRepository {
     }
 
     @Override
+    public List<Lead> lockRecyclableLeads(PublicPool pool, Instant inactiveSince, int limit) {
+        return jdbcTemplate.query("select * from crm_lead where tenant_id = ? and ownership_type = 'PRIVATE' "
+                        + "and status in ('NEW', 'FOLLOWING') and deleted_at is null "
+                        + "and coalesce(last_follow_up_at, created_at) <= ? order by id limit ? for update skip locked",
+                leadMapper(), pool.tenantId(), inactiveSince, limit);
+    }
+
+    @Override
+    public List<Lead> lockPrivateLeadsForHandover(long tenantId, long ownerUserId, int limit) {
+        return jdbcTemplate.query("select * from crm_lead where tenant_id = ? and ownership_type = 'PRIVATE' "
+                        + "and owner_user_id = ? and status in ('NEW', 'FOLLOWING') and deleted_at is null "
+                        + "order by id limit ? for update skip locked", leadMapper(), tenantId, ownerUserId, limit);
+    }
+
+    @Override
+    public long countPrivateLeads(long tenantId, long ownerUserId) {
+        return count("select count(1) from crm_lead where tenant_id = ? and ownership_type = 'PRIVATE' "
+                + "and owner_user_id = ? and status in ('NEW', 'FOLLOWING') and deleted_at is null", List.of(tenantId, ownerUserId));
+    }
+
+    @Override
     public Customer insertCustomer(Customer customer, long actorId) {
         jdbcTemplate.update("insert into crm_customer (id, tenant_id, customer_no, name, industry, region, status, "
                         + "ownership_type, owner_user_id, owner_dept_id, public_pool_id, pool_entered_at, version, "
@@ -185,6 +208,26 @@ public class JdbcSalesRepository implements SalesRepository {
     }
 
     @Override
+    public List<Customer> lockRecyclableCustomers(PublicPool pool, Instant inactiveSince, int limit) {
+        return jdbcTemplate.query("select * from crm_customer where tenant_id = ? and ownership_type = 'PRIVATE' "
+                        + "and status = 'ACTIVE' and deleted_at is null and coalesce(last_follow_up_at, created_at) <= ? "
+                        + "order by id limit ? for update skip locked", customerMapper(), pool.tenantId(), inactiveSince, limit);
+    }
+
+    @Override
+    public List<Customer> lockPrivateCustomersForHandover(long tenantId, long ownerUserId, int limit) {
+        return jdbcTemplate.query("select * from crm_customer where tenant_id = ? and ownership_type = 'PRIVATE' "
+                        + "and owner_user_id = ? and status = 'ACTIVE' and deleted_at is null order by id limit ? for update skip locked",
+                customerMapper(), tenantId, ownerUserId, limit);
+    }
+
+    @Override
+    public long countPrivateCustomers(long tenantId, long ownerUserId) {
+        return count("select count(1) from crm_customer where tenant_id = ? and ownership_type = 'PRIVATE' "
+                + "and owner_user_id = ? and deleted_at is null", List.of(tenantId, ownerUserId));
+    }
+
+    @Override
     public Contact insertContact(Contact contact, long actorId) {
         jdbcTemplate.update("insert into crm_contact (id, tenant_id, customer_id, name, mobile, email, department, title, "
                         + "is_decision_maker, version, created_by, updated_by) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -210,23 +253,23 @@ public class JdbcSalesRepository implements SalesRepository {
     public void appendOwnershipHistory(long id, long tenantId, String resourceType, long resourceId, String action,
                                        Long fromOwnerId, Long toOwnerId, Long fromPoolId, Long toPoolId,
                                        String operationId, String source, String reason, String beforeSnapshot,
-                                       String afterSnapshot, String traceId, long actorId) {
+                                       String afterSnapshot, String batchNo, String traceId, long actorId) {
         jdbcTemplate.update("insert into crm_ownership_history (id, tenant_id, resource_type, resource_id, action, "
                         + "from_owner_user_id, to_owner_user_id, from_pool_id, to_pool_id, operation_id, source, reason, "
-                        + "before_snapshot, after_snapshot, trace_id, operator_user_id) "
-                        + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?)",
+                        + "before_snapshot, after_snapshot, batch_no, trace_id, operator_user_id) "
+                        + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?)",
                 id, tenantId, resourceType, resourceId, action, fromOwnerId, toOwnerId, fromPoolId, toPoolId,
-                operationId, source, reason, beforeSnapshot, afterSnapshot, traceId, actorId);
+                operationId, source, reason, beforeSnapshot, afterSnapshot, batchNo, traceId, actorId);
     }
 
     @Override
     public void addHandover(long id, long tenantId, long fromUserId, long toUserId, String resourceType,
                             long resourceId, String operationId, String reason, String beforeSnapshot,
-                            String afterSnapshot, String traceId, long actorId) {
+                            String afterSnapshot, String batchNo, String traceId, long actorId) {
         jdbcTemplate.update("insert into crm_resource_handover (id, tenant_id, from_user_id, to_user_id, resource_type, "
-                + "resource_id, operation_id, reason, before_snapshot, after_snapshot, trace_id, created_by, updated_by) "
-                + "values (?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?)", id, tenantId, fromUserId, toUserId,
-                resourceType, resourceId, operationId, reason, beforeSnapshot, afterSnapshot, traceId, actorId, actorId);
+                + "resource_id, operation_id, reason, before_snapshot, after_snapshot, batch_no, trace_id, created_by, updated_by) "
+                + "values (?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?, ?)", id, tenantId, fromUserId, toUserId,
+                resourceType, resourceId, operationId, reason, beforeSnapshot, afterSnapshot, batchNo, traceId, actorId, actorId);
     }
 
     @Override
@@ -245,6 +288,52 @@ public class JdbcSalesRepository implements SalesRepository {
                 rs -> rs.next() ? rs.getBoolean(1) : false,
                 actor.tenantId(), departmentId, actor.departmentPath() + "%");
         return Boolean.TRUE.equals(visible);
+    }
+
+    @Override
+    public Optional<PublicPool> findPublicPool(long tenantId, long poolId) {
+        List<PublicPool> pools = jdbcTemplate.query("select * from crm_public_pool where tenant_id = ? and id = ? and deleted_at is null",
+                publicPoolMapper(), tenantId, poolId);
+        return pools.stream().findFirst();
+    }
+
+    @Override
+    public List<PublicPool> findActiveAutoRecyclePools() {
+        return jdbcTemplate.query("select * from crm_public_pool where status = 1 and auto_recycle_enabled = true "
+                        + "and deleted_at is null order by tenant_id, resource_type, id", publicPoolMapper());
+    }
+
+    @Override
+    public Optional<Actor> findAutomationActor(long tenantId) {
+        List<Actor> actors = jdbcTemplate.query("select u.id as user_id, u.tenant_id, d.id as department_id, d.path "
+                        + "from crm_user u join crm_department d on d.id = u.department_id and d.tenant_id = u.tenant_id "
+                        + "where u.tenant_id = ? and u.username = '__system__' and u.status = 1 and u.deleted_at is null "
+                        + "and d.status = 1 and d.deleted_at is null",
+                (rs, rowNum) -> new Actor(rs.getLong("tenant_id"), rs.getLong("user_id"), rs.getLong("department_id"),
+                        rs.getString("path"), Set.of("system"), Set.of(), Set.of(DataScope.ALL)), tenantId);
+        return actors.stream().findFirst();
+    }
+
+    @Override
+    public boolean isActiveUser(long tenantId, long userId) {
+        Boolean active = jdbcTemplate.query("select exists (select 1 from crm_user where tenant_id = ? and id = ? "
+                        + "and status = 1 and deleted_at is null)",
+                rs -> rs.next() ? rs.getBoolean(1) : false, tenantId, userId);
+        return Boolean.TRUE.equals(active);
+    }
+
+    @Override
+    public boolean existsTenantUser(long tenantId, long userId) {
+        Boolean exists = jdbcTemplate.query("select exists (select 1 from crm_user where tenant_id = ? and id = ? and deleted_at is null)",
+                rs -> rs.next() ? rs.getBoolean(1) : false, tenantId, userId);
+        return Boolean.TRUE.equals(exists);
+    }
+
+    @Override
+    public boolean deactivateUser(long tenantId, long userId, long actorId) {
+        return jdbcTemplate.update("update crm_user set status = 0, updated_by = ?, updated_at = now() "
+                        + "where tenant_id = ? and id = ? and status = 1 and deleted_at is null",
+                actorId, tenantId, userId) == 1;
     }
 
     private void appendPrivateDataScope(StringBuilder where, List<Object> args, Actor actor,
@@ -303,8 +392,21 @@ public class JdbcSalesRepository implements SalesRepository {
                 rs.getString("title"), rs.getBoolean("is_decision_maker"), rs.getLong("version"));
     }
 
+    private RowMapper<PublicPool> publicPoolMapper() {
+        return (rs, rowNum) -> new PublicPool(rs.getLong("id"), rs.getLong("tenant_id"),
+                PublicPool.ResourceType.valueOf(rs.getString("resource_type")), rs.getString("code"), rs.getString("name"),
+                rs.getInt("status") == 1, rs.getBoolean("auto_recycle_enabled"), nullableInteger(rs, "recycle_after_days"),
+                rs.getBoolean("claim_enabled"), rs.getBoolean("assign_enabled"), rs.getBoolean("release_enabled"),
+                rs.getInt("rule_version"), instant(rs, "effective_from"));
+    }
+
     private Long nullableLong(ResultSet rs, String column) throws SQLException {
         long value = rs.getLong(column);
+        return rs.wasNull() ? null : value;
+    }
+
+    private Integer nullableInteger(ResultSet rs, String column) throws SQLException {
+        int value = rs.getInt(column);
         return rs.wasNull() ? null : value;
     }
 

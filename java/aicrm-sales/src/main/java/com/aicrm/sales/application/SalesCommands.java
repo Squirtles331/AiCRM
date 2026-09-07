@@ -33,4 +33,7 @@ public final class SalesCommands {
 
     public record Handover(long resourceId, long version, long fromUserId, long toUserId, String reason) {
     }
+
+    public record BatchHandover(String batchNo, long fromUserId, long toUserId, int pageSize, String reason) {
+    }
 }

@@ -52,10 +52,10 @@ stateDiagram-v2
 | 释放 | 私海非终态、目标池启用且 `release_enabled` | 清负责人/部门，写池和 `pool_entered_at` | `RELEASE` |
 | 分配 | `assign` 权限、池启用且 `assign_enabled`、目标用户同租户启用 | 目标用户成为负责人 | `ASSIGN` |
 | 转移 | 私海非终态、目标用户同租户启用、版本一致 | 改负责人和负责人部门 | `TRANSFER` |
-| 规则回收 | 私海非终态、规则版本生效、超过 `recycle_after_days` | 进入规则指定池 | `RECYCLE` |
+| 规则回收 | 私海非终态、启用的自动回收目标池、超过 `recycle_after_days` | 进入该资源类型唯一的自动回收目标池 | `RECYCLE` |
 | 离职交接 | 原/新用户同租户、新用户启用、批次未处理 | 逐资源转移并写交接事实 | `HANDOVER` |
 
-聚合更新条件至少包含 `tenant_id + id + version + 当前归属关键字段`，受影响行为 0 时返回冲突。公海停用需原子设置 `status=0` 和三个手工动作开关为 false；已在池中的记录保留，但不能再认领或分配。规则内容不可原地修改：停用旧版本并用新 ID 插入递增 `rule_version/effective_from`。
+聚合更新条件至少包含 `tenant_id + id + version + 当前归属关键字段`，受影响行为 0 时返回冲突。自动回收以 `coalesce(last_follow_up_at, created_at)` 为最后有效时间，按页使用 `FOR UPDATE SKIP LOCKED` 避免多实例重复处理。每租户、每资源类型最多配置一个启用的自动回收目标池；迁移后定时任务默认关闭，必须在规则验收后显式开启。公海停用需原子设置 `status=0` 和三个手工动作开关为 false；已在池中的记录保留，但不能再认领或分配。规则内容不可原地修改：停用旧版本并用新 ID 插入递增 `rule_version/effective_from`。
 
 ## 线索转客户
 
@@ -74,4 +74,4 @@ stateDiagram-v2
 
 ## 离职交接
 
-交接请求以 `batch_no + Idempotency-Key` 唯一标识，先冻结原用户的新分配资格，再分页锁定其私海线索/客户。每条资源使用版本条件更新，分别写 `crm_resource_handover`、`HANDOVER` 历史和审计；批次完成后核对原用户仍持有数量为 0。冲突记录标记失败并可重跑，已完成记录不得重复转移。
+交接请求以 `batch_no + Idempotency-Key` 唯一标识，先校验目标用户同租户且启用，并在同一事务中停用来源用户以阻止新分配；随后分页锁定其可交接的私海线索/客户。每条资源使用版本条件更新，分别写 `crm_resource_handover`、`HANDOVER` 历史、审计与 Outbox；发生越权或版本冲突时整体回滚，来源用户也会恢复原状态，之后可使用新请求重试。已转换或无效线索属于历史记录，不参与负责人交接。
