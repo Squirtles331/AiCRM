@@ -89,29 +89,13 @@ flowchart LR
 docker compose up -d postgres
 ```
 
-当前 `docker-compose.yml` 只编排 PostgreSQL；Redis 和 RabbitMQ 需要自行安装或通过其他编排文件启动。注意，Compose 文件中的 `init.sql` 绑定路径仍指向旧目录，若该路径不存在，首次启动可能失败；可将其改为 `./java/aicrm-admin-boot/src/main/resources/db/init.sql`，或使用已有 PostgreSQL。无论采用哪种方式，都建议按下方命令显式执行旧表脚本。
+当前 `docker-compose.yml` 只编排 PostgreSQL；Redis 和 RabbitMQ 需要自行安装或通过其他编排文件启动。Compose 只创建空数据库，正式 schema 由应用启动时的 Flyway 迁移创建。
 
 ### 2. 初始化数据库
 
-项目包含两条数据库演进线：
+`java/aicrm-admin-boot/src/main/resources/db/migration/V1__platform_and_sales_foundation.sql` 至 `V7__constraints_indexes_and_guards.sql` 是唯一正式演进线。应用启动自动迁移，CI 也会从空库和旧租户/用户结构分别验证顺序升级。
 
-- `java/aicrm-admin-boot/src/main/resources/db/migration/V1__platform_and_sales_foundation.sql` 和 `V2__adopt_legacy_tenants_and_users.sql`：应用启动时由 Flyway 自动执行，创建 `crm_*` 新领域表。
-- `java/aicrm-admin-boot/src/main/resources/db/init.sql`：旧版 `/api/*` 接口使用的 `tenant`、`users`、`lead`、`customer` 等表，需要在开发库中显式执行。
-
-如果使用 Compose，建议在容器启动后手动执行旧表脚本（PowerShell）：
-
-```powershell
-Get-Content -Raw .\java\aicrm-admin-boot\src\main\resources\db\init.sql |
-  docker exec -i aicrm-postgres psql -U aicrm -d aicrm
-```
-
-Linux/macOS 可使用：
-
-```bash
-docker exec -i aicrm-postgres psql -U aicrm -d aicrm < java/aicrm-admin-boot/src/main/resources/db/init.sql
-```
-
-也可以连接到已有数据库后直接执行同一脚本。脚本包含 `IF NOT EXISTS` 和必要的兼容性处理，重复执行前仍应先确认目标环境。
+`java/aicrm-admin-boot/src/main/resources/db/init.sql` 仅保留为遗留表结构参考和兼容迁移输入，不得在新库或已纳入 Flyway 的数据库中手工执行。字段变化必须新增 Flyway 版本，禁止业务代码自动建表或人工改库后继续开发。
 
 ### 3. 编译与测试
 
@@ -120,6 +104,8 @@ cd java
 mvn test
 mvn -DskipTests package
 ```
+
+数据库阶段门需要 Docker/Testcontainers；完整命令为 `mvn -f java/pom.xml verify`。未启动 Docker、测试跳过或任一用例失败都表示阶段门未通过，详见 `docs/architecture/stage-gate.md`。
 
 只构建可运行包时，跳过测试即可。构建产物为：
 

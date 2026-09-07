@@ -1,0 +1,22 @@
+# 数据库命名、主键与变更规范
+
+## 命名
+
+- 表名使用单数、小写蛇形，平台正式表统一 `crm_` 前缀；主键为 `id`，外键为 `<聚合>_id`。
+- 布尔字段使用肯定语义的 `is_`、`can_` 或 `_enabled`；时间点用 `_at`；日期用 `_date`；编号用 `_no`；业务编码用 `code`。
+- PK、FK、UK、CHECK 和索引分别以 `pk_`、`fk_`、`uk_`、`ck_`、`idx_` 开头。部分唯一索引的“活跃”统一指 `deleted_at IS NULL`；公海活跃还要求 `status=1`。
+- 枚举物理值使用大写英文且不复用语义；显示文本不入约束。JSON 字段命名为 `extension`、`payload` 或 `*_snapshot`，不得在 JSON 中隐藏必查字段。
+
+## ID 与业务编号
+
+- 聚合、事实和事件 ID 由服务端 Snowflake 生成，`BIGINT` 存储；不得依赖数据库自增来跨服务传递标识。
+- ID 只表示身份，不携带租户授权含义。跨表引用同时带 `tenant_id` 并优先使用复合 FK；跨限界上下文只存 ID，不建实体级 FK。
+- `lead_no`、`customer_no` 由编号服务生成，建议格式 `LyyyyMMddNNNNNN`、`CyyyyMMddNNNNNN`；它们可展示、可检索但不可作为外键。
+- JSON/JavaScript 边界把所有 ID 序列化为字符串，禁止转为 IEEE-754 number。
+
+## 迁移纪律
+
+- 仅 Flyway 可修改正式 schema；Hibernate/MyBatis 不得自动建表，`ddl-auto` 必须为 `none` 或不存在。
+- 已提交并执行的迁移不可改 checksum；新变化追加更高版本。当前冻结序列为 V1 基线、V2 旧租户/用户导入、V3 权限与组织、V4 公海规则、V5 销售增强、V6 可靠性、V7 约束和索引。
+- SQL 必须同时通过空库迁移和带旧 `tenant/users` 表的升级测试。破坏性收紧采用“加可空列 -> 回填 -> 校验 -> NOT NULL/约束”的顺序。
+- 所有生产时间按 UTC 写入；会话展示时再转用户时区。金额仅允许 `NUMERIC(18,2)`，舍入规则由所属交易域确定。

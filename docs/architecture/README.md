@@ -45,7 +45,14 @@ flowchart LR
 ## 5. 文档索引
 
 - [数据字典](data-dictionary.md)
+- [数据库命名、主键与迁移规范](database-conventions.md)
+- [租户、组织、数据范围与字段权限](authorization.md)
 - [状态机](state-machines.md)
 - [API 与事件契约](api-events.md)
+- [错误码](error-codes.md)
+- [审计、幂等与 Outbox](reliability.md)
+- [模块依赖与 ArchUnit](module-boundaries.md)
+- [后续交易域边界](future-contexts.md)
+- [第一里程碑阶段门](stage-gate.md)
 - [安全与非功能要求](security-nfr.md)
 - [架构决策记录](adr.md)
