@@ -34,7 +34,7 @@ public class V1ActorContextInterceptor implements HandlerInterceptor {
         String traceId = request.getHeader("X-Trace-Id");
         TraceContext.set(traceId == null || traceId.isBlank() ? UUID.randomUUID().toString().replace("-", "") : traceId);
         response.setHeader("X-Trace-Id", TraceContext.get());
-        if (request.getRequestURI().equals("/api/v1/auth/login")) {
+        if (request.getRequestURI().equals(request.getContextPath() + "/api/v1/auth/login")) {
             return true;
         }
         AccessTokenService.TokenIdentity identity = accessTokenService.parse(resolveToken(request));

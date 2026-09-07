@@ -14,29 +14,15 @@ Java 后端（java/，经 Maven 依赖管理）
 | Spring Framework（spring-web / spring-aop / spring-context 等） | 6.1.x | Apache-2.0 |
 | Spring AMQP（spring-boot-starter-amqp） | 3.1.x | Apache-2.0 |
 | Spring Data Redis（spring-boot-starter-data-redis） | 3.2.x | Apache-2.0 |
-| Quartz（spring-boot-starter-quartz） | 2.3.x | Apache-2.0 |
-| MyBatis-Plus | 3.5.7 | Apache-2.0 |
 | Redisson | 3.27.2 | Apache-2.0 |
 | SpringDoc OpenAPI | 2.3.0 | Apache-2.0 |
-| Knife4j | 4.5.0 | Apache-2.0 |
 | swagger-annotations（jakarta） | 2.2.22 | Apache-2.0 |
 | jjwt（jjwt-api / jjwt-impl / jjwt-jackson） | 0.12.5 | Apache-2.0 |
-| pgvector（pgvector-java） | 0.1.6 | Apache-2.0 |
 | PostgreSQL JDBC Driver | 42.x | BSD-2-Clause |
+| Flyway Community | 9.22.x | Apache-2.0 |
+| Testcontainers | 1.21.4 | MIT |
+| ArchUnit | 1.2.1 | Apache-2.0 |
 | Lombok | 1.18.x | MIT |
-
-============================================================
-Python AI 服务（python/，经 pyproject.toml 管理）
-============================================================
-
-| 组件 | 版本 | 协议 |
-| --- | --- | --- |
-| FastAPI | 0.115+ | MIT |
-| Uvicorn | 0.32+ | BSD-3-Clause |
-| Pydantic | 2.12+ | MIT |
-| pydantic-settings | 2.8+ | MIT |
-| httpx | 0.27+ | BSD-3-Clause |
-| python-dotenv | 1.0+ | BSD-3-Clause |
 
 ============================================================
 文档与工具链

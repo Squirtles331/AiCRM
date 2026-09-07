@@ -27,7 +27,7 @@ public class AuthenticationService {
                         + "where u.tenant_id=? and lower(u.username)=lower(?) and u.status=1 and t.status=1 "
                         + "and u.deleted_at is null and t.deleted_at is null",
                 rs -> rs.next() ? new Credential(rs.getLong(1), rs.getString(2)) : null,
-                tenantId, username);
+                tenantId, username.trim());
         if (credential == null || credential.passwordHash() == null
                 || !passwordEncoder.matches(password, credential.passwordHash())) {
             throw new DomainException(ErrorCode.UNAUTHORIZED, "租户、用户名或密码错误");

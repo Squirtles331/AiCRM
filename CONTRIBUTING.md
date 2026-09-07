@@ -90,17 +90,13 @@ PR 描述请包含：
 
 ### Java 后端（java/）
 
-- 模块分层：`controller（aicrm-api）→ service（aicrm-service）→ mapper/entity（aicrm-dao）`，公共能力下沉 `aicrm-common`
-- 统一返回体：成功 `Result<T>`、分页 `PageResult<T>`，异常由全局异常处理器兜底
+- 模块边界：`aicrm-web → aicrm-sales/aicrm-platform → aicrm-shared-kernel`，基础设施由 `aicrm-admin-boot` 装配
+- 领域模块内部采用 `api/application/domain/infrastructure`；禁止 Controller 访问 JDBC，禁止跨领域引用实体或 Repository
+- 统一返回体：`ApiResponse<T>{code,message,data,traceId}`，分页使用共享内核 `PageResult<T>`
 - 接口必须补充 OpenAPI 注解：`@Tag` / `@Operation` / `@Parameter` / `@Schema` / `@ApiResponse`，规则见 [接口注解开发规范](./docs/api-annotation-guide.md)
-- 权限控制：接口标注 `@RequirePermission`（按钮级权限码），关键操作加 `@OperLog` 留痕
-- 提交前自测：`cd java && mvn -DskipTests package` 必须通过
-
-### Python AI 服务（python/）
-
-- 依赖通过 `pyproject.toml` 管理，使用 `uv`：`uv sync`
-- 新增能力在 `app/api/routes/` 下添加路由，保持 `app/core` / `app/schemas` / `app/services` 分层
-- 自测：`uv run pytest`（项目内已配置 pytest）
+- 权限从平台表解析，所有租户 SQL 必须显式带 `tenant_id`；关键操作在同一事务写审计、历史和 Outbox
+- 数据库只能通过 Flyway 变更，不得新增旧表、MyBatis Mapper 或兼容 Controller
+- 提交前自测：`mvn -f java/pom.xml clean verify` 必须通过
 
 ### 文档
 
@@ -109,7 +105,7 @@ PR 描述请包含：
 
 ## 审核与合入标准
 
-- ✅ 构建通过：`mvn -DskipTests package`（Java）或 `uv run pytest`（Python）
+- ✅ 构建与阶段门通过：`mvn -f java/pom.xml clean verify`
 - ✅ 至少 1 位维护者 Review 通过
 - ✅ 接口文档与代码同步更新
 - ✅ 无未决的破坏性变更（或已提供迁移说明）

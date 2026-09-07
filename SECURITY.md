@@ -37,11 +37,11 @@ AiCRM 重视安全问题。如果你发现了安全漏洞，请按照本文件�
 
 - 修复补丁发布**前**，不对外公开漏洞细节；
 - 补丁发布后，在安全通告中披露漏洞信息，并对报告者致谢（如报告者同意）；
-- 涉及第三方依赖（如 Spring Boot、MyBatis-Plus、FastAPI 等）的漏洞，优先同步上游官方修复并升级依赖。
+- 涉及第三方依赖（如 Spring Boot、PostgreSQL JDBC、Redisson 等）的漏洞，优先同步上游官方修复并升级依赖。
 
 ## 安全加固建议（部署方）
 
-- 生产环境通过 `application-prod.yml` 强制关闭文档入口（springdoc + knife4j），勿以 `AICRM_DOC_ENABLED=true` 覆盖；
-- 通过 Nginx 网关拦截 `/doc.html`、`/v3/api-docs`、`/swagger-ui*`、`/webjars*` 等路径；
-- 渠道 Webhook 地址仅向渠道开放平台登记，并对回调做签名校验；
-- 定期轮换渠道 token 与系统口令，勿将 `.env` / `auth_config` 提交到代码仓库。
+- 生产环境通过 `application-prod.yml` 强制关闭 springdoc 文档入口，勿以 `AICRM_DOC_ENABLED=true` 覆盖；
+- 通过网关拦截 `/v3/api-docs`、`/swagger-ui*`、`/webjars*` 等路径；
+- 外部回调必须校验签名、租户和幂等键；
+- 定期轮换 JWT 密钥、外部凭证与系统口令，勿将 `.env` 或凭证提交到代码仓库。

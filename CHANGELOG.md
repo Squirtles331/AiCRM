@@ -9,7 +9,13 @@
 
 ### Added
 
-- （暂无，欢迎通过 Issue / PR 提出）
+- PostgreSQL V1-V9 单轨数据模型、线索/客户私海公海闭环和 `/api/v1` 契约。
+- BCrypt 租户用户登录、服务端权限解析、字段脱敏、请求哈希幂等与 Outbox/Inbox。
+
+### Removed
+
+- 删除 `aicrm-common/aicrm-dao/aicrm-service/aicrm-api/aicrm-generator` 旧横向模块。
+- 删除旧 `/api/*` 路径、旧建表脚本和旧表数据导入；V9 清理检测到的旧表。
 
 ## [0.1.0] - 2026-08-03
 
