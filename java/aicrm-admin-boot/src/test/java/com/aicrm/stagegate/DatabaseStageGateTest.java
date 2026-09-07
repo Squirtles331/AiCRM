@@ -92,7 +92,7 @@ class DatabaseStageGateTest {
         assertEquals("4", scalar("select count(distinct data_scope) from crm_role where tenant_id=1"));
     }
 
-    private void verifyPoolAndOwnershipConstraints() {
+    private void verifyPoolAndOwnershipConstraints() throws SQLException {
         assertEquals("1", scalar("select count(*) from crm_user where tenant_id=1 and username='__system__' and status=1"));
 
         SQLException wrongPoolType = assertThrows(SQLException.class, () ->

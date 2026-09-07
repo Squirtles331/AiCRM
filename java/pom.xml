@@ -44,7 +44,7 @@
         <swagger-annotations.version>2.2.22</swagger-annotations.version>
         <jjwt.version>0.12.5</jjwt.version>
         <archunit.version>1.2.1</archunit.version>
-        <testcontainers.version>1.21.3</testcontainers.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
         <junit-jupiter.version>5.10.2</junit-jupiter.version>
         <!-- 内部模块版本 -->
         <aicrm.version>0.1.0-SNAPSHOT</aicrm.version>
