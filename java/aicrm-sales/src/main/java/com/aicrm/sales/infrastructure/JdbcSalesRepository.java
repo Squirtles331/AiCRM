@@ -3,6 +3,8 @@ package com.aicrm.sales.infrastructure;
 import com.aicrm.kernel.error.DomainException;
 import com.aicrm.kernel.error.ErrorCode;
 import com.aicrm.kernel.page.PageResult;
+import com.aicrm.kernel.security.Actor;
+import com.aicrm.kernel.security.DataScope;
 import com.aicrm.sales.domain.OwnershipType;
 import com.aicrm.sales.domain.SalesRepository;
 import com.aicrm.sales.domain.customer.Contact;
@@ -30,7 +32,7 @@ public class JdbcSalesRepository implements SalesRepository {
     }
 
     @Override
-    public Lead insertLead(Lead lead) {
+    public Lead insertLead(Lead lead, long actorId) {
         jdbcTemplate.update("insert into crm_lead (id, tenant_id, lead_no, name, mobile, email, company_name, "
                         + "source_type, source_ref, intent, status, ownership_type, owner_user_id, owner_dept_id, "
                         + "public_pool_id, pool_entered_at, version, created_by, updated_by, created_at, updated_at) "
@@ -38,7 +40,7 @@ public class JdbcSalesRepository implements SalesRepository {
                 lead.id(), lead.tenantId(), lead.leadNo(), lead.name(), lead.mobile(), lead.email(), lead.companyName(),
                 lead.sourceType(), lead.sourceRef(), lead.intent(), lead.status().name(), lead.ownershipType().name(),
                 lead.ownerUserId(), lead.ownerDeptId(), lead.publicPoolId(), lead.poolEnteredAt(), lead.version(),
-                lead.ownerUserId(), lead.ownerUserId(), lead.createdAt(), lead.updatedAt());
+                actorId, actorId, lead.createdAt(), lead.updatedAt());
         return lead;
     }
 
@@ -50,13 +52,10 @@ public class JdbcSalesRepository implements SalesRepository {
     }
 
     @Override
-    public PageResult<Lead> pageLeads(long tenantId, OwnershipType ownershipType, Long userId, long page, long size) {
+    public PageResult<Lead> pageLeads(Actor actor, OwnershipType ownershipType, long page, long size) {
         StringBuilder where = new StringBuilder(" where tenant_id = ? and deleted_at is null and ownership_type = ?");
-        List<Object> args = new ArrayList<>(List.of(tenantId, ownershipType.name()));
-        if (userId != null) {
-            where.append(" and owner_user_id = ?");
-            args.add(userId);
-        }
+        List<Object> args = new ArrayList<>(List.of(actor.tenantId(), ownershipType.name()));
+        appendPrivateDataScope(where, args, actor, ownershipType);
         long total = count("select count(1) from crm_lead" + where, args);
         List<Object> pageArgs = new ArrayList<>(args);
         pageArgs.add(size);
@@ -76,7 +75,7 @@ public class JdbcSalesRepository implements SalesRepository {
     }
 
     @Override
-    public boolean moveLead(long tenantId, long leadId, long expectedVersion, Long expectedOwnerId,
+    public boolean moveLead(long tenantId, long leadId, long expectedVersion, Long expectedOwnerId, long actorId,
                             OwnershipType targetType, Long targetUserId, Long targetPoolId, String status, Long customerId) {
         return jdbcTemplate.update("update crm_lead set ownership_type = ?, owner_user_id = ?, public_pool_id = ?, "
                         + "pool_entered_at = case when ? = 'PUBLIC' then now() else null end, status = coalesce(?, status), "
@@ -84,25 +83,36 @@ public class JdbcSalesRepository implements SalesRepository {
                         + "where tenant_id = ? and id = ? and version = ? and deleted_at is null "
                         + "and (? is null or owner_user_id = ?)",
                 targetType.name(), targetUserId, targetPoolId, targetType.name(), status, customerId,
-                targetUserId, tenantId, leadId, expectedVersion, expectedOwnerId, expectedOwnerId) == 1;
+                actorId, tenantId, leadId, expectedVersion, expectedOwnerId, expectedOwnerId) == 1;
     }
 
     @Override
-    public void updateLeadFollowUp(long tenantId, long leadId, long actorId, Instant nextFollowUpAt) {
-        jdbcTemplate.update("update crm_lead set last_follow_up_at = now(), next_follow_up_at = ?, "
-                + "updated_by = ?, updated_at = now(), version = version + 1 where tenant_id = ? and id = ? and deleted_at is null",
-                nextFollowUpAt, actorId, tenantId, leadId);
+    public boolean invalidateLead(long tenantId, long leadId, long expectedVersion, long actorId, String reason) {
+        return jdbcTemplate.update("update crm_lead set status = 'INVALID', invalid_reason = ?, updated_by = ?, "
+                        + "updated_at = now(), version = version + 1 where tenant_id = ? and id = ? and version = ? "
+                        + "and status in ('NEW', 'FOLLOWING') and deleted_at is null",
+                reason, actorId, tenantId, leadId, expectedVersion) == 1;
     }
 
     @Override
-    public Customer insertCustomer(Customer customer) {
+    public boolean updateLeadFollowUp(long tenantId, long leadId, long expectedVersion, long actorId,
+                                      Instant nextFollowUpAt) {
+        return jdbcTemplate.update("update crm_lead set status = case when status = 'NEW' then 'FOLLOWING' else status end, "
+                        + "last_follow_up_at = now(), next_follow_up_at = ?, updated_by = ?, updated_at = now(), "
+                        + "version = version + 1 where tenant_id = ? and id = ? and version = ? "
+                        + "and status in ('NEW', 'FOLLOWING') and deleted_at is null",
+                nextFollowUpAt, actorId, tenantId, leadId, expectedVersion) == 1;
+    }
+
+    @Override
+    public Customer insertCustomer(Customer customer, long actorId) {
         jdbcTemplate.update("insert into crm_customer (id, tenant_id, customer_no, name, industry, region, status, "
                         + "ownership_type, owner_user_id, owner_dept_id, public_pool_id, pool_entered_at, version, "
                         + "created_by, updated_by, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 customer.id(), customer.tenantId(), customer.customerNo(), customer.name(), customer.industry(), customer.region(),
                 customer.status(), customer.ownershipType().name(), customer.ownerUserId(), customer.ownerDeptId(),
-                customer.publicPoolId(), customer.poolEnteredAt(), customer.version(), customer.ownerUserId(),
-                customer.ownerUserId(), customer.createdAt(), customer.updatedAt());
+                customer.publicPoolId(), customer.poolEnteredAt(), customer.version(), actorId,
+                actorId, customer.createdAt(), customer.updatedAt());
         return customer;
     }
 
@@ -114,13 +124,10 @@ public class JdbcSalesRepository implements SalesRepository {
     }
 
     @Override
-    public PageResult<Customer> pageCustomers(long tenantId, OwnershipType ownershipType, Long userId, long page, long size) {
+    public PageResult<Customer> pageCustomers(Actor actor, OwnershipType ownershipType, long page, long size) {
         StringBuilder where = new StringBuilder(" where tenant_id = ? and deleted_at is null and ownership_type = ?");
-        List<Object> args = new ArrayList<>(List.of(tenantId, ownershipType.name()));
-        if (userId != null) {
-            where.append(" and owner_user_id = ?");
-            args.add(userId);
-        }
+        List<Object> args = new ArrayList<>(List.of(actor.tenantId(), ownershipType.name()));
+        appendPrivateDataScope(where, args, actor, ownershipType);
         long total = count("select count(1) from crm_customer" + where, args);
         List<Object> pageArgs = new ArrayList<>(args);
         pageArgs.add(size);
@@ -140,36 +147,49 @@ public class JdbcSalesRepository implements SalesRepository {
     }
 
     @Override
-    public boolean moveCustomer(long tenantId, long customerId, long expectedVersion, Long expectedOwnerId,
+    public boolean moveCustomer(long tenantId, long customerId, long expectedVersion, Long expectedOwnerId, long actorId,
                                 OwnershipType targetType, Long targetUserId, Long targetPoolId) {
         return jdbcTemplate.update("update crm_customer set ownership_type = ?, owner_user_id = ?, public_pool_id = ?, "
                         + "pool_entered_at = case when ? = 'PUBLIC' then now() else null end, version = version + 1, "
                         + "updated_by = ?, updated_at = now() where tenant_id = ? and id = ? and version = ? "
                         + "and deleted_at is null and (? is null or owner_user_id = ?)",
-                targetType.name(), targetUserId, targetPoolId, targetType.name(), targetUserId,
+                targetType.name(), targetUserId, targetPoolId, targetType.name(), actorId,
                 tenantId, customerId, expectedVersion, expectedOwnerId, expectedOwnerId) == 1;
     }
 
     @Override
     public void mergeCustomer(long tenantId, long sourceCustomerId, long targetCustomerId, long actorId, long expectedVersion) {
-        int updated = jdbcTemplate.update("update crm_customer set deleted_at = now(), deleted_by = ?, updated_by = ?, "
-                        + "updated_at = now(), version = version + 1 where tenant_id = ? and id = ? and version = ? and deleted_at is null",
-                actorId, actorId, tenantId, sourceCustomerId, expectedVersion);
+        int updated = jdbcTemplate.update("update crm_customer set merged_into_customer_id = ?, merged_at = now(), "
+                        + "deleted_at = now(), deleted_by = ?, updated_by = ?, updated_at = now(), version = version + 1 "
+                        + "where tenant_id = ? and id = ? and version = ? and status = 'ACTIVE' and deleted_at is null",
+                targetCustomerId, actorId, actorId, tenantId, sourceCustomerId, expectedVersion);
         if (updated != 1) {
             throw new DomainException(ErrorCode.CONFLICT, "客户已被其他操作修改");
         }
-        jdbcTemplate.update("update crm_contact set customer_id = ?, updated_by = ?, updated_at = now(), version = version + 1 "
+        jdbcTemplate.update("update crm_contact set source_customer_id = coalesce(source_customer_id, customer_id), customer_id = ?, "
+                        + "updated_by = ?, updated_at = now(), version = version + 1 where tenant_id = ? and customer_id = ? "
+                        + "and deleted_at is null", targetCustomerId, actorId, tenantId, sourceCustomerId);
+        jdbcTemplate.update("update crm_follow_up set customer_id = ?, updated_by = ?, updated_at = now(), version = version + 1 "
                 + "where tenant_id = ? and customer_id = ? and deleted_at is null", targetCustomerId, actorId, tenantId, sourceCustomerId);
         jdbcTemplate.update("update crm_lead set customer_id = ?, updated_by = ?, updated_at = now(), version = version + 1 "
                 + "where tenant_id = ? and customer_id = ? and deleted_at is null", targetCustomerId, actorId, tenantId, sourceCustomerId);
     }
 
     @Override
-    public Contact insertContact(Contact contact) {
+    public boolean updateCustomerFollowUp(long tenantId, long customerId, long expectedVersion, long actorId,
+                                          Instant nextFollowUpAt) {
+        return jdbcTemplate.update("update crm_customer set last_follow_up_at = now(), next_follow_up_at = ?, "
+                        + "updated_by = ?, updated_at = now(), version = version + 1 where tenant_id = ? and id = ? "
+                        + "and version = ? and status = 'ACTIVE' and deleted_at is null",
+                nextFollowUpAt, actorId, tenantId, customerId, expectedVersion) == 1;
+    }
+
+    @Override
+    public Contact insertContact(Contact contact, long actorId) {
         jdbcTemplate.update("insert into crm_contact (id, tenant_id, customer_id, name, mobile, email, department, title, "
                         + "is_decision_maker, version, created_by, updated_by) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 contact.id(), contact.tenantId(), contact.customerId(), contact.name(), contact.mobile(), contact.email(),
-                contact.department(), contact.title(), contact.decisionMaker(), contact.version(), null, null);
+                contact.department(), contact.title(), contact.decisionMaker(), contact.version(), actorId, actorId);
         return contact;
     }
 
@@ -189,19 +209,68 @@ public class JdbcSalesRepository implements SalesRepository {
     @Override
     public void appendOwnershipHistory(long id, long tenantId, String resourceType, long resourceId, String action,
                                        Long fromOwnerId, Long toOwnerId, Long fromPoolId, Long toPoolId,
-                                       String reason, long actorId) {
+                                       String operationId, String source, String reason, String beforeSnapshot,
+                                       String afterSnapshot, String traceId, long actorId) {
         jdbcTemplate.update("insert into crm_ownership_history (id, tenant_id, resource_type, resource_id, action, "
-                        + "from_owner_user_id, to_owner_user_id, from_pool_id, to_pool_id, reason, operator_user_id) "
-                        + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                id, tenantId, resourceType, resourceId, action, fromOwnerId, toOwnerId, fromPoolId, toPoolId, reason, actorId);
+                        + "from_owner_user_id, to_owner_user_id, from_pool_id, to_pool_id, operation_id, source, reason, "
+                        + "before_snapshot, after_snapshot, trace_id, operator_user_id) "
+                        + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?)",
+                id, tenantId, resourceType, resourceId, action, fromOwnerId, toOwnerId, fromPoolId, toPoolId,
+                operationId, source, reason, beforeSnapshot, afterSnapshot, traceId, actorId);
     }
 
     @Override
     public void addHandover(long id, long tenantId, long fromUserId, long toUserId, String resourceType,
-                            long resourceId, long actorId) {
+                            long resourceId, String operationId, String reason, String beforeSnapshot,
+                            String afterSnapshot, String traceId, long actorId) {
         jdbcTemplate.update("insert into crm_resource_handover (id, tenant_id, from_user_id, to_user_id, resource_type, "
-                + "resource_id, created_by) values (?, ?, ?, ?, ?, ?, ?)", id, tenantId, fromUserId, toUserId,
-                resourceType, resourceId, actorId);
+                + "resource_id, operation_id, reason, before_snapshot, after_snapshot, trace_id, created_by, updated_by) "
+                + "values (?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?)", id, tenantId, fromUserId, toUserId,
+                resourceType, resourceId, operationId, reason, beforeSnapshot, afterSnapshot, traceId, actorId, actorId);
+    }
+
+    @Override
+    public boolean isDepartmentInActorScope(Actor actor, long departmentId) {
+        if (actor.hasDataScope(DataScope.ALL)) {
+            return true;
+        }
+        if (actor.hasDataScope(DataScope.DEPARTMENT) && departmentId == actor.departmentId()) {
+            return true;
+        }
+        if (!actor.hasDataScope(DataScope.DEPARTMENT_AND_SUB)) {
+            return false;
+        }
+        Boolean visible = jdbcTemplate.query("select exists (select 1 from crm_department "
+                        + "where tenant_id = ? and id = ? and path like ? and deleted_at is null)",
+                rs -> rs.next() ? rs.getBoolean(1) : false,
+                actor.tenantId(), departmentId, actor.departmentPath() + "%");
+        return Boolean.TRUE.equals(visible);
+    }
+
+    private void appendPrivateDataScope(StringBuilder where, List<Object> args, Actor actor,
+                                        OwnershipType ownershipType) {
+        if (ownershipType != OwnershipType.PRIVATE || actor.hasDataScope(DataScope.ALL)) {
+            return;
+        }
+        List<String> clauses = new ArrayList<>();
+        if (actor.hasDataScope(DataScope.SELF)) {
+            clauses.add("owner_user_id = ?");
+            args.add(actor.userId());
+        }
+        if (actor.hasDataScope(DataScope.DEPARTMENT)) {
+            clauses.add("owner_dept_id = ?");
+            args.add(actor.departmentId());
+        }
+        if (actor.hasDataScope(DataScope.DEPARTMENT_AND_SUB)) {
+            clauses.add("owner_dept_id in (select id from crm_department where tenant_id = ? and path like ? and deleted_at is null)");
+            args.add(actor.tenantId());
+            args.add(actor.departmentPath() + "%");
+        }
+        if (clauses.isEmpty()) {
+            where.append(" and 1 = 0");
+            return;
+        }
+        where.append(" and (").append(String.join(" or ", clauses)).append(")");
     }
 
     private long count(String sql, List<Object> args) {

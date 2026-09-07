@@ -24,9 +24,11 @@ public class WebConfig implements WebMvcConfigurer {
     public static final String HEADER_TENANT_ID = "X-Tenant-Id";
 
     private final LoginInterceptor loginInterceptor;
+    private final V1ActorContextInterceptor v1ActorContextInterceptor;
 
-    public WebConfig(LoginInterceptor loginInterceptor) {
+    public WebConfig(LoginInterceptor loginInterceptor, V1ActorContextInterceptor v1ActorContextInterceptor) {
         this.loginInterceptor = loginInterceptor;
+        this.v1ActorContextInterceptor = v1ActorContextInterceptor;
     }
 
     @Override
@@ -37,6 +39,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns("/api/auth/login", "/error");
+        registry.addInterceptor(v1ActorContextInterceptor)
+                .addPathPatterns("/api/v1/**");
     }
 
     @Bean

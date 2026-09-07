@@ -3,6 +3,7 @@ package com.aicrm.platform.application;
 import com.aicrm.kernel.error.DomainException;
 import com.aicrm.kernel.error.ErrorCode;
 import com.aicrm.kernel.security.Actor;
+import com.aicrm.kernel.security.DataScope;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -20,10 +21,13 @@ public class PlatformPrincipalService {
     }
 
     public Actor resolve(long tenantId, long userId) {
-        Integer active = jdbcTemplate.query(
-                "select status from crm_user where tenant_id = ? and id = ? and deleted_at is null",
-                rs -> rs.next() ? rs.getInt(1) : null, tenantId, userId);
-        if (active == null || active != 1) {
+        UserMembership membership = jdbcTemplate.query(
+                "select u.status, u.department_id, d.path from crm_user u "
+                        + "join crm_department d on d.tenant_id = u.tenant_id and d.id = u.department_id "
+                        + "where u.tenant_id = ? and u.id = ? and u.deleted_at is null and d.deleted_at is null",
+                rs -> rs.next() ? new UserMembership(rs.getInt(1), rs.getLong(2), rs.getString(3)) : null,
+                tenantId, userId);
+        if (membership == null || membership.status() != 1) {
             throw new DomainException(ErrorCode.UNAUTHORIZED, "用户不存在或已停用");
         }
         Set<String> roles = new LinkedHashSet<>(jdbcTemplate.query(
@@ -36,7 +40,18 @@ public class PlatformPrincipalService {
                         + "where ur.tenant_id = ? and ur.user_id = ?",
                 (rs, rowNum) -> rs.getString(1), tenantId, userId));
         permissions.addAll(defaultPermissions(roles));
-        return new Actor(tenantId, userId, Set.copyOf(roles), Set.copyOf(permissions));
+        Set<DataScope> dataScopes = new LinkedHashSet<>(jdbcTemplate.query(
+                "select distinct r.data_scope from crm_user_role ur join crm_role r on r.id = ur.role_id "
+                        + "where ur.tenant_id = ? and ur.user_id = ? and r.status = 1 and r.deleted_at is null",
+                (rs, rowNum) -> DataScope.valueOf(rs.getString(1)), tenantId, userId));
+        if (roles.contains("admin")) {
+            dataScopes.add(DataScope.ALL);
+        }
+        if (dataScopes.isEmpty()) {
+            dataScopes.add(DataScope.SELF);
+        }
+        return new Actor(tenantId, userId, membership.departmentId(), membership.departmentPath(),
+                Set.copyOf(roles), Set.copyOf(permissions), Set.copyOf(dataScopes));
     }
 
     private Set<String> defaultPermissions(Set<String> roles) {
@@ -50,5 +65,8 @@ public class PlatformPrincipalService {
                     "customer:create", "customer:claim", "customer:read:own", "customer:write:own"));
         }
         return permissions;
+    }
+
+    private record UserMembership(int status, long departmentId, String departmentPath) {
     }
 }

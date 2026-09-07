@@ -45,6 +45,9 @@ mybatis-plus:
 
 # 业务自定义配置
 aicrm:
+  id:
+    worker-id: ${AICRM_ID_WORKER_ID:0}
+    datacenter-id: ${AICRM_ID_DATACENTER_ID:0}
   # 风控频控默认配置
   risk:
     # 同一联系人单渠道每日消息上限

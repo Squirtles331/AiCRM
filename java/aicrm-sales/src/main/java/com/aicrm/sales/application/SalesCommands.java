@@ -17,7 +17,8 @@ public final class SalesCommands {
     public record OwnershipChange(long resourceId, long version, Long targetUserId, Long publicPoolId, String reason) {
     }
 
-    public record ConvertLead(long leadId, long version, String customerName, String industry, String region) {
+    public record ConvertLead(long leadId, long version, Long existingCustomerId,
+                              String customerName, String industry, String region) {
     }
 
     public record MergeCustomers(long sourceCustomerId, long targetCustomerId, long version, String reason) {
@@ -27,6 +28,9 @@ public final class SalesCommands {
                                 boolean decisionMaker) {
     }
 
-    public record AddFollowUp(String channel, String content, Instant nextFollowUpAt) {
+    public record AddFollowUp(long version, String channel, String content, Instant nextFollowUpAt) {
+    }
+
+    public record Handover(long resourceId, long version, long fromUserId, long toUserId, String reason) {
     }
 }
