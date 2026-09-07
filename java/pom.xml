@@ -44,6 +44,7 @@
         <jjwt.version>0.12.5</jjwt.version>
         <archunit.version>1.2.1</archunit.version>
         <testcontainers.version>1.19.8</testcontainers.version>
+        <junit.version>5.10.2</junit.version>
         <!-- 内部模块版本 -->
         <aicrm.version>0.1.0-SNAPSHOT</aicrm.version>
     </properties>
@@ -141,6 +142,7 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
+                <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
