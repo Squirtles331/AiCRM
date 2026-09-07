@@ -1,303 +1,258 @@
-<div align="center">
-
-<img src="docs/images/aicrm-logo.svg" width="300" alt="AiCRM Logo"/>
-
 # AiCRM
 
-**AI 驱动的多渠道获客销售中台**
+面向 B2B 销售团队的客户关系管理后端。项目以“渠道获客 → 线索 → 客户与联系人 → 跟进 → 商机与交易协同”为业务主线，采用 PostgreSQL 驱动的模块化单体架构，支持多租户、权限、审计、幂等和线索/客户公海管理。
 
-从公域流量到私域客户：一次接入，AI 接待，持续转化。
+> 当前版本处于 DDD 模块化重构的第一阶段。仓库交付的是 Java 后端与领域基础代码，不包含 Web 管理端，也不包含独立的 Python/LLM 服务。
 
-[![Release](https://img.shields.io/badge/Release-v0.1.0-blue.svg)](https://github.com/your-org/aicrm/releases)
-[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/technologies/downloads/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://www.postgresql.org/)
-[![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
-[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.x-ff6600.svg)](https://www.rabbitmq.com/)
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB.svg)](https://www.python.org/)
-[![CI](https://img.shields.io/badge/CI-build%20passing-brightgreen.svg)](https://github.com/your-org/aicrm/actions)
-[![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](#开源协议)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#参与贡献)
-[![Changelog](https://img.shields.io/badge/Changelog-keep--a--changelog-important.svg)](CHANGELOG.md)
+## 当前状态
 
-</div>
+| 能力 | 状态 | 说明 |
+| --- | --- | --- |
+| 工程底座 | 已完成 | Maven 多模块、统一错误/分页/安全上下文、JWT、审计、幂等、Outbox 基础能力 |
+| 平台域 | 基础完成 | 租户、用户、角色、权限相关旧接口；新领域服务持续补齐 |
+| 销售域 | 基础完成 | 线索、客户、联系人、跟进、私海/公海、认领、转移、合并、线索转客户 |
+| 旧版 REST API | 可用 | 位于 `aicrm-api`，路径以 `/api/*` 开头 |
+| 新版 `/api/v1` API | 开发中 | 领域应用服务已搭建，HTTP Controller 按阶段增加 |
+| 渠道、会话、产品、统计等旧模块 | 可用/维护中 | 代码位于 `aicrm-service` 与 `aicrm-api`，逐步迁移到领域模块 |
+| Web 管理端 | 未提供 | 请基于 OpenAPI 或自行开发前端 |
+| AI 服务 | 未提供 | 当前不包含 Python 服务或模型推理代码 |
 
----
+## 业务能力
 
-## 目录
+- 多租户数据隔离：租户上下文、JWT 身份、权限校验和租户维度索引。
+- 线索管理：来源、意向、状态、负责人、公海、分配、认领、释放、转移、回收和转化。
+- 客户管理：客户、联系人、客户归属、公海、合并和跟进记录。
+- 销售协同：客户/线索跟进计划、归属历史、离职交接和版本号并发控制。
+- 旧业务模块：渠道账号与事件、会话消息、产品与竞品、话术、文件、任务、字典、配置、日志和看板接口。
+- 工程能力：Spring Boot、MyBatis-Plus、JdbcTemplate、Flyway、Redis/Redisson、RabbitMQ、Quartz、OpenAPI/Knife4j。
 
-- [项目简介](#项目简介)
-- [功能特性](#功能特性)
-- [系统架构](#系统架构)
-- [技术栈](#技术栈)
-- [快速开始](#快速开始)
-- [接口文档](#接口文档)
-- [文档与资源](#文档与资源)
-- [项目结构](#项目结构)
-- [路线图](#路线图)
-- [社区与支持](#社区与支持)
-- [社区与治理](#社区与治理)
-- [参与贡献](#参与贡献)
-- [开源协议](#开源协议)
+线索与客户遵循同一套归属模型：私海资源必须有负责人，公海资源可被授权用户认领；认领和状态变更通过版本号条件更新，操作写入归属历史。
 
-## 项目简介
+## 架构概览
 
-AiCRM 是一套面向渠道型销售团队的 **AI 获客销售中台**，把「公域获客 → AI 接待 → 线索转化」沉淀为可规模化、可追踪、可自动化的标准链路：
-
-- **多渠道统一接入**：抖音、视频号、企业微信的评论 / 私信 / 表单事件统一 Webhook 收敛，幂等去重、令牌自动刷新；
-- **AI 贯穿销售全流程**：意向识别、RAG 知识问答、字段抽取、对话摘要、自动转人工，AI 能力以独立 Python 服务提供，LLM Provider 可插拔（mock / openai / dashscope）；
-- **自动化运营引擎**：线索自动分配与回收重分配、自动标签规则、定时任务（渠道同步 / 令牌刷新 / 评论拉取）全部内置；
-- **多租户即开即用**：租户 / 套餐 / 用户 / 角色 / 菜单 / 权限完整体系，内置操作与登录审计、文件管理、代码生成器。
-
-> **适用场景**：SaaS 服务商、渠道型销售团队、需要将「公域流量」沉淀为「私域客户」的成长型公司。
->
-> **边界说明**：AiCRM 提供获客与客户管理能力，**不提供任何绕过平台规则的功能**；本仓库交付后端核心服务（Java 业务服务 + Python AI 服务）与完整接口文档，管理端 Web 前端由接入方基于 OpenAPI 文档自建或共建。
-
-## 功能特性
-
-| 模块 | 核心能力 |
-| --- | --- |
-| 渠道接入 | 抖音 / 视频号 / 企微 Webhook 统一入口 · 幂等去重 · 渠道账号与活码管理 · 令牌自动刷新 · 消息网关（敏感词 / 风控 / 限流） |
-| 客户与线索 | 客户主数据 · 多渠道身份归一与自动合并 · 标签体系与自动打标 · 线索分配引擎（产品线 / 地域 / 轮询）· 跟进记录 |
-| 会话与 AI | 会话生命周期 · 全渠道消息落库 · AI 智能回复（RAG 知识问答）· 转人工评估与交接包 · 企微侧边栏 |
-| 知识中台 | 产品库 · 竞品库 · 话术库 · 文档管理 · 知识向量同步（MQ 驱动） |
-| 系统管理 | 租户 / 套餐 · 用户 / 角色 / 权限 · 菜单 / 字典 / 参数 · 操作日志 / 登录日志 · 定时任务 · 文件存储 |
-| 数据统计 | 渠道转化漏斗 · 销售工作量 · 会话趋势 · AI 解决率看板 |
-| 工程化 | OpenAPI 3.0 文档（Knife4j + Swagger UI 双入口）· 离线文档包 · 代码生成器 · 环境隔离开关 |
-
-## 系统架构
-
-```
-                         ┌──────────────────────────────────────────────┐
-                         │                   客户端 / 运营端              │
-                         │         Web 管理端 · 企微侧边栏 H5             │
-                         └──────────────────────┬───────────────────────┘
-                                                │ HTTPS / JWT
-                         ┌──────────────────────▼───────────────────────┐
-  抖音 / 视频号 / 企微      │              Spring Boot 核心服务             │
-  （Webhook 回调） ──────► │  ┌────────────┐  ┌────────────┐  ┌─────────┐ │
-                         │  │  渠道接入    │  │  客户线索    │  │ 会话与AI │ │
-                         │  │  Webhook    │  │ 身份归一    │  │ 消息/转接 │ │
-                         │  └─────┬──────┘  └─────┬──────┘  └────┬────┘ │
-                         │        │               │               │      │
-                         │  ┌─────▼───────────────▼───────────────▼────┐ │
-                         │  │            知识中台 · 数据统计             │ │
-                         │  └─────┬───────────────────────────┬────────┘ │
-                         └────────┼───────────────────────────┼──────────┘
-                                  │ HTTP (FastAPI)            │ 异步事件
-                         ┌────────▼─────────┐         ┌───────▼─────────┐
-                         │  Python AI 服务   │         │  RabbitMQ       │
-                         │  意向/问答/抽取/摘要│         │  Topic + DLQ    │
-                         └────────┬─────────┘         └───────┬─────────┘
-                                  │                           │
-                     ┌────────────▼───────────┐   ┌───────────▼───────────┐
-                     │      PostgreSQL 16     │   │        Redis          │
-                     │   业务库 + JSONB + 向量 │   │  缓存 / 限流 / 分布式锁 │
-                     └────────────────────────┘   └───────────────────────┘
+```mermaid
+flowchart LR
+    C[客户端/外部渠道] --> W[Spring Boot 应用]
+    W --> API[旧版 REST API<br/>/api/*]
+    W --> WEB[新版 Web 适配层<br/>/api/v1（建设中）]
+    API --> S[旧业务服务与 MyBatis]
+    WEB --> P[平台域]
+    WEB --> D[销售域]
+    P --> PG[(PostgreSQL 16+)]
+    D --> PG
+    S --> PG
+    W --> R[(Redis)]
+    W --> MQ[(RabbitMQ)]
 ```
 
-关键设计：
+### 模块说明
 
-- **Java + Python 双服务**：Java 承担业务主链路（事务、权限、租户隔离），Python 专注 AI 能力（可独立扩展 / 替换 LLM Provider）；
-- **统一事件入口**：三大渠道 Webhook 统一收敛至 `POST /api/channel/events`，幂等去重后落库并发布异步事件；
-- **消息降级**：RabbitMQ 不可用时自动降级为日志记录，业务主链路不受影响；
-- **多租户隔离**：MyBatis-Plus 租户插件 + JWT（roles / perms）+ `@RequirePermission` 按钮级权限。
-
-## 技术栈
-
-| 分类 | 技术选型 |
+| 模块 | 职责 |
 | --- | --- |
-| 后端框架 | Spring Boot 3.2.5 · Spring MVC · Spring AOP |
-| 持久层 | MyBatis-Plus 3.5 · PostgreSQL 16（JSONB / 向量） |
-| 缓存 | Redis 7（Redisson） |
-| 消息队列 | RabbitMQ 3.x（Topic + 死信队列，自动降级） |
-| 定时任务 | Quartz |
-| 认证授权 | JWT（jjwt）+ `@RequirePermission` + `@OperLog` AOP 审计 |
-| 接口文档 | SpringDoc OpenAPI 2.3 + Knife4j 4.5（双 UI 支持） |
-| AI 服务 | Python 3.11 · FastAPI（LLM Provider：mock / openai / dashscope） |
-| 构建部署 | Maven 多模块 · Docker Compose · （可选）Spring Boot Actuator |
+| `aicrm-shared-kernel` | 领域错误、事件、分页、标识生成、安全上下文等共享内核 |
+| `aicrm-platform` | 平台应用能力：身份、权限、审计、幂等、事务 Outbox |
+| `aicrm-sales` | 销售领域模型、应用命令/查询、线索与客户仓储端口及 PostgreSQL 适配器 |
+| `aicrm-web` | 新版 REST API 的 DTO、Controller 与异常映射骨架（持续建设中） |
+| `aicrm-common` | 旧接口通用返回、异常、JWT、租户上下文和工具类 |
+| `aicrm-dao` | 旧接口实体与 MyBatis-Plus Mapper |
+| `aicrm-service` | 旧接口业务服务、渠道客户端、消息消费者、定时任务和文件存储 |
+| `aicrm-api` | 旧接口 Controller、OpenAPI 与 Knife4j 配置 |
+| `aicrm-admin-boot` | 应用启动类、Spring 配置、数据源、Redis、RabbitMQ、Flyway |
+| `aicrm-generator` | 根据数据库表生成旧版 CRUD 代码的独立工具，不参与运行时启动 |
+
+## 环境要求
+
+- JDK 17 或更高版本
+- Maven 3.8 或更高版本
+- PostgreSQL 16 或更高版本（唯一承诺支持的数据库）
+- Redis 6 或更高版本
+- RabbitMQ 3.x（事件异步处理需要；仅编译或部分接口调试时可按环境决定是否启用）
+- Docker Desktop（可选，用于启动 PostgreSQL）
 
 ## 快速开始
 
-### 环境要求
+以下命令均从仓库根目录执行。
 
-| 依赖 | 版本 | 必须 | 说明 |
-| --- | --- | --- | --- |
-| JDK | 17+ | 是 | 后端运行环境 |
-| Maven | 3.8+ | 是 | 构建工具 |
-| PostgreSQL | 16 | 是 | 业务主库 |
-| Redis | 6+ | 是 | 缓存 / 限流（本地 6379） |
-| RabbitMQ | 3.x | 否 | 未启动时自动降级 |
-| Python | 3.11+ | 否 | 仅运行 AI 能力服务时需要 |
+### 1. 准备 PostgreSQL、Redis 和 RabbitMQ
 
-### 第一步：启动基础设施并初始化数据库
+开发配置默认连接：
 
-Docker 方式（推荐，自动执行 `db/init.sql` 建表）：
+| 服务 | 地址 | 默认账号/库 |
+| --- | --- | --- |
+| PostgreSQL | `localhost:5432` | 数据库 `aicrm`，用户 `aicrm`，密码 `aicrm_dev_123` |
+| Redis | `localhost:6379` | 无密码，数据库 0 |
+| RabbitMQ | `localhost:5672` | 用户 `aicrm`，密码 `aicrm_dev_123`，虚拟主机 `aicrm` |
 
-```bash
-docker compose up -d
-```
-
-> 默认编排 PostgreSQL 16（用户 `aicrm` / 密码 `aicrm_dev_123` / 库 `aicrm`），Redis 复用本机 6379。
-
-本机已有 PostgreSQL 时手动初始化：
+可以使用仓库中的 Compose 文件启动 PostgreSQL：
 
 ```bash
-psql -U postgres -c "CREATE USER aicrm WITH PASSWORD 'aicrm_dev_123';"
-psql -U postgres -c "CREATE DATABASE aicrm OWNER aicrm;"
-psql -U aicrm -d aicrm -f java/aicrm-admin-boot/src/main/resources/db/init.sql
+docker compose up -d postgres
 ```
 
-### 第二步：启动后端
+当前 `docker-compose.yml` 只编排 PostgreSQL；Redis 和 RabbitMQ 需要自行安装或通过其他编排文件启动。注意，Compose 文件中的 `init.sql` 绑定路径仍指向旧目录，若该路径不存在，首次启动可能失败；可将其改为 `./java/aicrm-admin-boot/src/main/resources/db/init.sql`，或使用已有 PostgreSQL。无论采用哪种方式，都建议按下方命令显式执行旧表脚本。
+
+### 2. 初始化数据库
+
+项目包含两条数据库演进线：
+
+- `java/aicrm-admin-boot/src/main/resources/db/migration/V1__platform_and_sales_foundation.sql` 和 `V2__adopt_legacy_tenants_and_users.sql`：应用启动时由 Flyway 自动执行，创建 `crm_*` 新领域表。
+- `java/aicrm-admin-boot/src/main/resources/db/init.sql`：旧版 `/api/*` 接口使用的 `tenant`、`users`、`lead`、`customer` 等表，需要在开发库中显式执行。
+
+如果使用 Compose，建议在容器启动后手动执行旧表脚本（PowerShell）：
+
+```powershell
+Get-Content -Raw .\java\aicrm-admin-boot\src\main\resources\db\init.sql |
+  docker exec -i aicrm-postgres psql -U aicrm -d aicrm
+```
+
+Linux/macOS 可使用：
+
+```bash
+docker exec -i aicrm-postgres psql -U aicrm -d aicrm < java/aicrm-admin-boot/src/main/resources/db/init.sql
+```
+
+也可以连接到已有数据库后直接执行同一脚本。脚本包含 `IF NOT EXISTS` 和必要的兼容性处理，重复执行前仍应先确认目标环境。
+
+### 3. 编译与测试
 
 ```bash
 cd java
+mvn test
 mvn -DskipTests package
+```
+
+只构建可运行包时，跳过测试即可。构建产物为：
+
+```text
+java/aicrm-admin-boot/target/aicrm.jar
+```
+
+### 4. 启动服务
+
+```bash
+cd java
 java -jar aicrm-admin-boot/target/aicrm.jar
 ```
 
-启动成功后访问 **http://localhost:8080/doc.html** 即可在线调试全部接口。
-
-### 第三步（可选）：启动 AI 能力服务
+默认端口为 `8080`，默认激活 `dev` profile。也可以显式指定环境：
 
 ```bash
-cd python
-cp .env.example .env          # 默认 mock 模式，无需任何 API Key
-uv sync                       # 安装依赖（清华镜像加速）；或使用 pip install -e .
-uv run uvicorn app.main:app --host 0.0.0.0 --port 8100
+java -jar aicrm-admin-boot/target/aicrm.jar --spring.profiles.active=prod
 ```
 
-> AI 服务未启动时不影响业务接口调试，AI 相关调用自动降级返回模拟结果。
+## 首次登录与租户初始化
 
-### 验证
+旧版登录接口为 `POST /api/auth/login`，请求体需要 `tenantId`、`mobile` 和 `password`。数据库脚本不会创建默认租户或默认账号，当前也没有匿名 bootstrap 接口，因此首次使用时需要：
+
+1. 通过平台初始化流程创建租户；或
+2. 在开发数据库中手动创建一条租户和管理员用户记录，并使用 BCrypt 密码哈希；或
+3. 使用已经存在的开发数据。
+
+通过 `TenantService` 创建租户时，会自动初始化管理员账号以及 `admin`、`sales`、`supervisor` 三个角色。未传管理员密码时，代码默认使用 `Aicrm@123456`，首次登录后请立即修改。生产环境不要使用默认密码。
+
+登录示例：
 
 ```bash
-curl http://localhost:8080/actuator/health        # Java 服务
-curl http://localhost:8100/health                 # AI 服务（若已启动）
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"tenantId":1,"mobile":"13800138000","password":"your-password"}'
 ```
+
+登录返回 JWT。访问受保护的 `/api/*` 接口时，在请求头中携带：
+
+```text
+Authorization: Bearer <token>
+```
+
+开发环境也支持通过 `X-Tenant-Id` 请求头或 `tenantId` 查询参数传递租户标识；生产环境应由认证网关/JWT 注入并严格校验，不能依赖客户端自行提交。
 
 ## 接口文档
 
-本地 `dev` 环境默认开启双入口（生产环境由 `application-prod.yml` 强制关闭）：
+开发环境默认开启：
 
-| 入口 | 地址 | 说明 |
-| --- | --- | --- |
-| Knife4j 增强 UI | http://localhost:8080/doc.html | 分组导航 · 全局参数 · 字段级 Mock · 在线调试 |
-| 原生 Swagger UI | http://localhost:8080/swagger-ui.html | 标准 Swagger UI · 分组下拉 · Try it out |
-| OpenAPI JSON | http://localhost:8080/v3/api-docs | 标准 OpenAPI 3.0，可按分组 `/v3/api-docs/{分组名}` |
-
-快速体验一个接口：
-
-```bash
-# 登录获取 JWT
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin123"}'
-```
-
-离线交付包（无需启动项目，浏览器直接打开）：
-
-| 文件 | 说明 |
+| 地址 | 用途 |
 | --- | --- |
-| `docs/offline-api-doc.html` | 单文件离线 HTML 接口文档（ReDoc，完全自包含） |
-| `docs/offline-api-doc.md` | Markdown 版接口文档 |
-| `docs/openapi.json` | 标准 OpenAPI 3.0 定义，可直接导入 Apifox / JMeter / Postman |
+| <http://localhost:8080/doc.html> | Knife4j 增强 UI |
+| <http://localhost:8080/swagger-ui.html> | 原生 Swagger UI |
+| <http://localhost:8080/v3/api-docs> | OpenAPI 3.0 JSON |
 
-## 文档与资源
+生产配置 `application-prod.yml` 会关闭上述文档入口。可通过环境变量 `AICRM_DOC_ENABLED=false` 在非生产环境关闭文档。
 
-| 文档 | 说明 |
+## 配置说明
+
+公共配置位于 `java/aicrm-admin-boot/src/main/resources/application.yml`，开发和生产覆盖分别位于 `application-dev.yml`、`application-prod.yml`。
+
+生产环境至少应设置以下变量：
+
+| 变量 | 作用 |
 | --- | --- |
-| [本地接口文档配置说明](docs/api-doc-setup-guide.md) | 双入口地址 / 开关 / 常见问题 |
-| [接口注解开发规范](docs/api-annotation-guide.md) | `@Tag / @Operation / @Schema / @ApiResponse` 用法约定 |
-| [接口文档迭代维护规范](docs/api-doc-maintenance-guide.md) | 变更流程 / 评审检查项 / 离线文档重新生成 |
-| [开发规范](docs/development-standards.md) | Git 分支 / 提交 / 接口 / 代码规范 |
-| [错误码对照表](docs/error-code-table.md) | 全量错误码与边界场景对照 |
-| [Mock 链路说明](docs/mock-chain-guide.md) | 评论 → 私信 → 加企微 → 会话全流程 Mock |
-| [压测接口清单](docs/performance-testing-list.md) | 核心接口 + JMeter 导入建议 |
-| [生产环境配置校验单](docs/production-config-check.md) | 生产文档关闭核查 / 网关拦截规则 |
-| [WebSocket 接入指南](docs/websocket-guide.md) | 实时消息推送接入说明 |
-| [客户对接确认单](docs/customer-onboarding-confirmation.md) | 客户侧对接交付物清单 |
+| `AICRM_JWT_SECRET` | JWT 签名密钥，至少 32 字节随机值 |
+| `DB_URL` | PostgreSQL JDBC 地址 |
+| `DB_USERNAME` / `DB_PASSWORD` | 数据库账号密码 |
+| `REDIS_HOST` / `REDIS_PORT` / `REDIS_PASSWORD` | Redis 连接信息 |
+| `RABBITMQ_HOST` / `RABBITMQ_PORT` | RabbitMQ 地址 |
+| `RABBITMQ_USERNAME` / `RABBITMQ_PASSWORD` / `RABBITMQ_VHOST` | RabbitMQ 认证信息 |
+
+文件存储默认使用本地目录 `./data/upload`，也支持在配置中切换到 MinIO。生产环境请使用持久化磁盘或对象存储，并收紧 CORS、上传大小和外部渠道回调校验。
 
 ## 项目结构
 
-```
+```text
 .
-├── docs/                     # 项目文档（规范 / 错误码 / Mock / 压测 / 维护 / 离线文档 / Logo）
-├── java/                     # Java 后端（Maven 多模块）
-│   ├── aicrm-common          #   通用模块：Result / ResultCode / JWT / 租户上下文
-│   ├── aicrm-dao             #   数据访问：Entity / Mapper（MyBatis-Plus）
-│   ├── aicrm-service         #   业务服务：渠道 / 线索 / 会话 / AI / 知识库 / 统计
-│   ├── aicrm-api             #   HTTP 接口层：Controller + OpenAPI 配置 + Mock 注解
-│   ├── aicrm-admin-boot      #   启动模块：应用入口 / 全局配置 / db/init.sql
-│   └── aicrm-generator       #   代码生成器（FastAutoGenerator + FreeMarker 模板）
-├── python/                   # AI 能力服务（FastAPI）
-│   └── app/                  #   main.py 入口 / api / core / schemas / services
-├── docker-compose.yml        # 本地中间件编排（PostgreSQL）
-├── README.md                 # 项目说明（入口）
-├── CHANGELOG.md              # 版本变更记录
-├── CONTRIBUTING.md           # 贡献指南
-├── CODE_OF_CONDUCT.md        # 贡献者公约
-├── SECURITY.md               # 安全政策 / 漏洞披露
-├── NOTICE                    # 第三方组件与协议声明
-└── LICENSE                   # Apache-2.0 开源协议
+├── java/
+│   ├── pom.xml                 # Maven 聚合工程
+│   ├── aicrm-shared-kernel/    # 领域共享内核
+│   ├── aicrm-platform/         # 平台域
+│   ├── aicrm-sales/            # 销售域
+│   ├── aicrm-web/              # 新版 API 骨架
+│   ├── aicrm-common/           # 旧版通用能力
+│   ├── aicrm-dao/              # 旧版数据访问
+│   ├── aicrm-service/          # 旧版业务服务
+│   ├── aicrm-api/              # 旧版接口层
+│   ├── aicrm-admin-boot/       # 启动模块与配置
+│   └── aicrm-generator/        # 代码生成器
+├── docker-compose.yml          # 本地 PostgreSQL 编排
+├── 智能CRM系统整体闭环流程文档.md # 产品与业务全景设计
+├── 开发阶段计划.md             # DDD 重构计划与验收标准
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── CODE_OF_CONDUCT.md
+├── NOTICE
+├── LICENSE
+└── README.md
 ```
+
+## 开发约定
+
+- PostgreSQL 是唯一官方数据库；数据库变更使用 Flyway 迁移脚本。
+- 新业务优先进入领域模块，Controller、应用服务、领域对象和持久化对象保持隔离。
+- 跨领域通过公开应用接口或领域事件协作，不直接依赖其他领域的实体、Mapper 或 Repository。
+- 所有业务查询和命令必须带租户上下文；涉及私海/公海的操作需要校验数据范围和资源版本。
+- 密码仅保存 BCrypt 哈希，日志中不得记录密码、JWT 或完整敏感信息。
+
+提交代码前建议执行：
+
+```bash
+cd java
+mvn test
+mvn -DskipTests package
+```
+
+更完整的贡献流程请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)，安全问题请按照 [SECURITY.md](SECURITY.md) 的方式私下报告。
 
 ## 路线图
 
-当前版本（v0.1.0）为 MVP 里程碑，以下能力已列入规划，欢迎参与共建：
+下一阶段重点包括：
 
-- WebSocket 实时消息推送（替代当前轮询方案）
-- 管理端 Web 前端（基于 OpenAPI 文档的完整管理界面）
-- 抖音 / 视频号 / 企微真实 OAuth 授权与令牌刷新联调
-- 企微侧边栏能力增强（客户画像 / 话术推荐）
-- 知识库检索强化（混合检索 / Rerank 重排）
+- 完成 `/api/v1` 线索、客户、联系人和跟进 Controller 及契约测试。
+- 补齐组织、数据范围、字段权限和审批能力。
+- 将渠道、会话、产品、统计等旧实现迁移到领域模块。
+- 增加 Testcontainers、ArchUnit、并发认领和跨租户安全测试。
+- 在核心业务稳定后再建设管理端和外部系统连接器。
 
-> 路线图随社区反馈动态调整，建议与讨论请在 [Issues](https://github.com/your-org/aicrm/issues) / Discussions 中提出。
-
-## 社区与支持
-
-| 渠道 | 用途 |
-| --- | --- |
-| GitHub Issues | Bug 报告 · 功能建议（请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md)） |
-| GitHub Discussions | 使用交流 · 方案咨询 · 最佳实践 |
-| 交流群（微信 / 钉钉） | 发布后补充，欢迎在 Discussions 中留言获取 |
-
-## 社区与治理
-
-| 文件 | 说明 |
-| --- | --- |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献指南：Issue / 开发流程 / PR 规范 / 代码要求 |
-| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | 贡献者公约：社区交流与行为准则 |
-| [SECURITY.md](SECURITY.md) | 安全政策：漏洞披露渠道、处理承诺与加固建议 |
-| [CHANGELOG.md](CHANGELOG.md) | 版本变更记录（Keep a Changelog + 语义化版本） |
-| [NOTICE](NOTICE) | 第三方开源组件与协议声明 |
-| [LICENSE](LICENSE) | Apache License 2.0 |
-
-## 参与贡献
-
-我们欢迎任何形式的贡献：功能建议、Bug 报告、文档完善、代码提交。完整流程与要求请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
-建议流程：
-
-1. Fork 本仓库并从 `develop` 创建特性分支：`git checkout -b feature/xxx develop`
-2. 提交变更并确保通过 `mvn -DskipTests package` 构建
-3. 遵循《[接口文档迭代维护规范](docs/api-doc-maintenance-guide.md)》中的评审检查项
-4. 发起 Pull Request（目标分支 `develop`），描述变更内容与验证结果
-
-所有贡献者需遵守 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)；发现安全漏洞请通过 [SECURITY.md](SECURITY.md) 中的渠道私下报告。
+详细阶段划分与验收标准见 [开发阶段计划.md](开发阶段计划.md)，完整业务边界见 [智能CRM系统整体闭环流程文档.md](智能CRM系统整体闭环流程文档.md)。
 
 ## 开源协议
 
-本项目基于 **Apache License 2.0** 开源，完整协议文本见 [LICENSE](./LICENSE)。
-
-**免责声明**：AiCRM 仅提供获客与客户管理能力，不提供任何绕过平台规则的功能；接入各渠道时请遵守对应开放平台的使用规范与当地法律法规。
-
----
-
-<div align="center">
-
-**AiCRM** · AI 获客销售中台
-
-Copyright © 2026 AiCRM Project Contributors · [Apache-2.0](./LICENSE)
-
-</div>
+本项目使用 [Apache License 2.0](LICENSE)。使用渠道接口、客户数据和文件存储时，请遵守对应平台规则、隐私保护要求及适用法律法规。本项目不提供绕过平台规则或未经授权采集个人信息的能力。
