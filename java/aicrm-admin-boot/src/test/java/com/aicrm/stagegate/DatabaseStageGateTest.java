@@ -44,6 +44,7 @@ class DatabaseStageGateTest {
     @Test
     void legacyTenantAndUsersUpgradeInOrder() throws Exception {
         clean();
+        migrateTo("1");
         execute("create table tenant (id bigint primary key, name varchar(200), status smallint, "
                 + "created_at timestamptz, updated_at timestamptz, deleted smallint)");
         execute("create table users (id bigint primary key, tenant_id bigint, name varchar(100), "
@@ -330,6 +331,11 @@ class DatabaseStageGateTest {
     private void migrate() {
         Flyway.configure().dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())
                 .locations("classpath:db/migration").load().migrate();
+    }
+
+    private void migrateTo(String target) {
+        Flyway.configure().dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())
+                .locations("classpath:db/migration").target(target).load().migrate();
     }
 
     private Connection connection() throws SQLException {
