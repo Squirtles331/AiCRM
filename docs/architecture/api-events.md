@@ -42,6 +42,10 @@
 | `CustomerClaimed/Released/Assigned/Transferred/Recycled` | Customer | 前后负责人、部门、公海、规则版本 | 审计、提醒 |
 | `CustomerMerged` | Customer | `sourceCustomerId,targetCustomerId` | 下游引用修正 |
 | `ResourcesHandedOver` | Handover | `fromUserId,toUserId,resourceIds` | 离职流程确认 |
+| `CategoryCreated` | ProductCategory | `categoryId,code` | 目录同步、审计 |
+| `ProductCreated` | Product | `productId,sku` | 目录同步、报价可选产品投影 |
+| `PriceListCreated/PriceItemCreated` | PriceList / PriceItem | 价目表和价格项快照 | 报价准备、审计 |
+| `PriceListPublished` | PriceList | `priceListId,currency,effectiveFrom` | 报价可用价格表投影 |
 
 事件信封固定包含 `eventId,eventType,eventVersion,tenantId,aggregateType,aggregateId,operationId,occurredAt,traceId,payload`。新增可选字段保持同版本，删除/改义或类型变化必须升 `eventVersion` 并提供兼容期。
 

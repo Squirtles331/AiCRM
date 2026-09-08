@@ -59,6 +59,7 @@ public class PlatformPrincipalService {
         if (roles.stream().anyMatch(role -> List.of("admin", "supervisor").contains(role))) {
             permissions.addAll(Set.of("lead:read:any", "lead:write:any", "lead:assign", "lead:handover",
                     "customer:read:any", "customer:write:any", "customer:assign", "customer:handover"));
+            permissions.addAll(Set.of("catalog:read", "catalog:write", "catalog:publish"));
         }
         if (!roles.isEmpty()) {
             permissions.addAll(Set.of("lead:create", "lead:claim", "lead:read:own", "lead:write:own",

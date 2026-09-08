@@ -297,6 +297,58 @@ class SalesApiV1IntegrationTest {
     }
 
     @Test
+    void managesTenantCatalogAndPublishesOnlyCompleteDraftPriceLists() throws Exception {
+        seedSalesTenant();
+        seedAdminAndExitingUser();
+        String token = token(ADMIN_USER_ID);
+
+        String categoryResponse = mockMvc.perform(post("/api/v1/catalog/categories")
+                        .header("Authorization", bearer(token)).header("Idempotency-Key", "catalog-category-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\":\"SOFTWARE\",\"name\":\"软件\",\"sortOrder\":10}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.code").value("OK"))
+                .andReturn().getResponse().getContentAsString();
+        String categoryId = objectMapper.readTree(categoryResponse).path("data").path("id").asText();
+
+        String productResponse = mockMvc.perform(post("/api/v1/catalog/products")
+                        .header("Authorization", bearer(token)).header("Idempotency-Key", "catalog-product-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"categoryId\":" + categoryId + ",\"sku\":\"CRM-STD\",\"name\":\"CRM 标准版\",\"unit\":\"套\"}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.sku").value("CRM-STD"))
+                .andReturn().getResponse().getContentAsString();
+        String productId = objectMapper.readTree(productResponse).path("data").path("id").asText();
+
+        String priceListResponse = mockMvc.perform(post("/api/v1/catalog/price-lists")
+                        .header("Authorization", bearer(token)).header("Idempotency-Key", "catalog-price-list-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\":\"STANDARD-2026\",\"name\":\"2026 标准价\",\"currency\":\"CNY\"}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
+                .andReturn().getResponse().getContentAsString();
+        String priceListId = objectMapper.readTree(priceListResponse).path("data").path("id").asText();
+
+        mockMvc.perform(post("/api/v1/catalog/price-lists/{id}/items", priceListId)
+                        .header("Authorization", bearer(token)).header("Idempotency-Key", "catalog-price-item-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"productId\":" + productId + ",\"listPrice\":1000.00,\"minimumPrice\":800.00,\"taxRate\":0.06}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.listPrice").value(1000));
+
+        mockMvc.perform(post("/api/v1/catalog/price-lists/{id}/actions/publish", priceListId)
+                        .header("Authorization", bearer(token)).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.data.version").value(1));
+
+        mockMvc.perform(post("/api/v1/catalog/price-lists/{id}/items", priceListId)
+                        .header("Authorization", bearer(token)).header("Idempotency-Key", "catalog-price-item-after-publish")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"productId\":" + productId + ",\"listPrice\":1000.00}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_outbox_event where tenant_id=? and aggregate_type='PRICE_LIST'",
+                Long.class, TENANT_ID)).isEqualTo(2L);
+    }
+
+    @Test
     void publishesRetriesAndDeduplicatesReliableMessages() {
         seedSalesTenant();
         long successfulEventId = 519001L;

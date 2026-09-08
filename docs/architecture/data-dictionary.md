@@ -1,6 +1,6 @@
-# 第一里程碑数据字典（冻结版）
+# CRM 数据字典（阶段 2A）
 
-版本：`M1-DB-1.3`；状态：已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V9` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
+版本：`M2A-DB-1.0`；状态：产品目录已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V10` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
 
 ## 1. 类型与通用字段组
 
@@ -52,6 +52,17 @@
 
 每个租户自动拥有用户名为 `__system__` 的启用系统任务用户。它只作为定时回收等非人工操作的审计操作者，不参与普通登录、数据授权或业务负责人分配。
 
-## 5. 后续对象登记
+## 5. 产品与价格目录
+
+| 表 | 字段（类型；N=NOT NULL；默认值） | 键、检查与主要索引 |
+|---|---|---|
+| `crm_product_category` | `id/tenant_id BIGINT N`；`parent_id BIGINT NULL`；`code VARCHAR(64) N`；`name VARCHAR(100) N`；`status VARCHAR(16) N DEFAULT 'ACTIVE'`；`sort_order INT N DEFAULT 0`；`extension JSONB N DEFAULT '{}'`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 活跃 `(tenant_id,code)` 唯一；状态为 `ACTIVE/DISABLED`；父分类复合 FK 保证同租户；父级索引 |
+| `crm_product` | `id/tenant_id BIGINT N`；`category_id BIGINT NULL`；`product_no VARCHAR(32) N`；`sku VARCHAR(64) N`；`name VARCHAR(200) N`；`specification VARCHAR(500) NULL`；`unit VARCHAR(32) N`；`status VARCHAR(16) N DEFAULT 'ACTIVE'`；`sale_enabled BOOLEAN N DEFAULT true`；`extension JSONB N DEFAULT '{}'`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 活跃 `(tenant_id,product_no)`、`(tenant_id,sku)` 唯一；分类复合 FK；分类索引；状态为 `ACTIVE/DISABLED` |
+| `crm_price_list` | `id/tenant_id BIGINT N`；`code VARCHAR(64) N`；`name VARCHAR(100) N`；`currency CHAR(3) N`；`status VARCHAR(16) N DEFAULT 'DRAFT'`；`effective_from/effective_to TIMESTAMPTZ NULL`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 活跃编码租户内唯一；状态为 `DRAFT/ACTIVE/EXPIRED/DISABLED`；币种三位大写；结束时间晚于开始时间；生效区间索引 |
+| `crm_price_item` | `id/tenant_id BIGINT N`；`price_list_id/product_id BIGINT N`；`list_price NUMERIC(18,2) N`；`minimum_price NUMERIC(18,2) NULL`；`tax_rate NUMERIC(5,4) N DEFAULT 0`；`status VARCHAR(16) N DEFAULT 'ACTIVE'`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 价目表、产品复合 FK；活跃 `(tenant_id,price_list_id,product_id)` 唯一；最低价不得大于目录价；税率 0 到 1；产品索引 |
+
+目录权限为 `catalog:read`、`catalog:write`、`catalog:publish`。产品目录写操作与审计、Outbox 同事务保存；发布后价目表不允许继续新增价格项。
+
+## 6. 后续对象登记
 
 交易域对象不在本冻结版本建表。其主责、主键、租户和跨域引用规则见 [future-contexts.md](future-contexts.md)；任何正式字段必须经对应阶段门并通过新 Flyway 版本创建，禁止提前塞入 `crm_lead.extension` 或 `crm_customer.extension`。

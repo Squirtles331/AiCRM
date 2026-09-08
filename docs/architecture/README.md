@@ -2,7 +2,7 @@
 
 ## 1. 适用范围
 
-本目录是后端研发、测试和评审的阶段 0 基线。当前只准实现工程底座以及线索、客户私海/公海闭环；商机、报价、合同、订单、交付、财务和售后只定义上下文边界，不进入编码。
+本目录是后端研发、测试和评审的架构基线。当前已交付工程底座、线索/客户私海公海闭环及阶段 2A 的产品与价格目录；商机、报价、合同、订单、交付、财务和售后仍只定义上下文边界，不进入编码。
 
 进入下一阶段必须同时满足：本目录相关设计已评审、Flyway 可从空库初始化、模块边界测试通过、租户与数据范围测试通过、当前阶段端到端用例通过。
 
@@ -12,10 +12,12 @@
 flowchart LR
     WEB["aicrm-web\nHTTP 适配器"] --> PLATFORM["aicrm-platform\n租户 权限 审计 幂等"]
     WEB --> SALES["aicrm-sales\n线索 客户 联系人 跟进"]
+    WEB --> CATALOG["aicrm-catalog\n分类 产品 价目表"]
     SALES --> KERNEL["aicrm-shared-kernel\n值对象 错误 事件 安全上下文"]
+    CATALOG --> KERNEL
     PLATFORM --> KERNEL
     BOOT["aicrm-admin-boot\n装配与启动"] --> WEB
-    BOOT --> LEGACY["遗留 api/service/dao\n迁移期间只作适配"]
+    CATALOG --> PLATFORM
     SALES -. "Outbox 事件" .-> FUTURE["后续交易与分析上下文"]
 ```
 
@@ -27,7 +29,7 @@ flowchart LR
 |---|---|---|
 | platform | 租户、组织、用户、角色、权限、审计、幂等、Outbox | 销售业务状态 |
 | sales | 公海池、线索、客户、联系人、跟进、归属历史、交接 | 库存、到账、正式发票 |
-| catalog（后续） | 产品、价格表、折扣规则 | 合同成交价审批 |
+| catalog | 产品分类、产品、价目表、价格项 | 合同成交价审批与报价折扣 |
 | trade（后续） | 合同、合同变更、销售订单 | 实际库存与发货 |
 | fulfillment（后续） | 交付计划、验收、异常协调 | ERP 库存事实 |
 | finance（后续） | 回款计划、开票申请及外部结果镜像 | 到账核销与正式发票主数据 |
@@ -56,3 +58,4 @@ flowchart LR
 - [第一里程碑阶段门](stage-gate.md)
 - [安全与非功能要求](security-nfr.md)
 - [架构决策记录](adr.md)
+- [阶段 2A 产品与价格设计](catalog.md)

@@ -22,6 +22,7 @@
         <module>aicrm-shared-kernel</module>
         <module>aicrm-platform</module>
         <module>aicrm-sales</module>
+        <module>aicrm-catalog</module>
         <module>aicrm-web</module>
         <module>aicrm-admin-boot</module>
     </modules>
@@ -58,6 +59,11 @@
             <dependency>
                 <groupId>com.aicrm</groupId>
                 <artifactId>aicrm-sales</artifactId>
+                <version>${aicrm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aicrm</groupId>
+                <artifactId>aicrm-catalog</artifactId>
                 <version>${aicrm.version}</version>
             </dependency>
             <dependency>
