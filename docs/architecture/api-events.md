@@ -20,6 +20,8 @@
 | `GET /api/v1/sales-conversations/{id}` | 查询会话及追加式沟通记录 | 会话负责人或 `conversation:read:any` |
 | `POST /api/v1/sales-conversations/{id}/entries` | 追加入站、出站或内部备注记录；请求含 `Idempotency-Key` | 会话负责人或 `conversation:write:any` |
 | `POST /api/v1/sales-conversations/{id}/actions/close|reopen` | 关闭或重开会话；请求含 `version` | 会话负责人或 `conversation:write:any` |
+| `GET/POST /api/v1/sales-documents` | 查询或创建 CRM 销售资料；创建含 `Idempotency-Key` | `document:read` / `document:manage` |
+| `POST /api/v1/sales-documents/{id}/actions/publish|archive` | 发布或归档销售资料；请求含 `version` | `document:manage` |
 | `POST /api/v1/acquisition-channels` | 创建 CRM 获客渠道；请求含 `code/name/sourceType` 和 `Idempotency-Key` | `channel:manage` |
 | `GET /api/v1/acquisition-channels`、`GET /api/v1/acquisition-channels/{id}` | 查询获客渠道列表或详情 | `channel:read/manage` |
 | `POST /api/v1/acquisition-channels/{id}/actions/activate|disable` | 启用或停用渠道；请求含 `version` | `channel:manage` |
