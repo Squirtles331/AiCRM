@@ -62,7 +62,7 @@ stateDiagram-v2
 | `POST /api/v1/contracts/{id}/actions/submit-signature|withdraw-signature|sign|void` | 对应 `contract:*` | 请求含合同 `version`；作废额外含原因。 |
 | `POST /api/v1/contracts/{id}/changes` | `contract:change` | `Idempotency-Key`；创建变更快照。 |
 | `POST /api/v1/orders` | `order:create` | `Idempotency-Key`；合同必须已签。 |
-| `POST /api/v1/orders/{id}/actions/confirm|request-cancel` | 对应 `order:*` | 请求含订单 `version`；取消须说明原因。 |
+| `POST /api/v1/orders/{id}/actions/confirm|request-cancel|close` | 对应 `order:*` | 请求含订单 `version`；取消须说明原因；关闭须满足 CRM 销售流程条件。 |
 
 第一实现切片严格限定为“批准报价 -> 合同草稿 -> 签署 -> 订单草稿”。合同变更、作废拦截、订单确认/取消和 CRM 内部关闭在该切片完成验收后逐项实现；不建设交付、回款、开票或售后表。
 
