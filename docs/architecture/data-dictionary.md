@@ -120,6 +120,8 @@ V20 的 `crm_performance_score_rule` 保存名称、匹配指标、`DRAFT/ACTIVE
 | `crm_connector` | `id/tenant_id BIGINT N`；`connector_no VARCHAR(32) N`；`name VARCHAR(200) N`；`type/status VARCHAR(32/16) N`；`operator_user_id BIGINT N`；`public_pool_id BIGINT NULL`；`secret_hash VARCHAR(100) N`；`version`、`AUDIT_MUTABLE` | 类型为 `MARKETING_WEBHOOK/ORGANIZATION_WEBHOOK`，状态为 `ACTIVE/DISABLED`；营销连接器必须是启用线索公海，组织连接器不得有公海；执行用户必须为同租户启用用户。密钥只保存 BCrypt 哈希。 |
 | `crm_connector_event` | `id/tenant_id/connector_id BIGINT N`；`external_event_id VARCHAR(128) N`；`event_type VARCHAR(64) N`；`payload JSONB N`；`payload_hash CHAR(64) N`；`outcome VARCHAR(32) N`；`lead_id BIGINT NULL`；`received_at TIMESTAMPTZ N` | `(tenant_id, connector_id, external_event_id)` 唯一且触发器禁止更新/删除；结果为 `LEAD_CREATED/ACCEPTED`，前者必须引用线索，后者禁止引用线索。 |
 
+连接器监控不创建投影或告警表，而是按 UTC 时间窗关联 `crm_connector_event` 和聚合类型为 `CONNECTOR_EVENT` 的 `crm_outbox_event`，计算受理、线索、待投递、已发布和死信数量。死信重放复用既有 Outbox 行，把状态恢复为 `PENDING` 并写 `crm_audit_log`，不复制连接器事件或 CRM 线索。
+
 ## 12. 后续对象登记
 
 交易域对象不在本冻结版本建表。其主责、主键、租户和跨域引用规则见 [future-contexts.md](future-contexts.md)；任何正式字段必须经对应阶段门并通过新 Flyway 版本创建，禁止提前塞入 `crm_lead.extension`、`crm_customer.extension` 或 `crm_opportunity.extension`。

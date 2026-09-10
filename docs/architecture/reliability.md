@@ -16,7 +16,7 @@
 
 ## Outbox 发布
 
-发布器以 `FOR UPDATE SKIP LOCKED` 批量领取 `PENDING/FAILED` 且已到 `available_at/next_retry_at` 的记录，置 `PUBLISHING` 并记录租约；发布成功置 `PUBLISHED/published_at`。失败采用分级退避，建议 1m、5m、30m、2h、12h；达到上限置 `DEAD/dead_lettered_at`，只能由 `outbox:retry` 权限重放。
+发布器以 `FOR UPDATE SKIP LOCKED` 批量领取 `PENDING/FAILED` 且已到 `available_at/next_retry_at` 的记录，置 `PUBLISHING` 并记录租约；发布成功置 `PUBLISHED/published_at`。失败采用分级退避，建议 1m、5m、30m、2h、12h；达到上限置 `DEAD/dead_lettered_at`。人工重放只允许 `outbox:retry` 权限，将死信记录复位为 `PENDING`、清除错误和租约、重新开始一轮自动退避，并写独立审计；不得复制业务聚合或生成另一条 Outbox 事件。
 
 当前实现使用 1m、5m、30m、2h、12h 五级确定性退避，第六次失败进入 `DEAD`；领取时会恢复超过租约时间的 `PUBLISHING` 记录。发布调度默认关闭，需设置 `AICRM_OUTBOX_ENABLED=true`，并可通过 `AICRM_OUTBOX_INTERVAL_MILLIS`、`AICRM_OUTBOX_BATCH_SIZE`、`AICRM_OUTBOX_LEASE_SECONDS` 调整。Broker Confirm 超时或否认均按失败处理。
 

@@ -64,6 +64,8 @@
 | `GET /api/v1/connectors/{id}` | 查询连接器元数据，绝不返回共享密钥或密钥哈希 | `connector:read/manage` |
 | `POST /api/v1/connectors/{id}/actions/activate|disable` | 启用或停用连接器；请求含 `version` | `connector:manage` |
 | `POST /api/v1/connectors/{id}/events` | 使用 `X-Connector-Secret` 接收外部事件；正文含 `eventId/eventType`，营销事件含 `lead` | 匿名密钥认证；同事件号载荷哈希幂等 |
+| `GET /api/v1/connectors/{id}/monitoring?from&to` | 查询连接器受理与 Outbox 投递状态；日期为 UTC 左闭右开窗口 | `connector:read/manage` |
+| `POST /api/v1/connectors/{id}/outbox/{outboxEventId}/actions/retry` | 将该连接器的死信投递重新置为待投递 | 同时具备 `connector:manage` 与 `outbox:retry` |
 | `POST /api/v1/approval-definitions` | 创建审批定义 | `approval:manage` |
 | `POST /api/v1/approval-definitions/{id}/actions/activate` | 启用审批定义，须含定义版本 | `approval:manage` |
 | `GET /api/v1/approval-tasks/pending` | 当前用户待审批任务 | `approval:task:read` |

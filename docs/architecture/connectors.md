@@ -19,3 +19,11 @@ V21 和 `aicrm-integration` 只实现 CRM 受控的入站 Webhook。连接器有
 `crm_connector.status` 为 `ACTIVE/DISABLED`，状态变更采用乐观锁。营销连接器必须引用同租户、启用的 `LEAD` 公海；组织连接器禁止填写公海。两类连接器都必须绑定同租户启用用户，营销连接器执行用户还必须拥有 `lead:create`。
 
 `crm_connector_event` 是追加式事实，唯一键为 `(tenant_id, connector_id, external_event_id)`。结果只可能为 `LEAD_CREATED` 或 `ACCEPTED`；前者必须引用 CRM 线索，后者不得引用线索。原始 JSON 仅保存在受控事件表，不被放入 Outbox 载荷。
+
+## 投递重试与监控
+
+每条连接器接收记录都会有一条 `ConnectorEventAccepted` Outbox。现有发布器对 `PENDING/FAILED` 自动按 1 分钟、5 分钟、30 分钟、2 小时、12 小时退避重试；耗尽后为 `DEAD`。这是事件投递可靠性，不会重放线索创建或组织事件接收事务。
+
+`GET /api/v1/connectors/{id}/monitoring?from&to` 返回 UTC 左闭右开、1 至 31 天窗口中的受理数、营销线索数、组织接收数及对应 Outbox 的待投递、已发布、死信数。省略日期为最近七个 UTC 自然日。`connector:read/manage` 可查看计数；最近故障的错误文本仅对 `connector:manage` 返回。
+
+`POST /api/v1/connectors/{id}/outbox/{outboxEventId}/actions/retry` 只允许同时具备 `connector:manage` 和 `outbox:retry` 的管理员操作。目标必须属于该连接器且状态为 `DEAD`；操作把其恢复为 `PENDING`、清除错误和租约、重置尝试计数，并写 `OUTBOX/RETRY` 审计。它不创建新的 Outbox 事件，随后由原有调度器投递。

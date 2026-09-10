@@ -965,17 +965,25 @@ class SalesApiV1IntegrationTest {
                 """, Long.class, TENANT_ID, Long.parseLong(marketingId));
         jdbcTemplate.update("update crm_outbox_event set status='DEAD', retry_count=6, last_error='broker unavailable', "
                         + "dead_lettered_at=now(), updated_at=now() where tenant_id=? and id=?", TENANT_ID, outboxEventId);
+        mockMvc.perform(get("/api/v1/connectors/{id}/monitoring", marketingId).header("Authorization", bearer(token(USER_ONE_ID))))
+                .andExpect(status().isForbidden());
         mockMvc.perform(get("/api/v1/connectors/{id}/monitoring", marketingId).header("Authorization", bearer(adminToken)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.receivedEvents").value(1))
                 .andExpect(jsonPath("$.data.leadsCreated").value(1)).andExpect(jsonPath("$.data.deadPublications").value(1))
                 .andExpect(jsonPath("$.data.latestIssue.outboxEventId").value(String.valueOf(outboxEventId)))
                 .andExpect(jsonPath("$.data.latestIssue.lastError").value("broker unavailable"));
         mockMvc.perform(post("/api/v1/connectors/{id}/outbox/{outboxEventId}/actions/retry", marketingId, outboxEventId)
+                        .header("Authorization", bearer(token(USER_ONE_ID))))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/v1/connectors/{id}/outbox/{outboxEventId}/actions/retry", marketingId, outboxEventId)
                         .header("Authorization", bearer(adminToken)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("PENDING"))
                 .andExpect(jsonPath("$.data.retryCount").value(0));
         assertThat(jdbcTemplate.queryForObject("select status || ':' || retry_count from crm_outbox_event where tenant_id=? and id=?",
                 String.class, TENANT_ID, outboxEventId)).isEqualTo("PENDING:0");
+        outboxDispatchService.dispatchBatch("connector-retry-test", 100, Duration.ofMinutes(5));
+        assertThat(jdbcTemplate.queryForObject("select status from crm_outbox_event where tenant_id=? and id=?",
+                String.class, TENANT_ID, outboxEventId)).isEqualTo("PUBLISHED");
         assertThat(jdbcTemplate.queryForObject("select count(*) from crm_audit_log where tenant_id=? and resource_type='OUTBOX' and resource_id=? and action='RETRY'",
                 Long.class, TENANT_ID, outboxEventId)).isEqualTo(1L);
     }
