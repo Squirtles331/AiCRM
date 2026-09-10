@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/v1/connectors")
@@ -47,6 +50,14 @@ public class ConnectorV1Controller {
         return success(ConnectorApiDtos.view(connectors.get(ActorContext.require(), id)));
     }
 
+    @GetMapping("/{id}/monitoring")
+    @Operation(summary = "查询连接器受理与投递监控")
+    public ApiResponse<ConnectorApiDtos.MonitoringView> monitoring(@PathVariable long id,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return success(ConnectorApiDtos.view(connectors.monitoring(ActorContext.require(), id, from, to)));
+    }
+
     @PostMapping("/{id}/actions/activate")
     @Operation(summary = "启用连接器")
     public ApiResponse<ConnectorApiDtos.View> activate(@PathVariable long id,
@@ -61,6 +72,14 @@ public class ConnectorV1Controller {
                                                        @Valid @RequestBody ConnectorApiDtos.VersionRequest request) {
         return success(ConnectorApiDtos.view(connectors.disable(ActorContext.require(), id,
                 new ConnectorCommands.StatusChange(request.version()))));
+    }
+
+    @PostMapping("/{id}/outbox/{outboxEventId}/actions/retry")
+    @Operation(summary = "重放连接器死信投递")
+    public ApiResponse<ConnectorApiDtos.RetryReceiptView> retryDeadPublication(@PathVariable long id,
+                                                                                 @PathVariable long outboxEventId) {
+        var receipt = connectors.retryDeadPublication(ActorContext.require(), id, outboxEventId);
+        return success(new ConnectorApiDtos.RetryReceiptView(String.valueOf(receipt.eventId()), receipt.status(), receipt.retryCount()));
     }
 
     @PostMapping("/{id}/events")

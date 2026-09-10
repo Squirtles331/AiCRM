@@ -3,6 +3,7 @@ package com.aicrm.integration.application;
 import com.aicrm.integration.domain.Connector;
 import com.aicrm.integration.domain.ConnectorEvent;
 import com.aicrm.integration.domain.ConnectorEventReceipt;
+import com.aicrm.integration.domain.ConnectorMonitoring;
 import com.aicrm.integration.domain.ConnectorRepository;
 import com.aicrm.integration.domain.ConnectorStatus;
 import com.aicrm.integration.domain.ConnectorType;
@@ -14,6 +15,7 @@ import com.aicrm.kernel.security.Actor;
 import com.aicrm.platform.application.AuditLogService;
 import com.aicrm.platform.application.IdempotencyService;
 import com.aicrm.platform.application.OutboxService;
+import com.aicrm.platform.application.OutboxRetryService;
 import com.aicrm.platform.application.PlatformPrincipalService;
 import com.aicrm.sales.application.SalesCommandService;
 import com.aicrm.sales.application.SalesCommands;
@@ -29,6 +31,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -47,12 +51,13 @@ public class ConnectorService {
     private final SalesCommandService salesCommandService;
     private final AuditLogService auditLogService;
     private final OutboxService outboxService;
+    private final OutboxRetryService outboxRetryService;
     private final ObjectMapper objectMapper;
 
     public ConnectorService(ConnectorRepository repository, IdGenerator idGenerator, IdempotencyService idempotencyService,
                             PlatformPrincipalService principalService, PasswordEncoder passwordEncoder,
                             SalesCommandService salesCommandService, AuditLogService auditLogService,
-                            OutboxService outboxService, ObjectMapper objectMapper) {
+                            OutboxService outboxService, OutboxRetryService outboxRetryService, ObjectMapper objectMapper) {
         this.repository = repository;
         this.idGenerator = idGenerator;
         this.idempotencyService = idempotencyService;
@@ -61,6 +66,7 @@ public class ConnectorService {
         this.salesCommandService = salesCommandService;
         this.auditLogService = auditLogService;
         this.outboxService = outboxService;
+        this.outboxRetryService = outboxRetryService;
         this.objectMapper = objectMapper;
     }
 
@@ -84,6 +90,31 @@ public class ConnectorService {
     public Connector get(Actor actor, long connectorId) {
         requireRead(actor);
         return connector(actor.tenantId(), connectorId);
+    }
+
+    @Transactional(readOnly = true)
+    public ConnectorMonitoring monitoring(Actor actor, long connectorId, LocalDate from, LocalDate to) {
+        requireRead(actor);
+        connector(actor.tenantId(), connectorId);
+        DateRange range = dateRange(from, to);
+        ConnectorMonitoring monitoring = repository.monitoring(actor.tenantId(), connectorId, range.from(), range.to());
+        if (actor.permissions().contains("connector:manage") || monitoring.latestIssue() == null) {
+            return monitoring;
+        }
+        ConnectorMonitoring.DeliveryIssue issue = monitoring.latestIssue();
+        return new ConnectorMonitoring(monitoring.receivedEvents(), monitoring.leadsCreated(), monitoring.acceptedEvents(),
+                monitoring.pendingPublications(), monitoring.publishedPublications(), monitoring.deadPublications(),
+                new ConnectorMonitoring.DeliveryIssue(issue.outboxEventId(), issue.status(), issue.retryCount(), null, issue.updatedAt()));
+    }
+
+    @Transactional
+    public OutboxRetryService.RetryReceipt retryDeadPublication(Actor actor, long connectorId, long outboxEventId) {
+        require(actor, "connector:manage");
+        connector(actor.tenantId(), connectorId);
+        if (!repository.ownsConnectorEventOutbox(actor.tenantId(), connectorId, outboxEventId)) {
+            throw new DomainException(ErrorCode.NOT_FOUND, "连接器事件投递不存在");
+        }
+        return outboxRetryService.retryDead(actor, outboxEventId);
     }
 
     @Transactional
@@ -224,6 +255,19 @@ public class ConnectorService {
         return "connector-lead:" + connectorId + ":" + sha256(externalEventId).substring(0, 32);
     }
 
+    private DateRange dateRange(LocalDate from, LocalDate to) {
+        if ((from == null) != (to == null)) {
+            throw new DomainException(ErrorCode.VALIDATION_ERROR, "from 和 to 必须同时提供");
+        }
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        LocalDate effectiveFrom = from == null ? today.minusDays(6) : from;
+        LocalDate effectiveTo = to == null ? today.plusDays(1) : to;
+        if (!effectiveTo.isAfter(effectiveFrom) || effectiveFrom.plusDays(31).isBefore(effectiveTo)) {
+            throw new DomainException(ErrorCode.VALIDATION_ERROR, "监控时间窗必须为 1 至 31 天的 UTC 左闭右开区间");
+        }
+        return new DateRange(effectiveFrom.atStartOfDay().toInstant(ZoneOffset.UTC), effectiveTo.atStartOfDay().toInstant(ZoneOffset.UTC));
+    }
+
     private String requiredText(JsonNode object, String field, String label) {
         return required(text(object, field), label);
     }
@@ -254,5 +298,8 @@ public class ConnectorService {
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException("SHA-256 不可用", exception);
         }
+    }
+
+    private record DateRange(Instant from, Instant to) {
     }
 }
