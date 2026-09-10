@@ -5,6 +5,7 @@ import com.aicrm.analytics.domain.WorkbenchSummary;
 import com.aicrm.kernel.error.DomainException;
 import com.aicrm.kernel.error.ErrorCode;
 import com.aicrm.kernel.security.Actor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -18,6 +19,7 @@ public class WorkbenchQueryService {
     private final WorkbenchRepository repository;
     private final Clock clock;
 
+    @Autowired
     public WorkbenchQueryService(WorkbenchRepository repository) {
         this(repository, Clock.systemUTC());
     }
