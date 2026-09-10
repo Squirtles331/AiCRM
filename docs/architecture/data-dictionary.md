@@ -1,6 +1,6 @@
-# CRM 数据字典（阶段 2D）
+# CRM 数据字典（阶段 3A）
 
-版本：`M2D-DB-1.0`；状态：产品目录、商机管道、报价与审批基础已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V13` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
+版本：`M3A-DB-1.1`；状态：产品目录、商机管道、报价审批、合同签署与订单草稿首切片已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V16` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
 
 ## 1. 类型与通用字段组
 
@@ -82,7 +82,20 @@
 
 报价创建只允许引用进行中或赢单商机与生效价目表，并将产品与价格复制到版本行。报价根 `version` 和当前报价版本 `version` 是独立乐观锁；提交和过期命令必须同时提供 `rootVersion` 和 `version`，分别校验两个聚合记录。提交创建审批实例；审批结论同步报价，不存在绕过审批的报价直接驳回命令。当前报价被拒绝后，可使用根版本创建 `current_version_no + 1` 的草稿重报版本，原版本与行保持不可变。Outbox 断言和查询必须使用 `tenant_id + aggregate_type + aggregate_id` 精确定位，不以租户内事件总数推断状态。
 
-## 8. 审批
+## 8. 合同与销售订单
+
+| 表 | 字段（类型；N=NOT NULL；默认值） | 键、检查与主要索引 |
+|---|---|---|
+| `crm_contract` | `id/tenant_id BIGINT N`；`contract_no VARCHAR(32) N`；`name VARCHAR(200) N`；`quote_id/quote_version_id/customer_id BIGINT N`；`currency CHAR(3) N`；`subtotal/discount_amount/tax_amount/total_amount NUMERIC(18,2) N DEFAULT 0`；`status VARCHAR(24) N DEFAULT 'DRAFT'`；`effective_from/effective_to DATE NULL`；`submitted_at/signed_at/voided_at TIMESTAMPTZ NULL`；`void_reason VARCHAR(500) NULL`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 活跃合同号租户内唯一；活跃 `(tenant_id,quote_id,quote_version_id)` 唯一；状态为 `DRAFT/PENDING_SIGNATURE/SIGNED/VOIDED`；金额非负、币种三位大写、截止日不得早于生效日；作废状态必须同时有时间与原因。报价、报价版本、客户只存 ID，由应用服务校验。 |
+| `crm_contract_line` | `id/tenant_id/contract_id BIGINT N`；`line_no INTEGER N`；`quote_line_id/product_id BIGINT N`；产品编号、SKU、名称、单位快照；`quantity NUMERIC(18,4) N`；`list_price/unit_price/line_amount NUMERIC(18,2) N`；`discount_rate/tax_rate NUMERIC(5,4) N`；`AUDIT_MUTABLE` | 同合同活跃行号唯一；同领域合同复合 FK；数量正数，金额非负，折扣和税率为 0 到 1。合同明细只在创建时由获批报价版本复制。 |
+| `crm_contract_change` | `id/tenant_id/contract_id BIGINT N`；`change_no VARCHAR(32) N`；`status VARCHAR(16) N DEFAULT 'DRAFT'`；`reason VARCHAR(500) N`；`before_snapshot/after_snapshot JSONB N`；审批时间、拒绝原因、`version`、`AUDIT_MUTABLE` | 活跃变更号租户内唯一；同领域合同复合 FK；状态 `DRAFT/SUBMITTED/APPROVED/REJECTED/CANCELLED`。当前仅冻结模型，不允许直接改写已签合同。 |
+| `crm_sales_order` | `id/tenant_id BIGINT N`；`order_no VARCHAR(32) N`；`contract_id/customer_id BIGINT N`；`external_order_no VARCHAR(100) NULL`；`currency CHAR(3) N`；`total_amount NUMERIC(18,2) N`；状态、预计交付、确认/取消/关闭时间、`version`、`AUDIT_MUTABLE` | 活跃订单号、非空外部订单号和活跃 `contract_id` 均租户内唯一；首切片每个已签合同创建一张完整订单，状态 `DRAFT/CONFIRMED/CANCELLING/CANCELLED/CLOSED`。正式库存、实际发货不在 CRM 表中。 |
+| `crm_sales_order_line` | `id/tenant_id/order_id BIGINT N`；`line_no INTEGER N`；`contract_line_id/product_id BIGINT N`；产品快照、数量、成交单价、税率、行金额、`AUDIT_MUTABLE` | 同订单行号唯一；同领域订单复合 FK；数量正数，金额非负，税率为 0 到 1。 |
+| `crm_order_cancel` | `id/tenant_id/order_id BIGINT N`；`cancel_no VARCHAR(32) N`；`status VARCHAR(16) N DEFAULT 'PENDING'`；`reason VARCHAR(500) N`；`request_snapshot JSONB N`；处理时间、拒绝原因、`version`、`AUDIT_MUTABLE` | 活跃取消编号租户内唯一；每订单至多一个未完成取消；状态 `PENDING/APPROVED/REJECTED/COMPLETED`。 |
+
+合同根和快照行在同一事务创建，同时写入 `crm_audit_log` 与 `crm_outbox_event`。签署状态转换使用根 `version` 条件更新；任何报价、产品、价格项的后续变更均不得回写合同快照。
+
+## 9. 审批
 
 | 表 | 字段（类型；N=NOT NULL；默认值） | 键、检查与主要索引 |
 |---|---|---|

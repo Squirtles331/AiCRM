@@ -1,0 +1,12 @@
+package com.aicrm.trade.order.domain;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface SalesOrderRepository {
+    SalesOrder insert(SalesOrder order, long actorId);
+    void insertLine(SalesOrderLine line, long actorId);
+    Optional<SalesOrder> find(long tenantId, long orderId);
+    List<SalesOrderLine> findLines(long tenantId, long orderId);
+    boolean existsForContract(long tenantId, long contractId);
+}

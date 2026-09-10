@@ -39,6 +39,14 @@
 | `POST /api/v1/quotes/{id}/actions/submit` | 提交报价；请求须含 `rootVersion,version,approvalDefinitionCode` 和 `Idempotency-Key` | `quote:submit` |
 | `POST /api/v1/quotes/{id}/actions/withdraw-approval` | 撤回在途报价审批；请求须含 `approvalInstanceId,instanceVersion` | `quote:withdraw` |
 | `POST /api/v1/quotes/{id}/actions/expire` | 已批准报价到期处理；请求须含 `rootVersion,version` | `quote:expire` |
+| `POST /api/v1/contracts` | 从已批准报价的当前批准版本创建合同草稿；请求须含合同名称和 `Idempotency-Key` | `contract:create` + 来源商机数据范围 |
+| `GET /api/v1/contracts/{id}` | 查询合同根 | `contract:read:own/any` + 来源商机数据范围 |
+| `GET /api/v1/contracts/{id}/lines` | 查询合同不可变商业快照行 | 同合同查看权限 |
+| `POST /api/v1/contracts/{id}/actions/submit-signature` | 提交草稿合同签署；请求须含 `version` | `contract:submit-signature` |
+| `POST /api/v1/contracts/{id}/actions/sign` | 确认待签署合同已签；请求须含 `version` | `contract:sign` |
+| `POST /api/v1/orders` | 从已签合同创建完整销售订单草稿；请求含 `expectedDeliveryAt` 和 `Idempotency-Key` | `order:create` + 合同来源数据范围 |
+| `GET /api/v1/orders/{id}` | 查询销售订单根 | `order:read:own/any` + 合同来源数据范围 |
+| `GET /api/v1/orders/{id}/lines` | 查询销售订单不可变商业快照行 | 同订单查看权限 |
 | `POST /api/v1/approval-definitions` | 创建审批定义 | `approval:manage` |
 | `POST /api/v1/approval-definitions/{id}/actions/activate` | 启用审批定义，须含定义版本 | `approval:manage` |
 | `GET /api/v1/approval-tasks/pending` | 当前用户待审批任务 | `approval:task:read` |
@@ -67,6 +75,9 @@
 | `OpportunityWon/Lost/Restarted` | Opportunity | `opportunityId,status,reason` | 后续报价、经营报表 |
 | `QuoteCreated` | Quote | `quoteId,opportunityId,priceListId,currentVersionNo` | 审计、工作台 |
 | `QuoteSubmitted/Approved/Rejected/ApprovalWithdrawn/Expired` | Quote | `quoteId,status,currentVersionNo` | 审批衔接、提醒、报表 |
+| `ContractCreated` | Contract | `contractId,quoteId,quoteVersionId,customerId,totalAmount` | 合同台账、审计 |
+| `ContractSignatureSubmitted/ContractSigned` | Contract | `contractId,status,version` | 待办、订单准入 |
+| `OrderCreated` | Order | `orderId,contractId,customerId,totalAmount` | 交付协调准备、审计 |
 | `ApprovalDefinitionCreated/Activated` | Approval | `definitionId,resourceType,status` | 审计、配置投影 |
 | `ApprovalStarted` | Approval | `instanceId,resourceType,resourceId,definitionVersion` | 待办、提醒 |
 | `ApprovalTaskApproved/Rejected/Transferred` | Approval | `instanceId,taskId,status` | 待办、业务状态同步 |

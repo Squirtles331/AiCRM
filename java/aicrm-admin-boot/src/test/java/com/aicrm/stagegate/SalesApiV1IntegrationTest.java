@@ -124,7 +124,10 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/leads/{id}/actions/convert']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/customers/public']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/customers/{id}/actions/merge']").exists())
-                .andExpect(jsonPath("$.paths['/api/v1/handovers/batch']").exists());
+                .andExpect(jsonPath("$.paths['/api/v1/handovers/batch']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/contracts']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/contracts/{id}/actions/submit-signature']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/orders']").exists());
     }
 
     @Test
@@ -444,6 +447,9 @@ class SalesApiV1IntegrationTest {
         mockMvc.perform(get("/api/v1/quotes/{id}/versions/1/lines", quoteId).header("Authorization", bearer(token)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].lineAmount").value(1800));
+        mockMvc.perform(post("/api/v1/contracts").header("Authorization", bearer(token)).header("Idempotency-Key", "contract-before-approval")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"quoteId\":" + quoteId + ",\"name\":\"不应创建的合同\"}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
         mockMvc.perform(post("/api/v1/quotes/{id}/actions/submit", quoteId).header("Authorization", bearer(token))
                         .header("Idempotency-Key", "quote-submit-1")
                         .contentType(MediaType.APPLICATION_JSON).content("{\"rootVersion\":0,\"version\":0,\"approvalDefinitionCode\":\"QUOTE_STANDARD\"}"))
@@ -462,6 +468,49 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.data.quoteStatus").value("APPROVED"));
         mockMvc.perform(get("/api/v1/quotes/{id}", quoteId).header("Authorization", bearer(token)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("APPROVED"));
+        String contractResponse = mockMvc.perform(post("/api/v1/contracts").header("Authorization", bearer(token)).header("Idempotency-Key", "contract-create-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"quoteId\":" + quoteId + ",\"name\":\"CRM 年度采购合同\",\"effectiveFrom\":\"2026-01-01\",\"effectiveTo\":\"2026-12-31\"}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
+                .andExpect(jsonPath("$.data.totalAmount").value(1908)).andReturn().getResponse().getContentAsString();
+        String contractId = objectMapper.readTree(contractResponse).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/contracts").header("Authorization", bearer(token)).header("Idempotency-Key", "contract-create-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"quoteId\":" + quoteId + ",\"name\":\"CRM 年度采购合同\",\"effectiveFrom\":\"2026-01-01\",\"effectiveTo\":\"2026-12-31\"}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(contractId));
+        mockMvc.perform(get("/api/v1/contracts/{id}/lines", contractId).header("Authorization", bearer(token)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].lineAmount").value(1800));
+        mockMvc.perform(post("/api/v1/contracts/{id}/actions/submit-signature", contractId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("PENDING_SIGNATURE"))
+                .andExpect(jsonPath("$.data.version").value(1));
+        mockMvc.perform(post("/api/v1/contracts/{id}/actions/submit-signature", contractId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
+        mockMvc.perform(post("/api/v1/contracts/{id}/actions/sign", contractId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":1}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("SIGNED"))
+                .andExpect(jsonPath("$.data.version").value(2));
+        mockMvc.perform(post("/api/v1/contracts").header("Authorization", bearer(token)).header("Idempotency-Key", "contract-create-2")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"quoteId\":" + quoteId + ",\"name\":\"重复合同\"}"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
+        String orderResponse = mockMvc.perform(post("/api/v1/orders").header("Authorization", bearer(token)).header("Idempotency-Key", "order-create-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"contractId\":" + contractId + ",\"expectedDeliveryAt\":\"2026-03-01T00:00:00Z\"}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
+                .andExpect(jsonPath("$.data.totalAmount").value(1908)).andReturn().getResponse().getContentAsString();
+        String orderId = objectMapper.readTree(orderResponse).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/orders").header("Authorization", bearer(token)).header("Idempotency-Key", "order-create-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"contractId\":" + contractId + ",\"expectedDeliveryAt\":\"2026-03-01T00:00:00Z\"}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(orderId));
+        mockMvc.perform(get("/api/v1/orders/{id}/lines", orderId).header("Authorization", bearer(token)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].lineAmount").value(1800));
+        mockMvc.perform(post("/api/v1/orders").header("Authorization", bearer(token)).header("Idempotency-Key", "order-create-2")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"contractId\":" + contractId + "}"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
+        assertThat(outboxCount("ORDER", Long.parseLong(orderId))).isEqualTo(1L);
+        assertThat(outboxCount("CONTRACT", Long.parseLong(contractId))).isEqualTo(3L);
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_audit_log where tenant_id=? and resource_type='CONTRACT' and resource_id=?",
+                Long.class, TENANT_ID, Long.parseLong(contractId))).isEqualTo(3L);
         assertThat(outboxCount("QUOTE", Long.parseLong(quoteId))).isEqualTo(3L);
         assertThat(jdbcTemplate.queryForObject("select count(*) from crm_approval_instance where tenant_id=? and resource_type='QUOTE' and resource_id=?", Long.class, TENANT_ID, Long.parseLong(quoteId))).isEqualTo(1L);
 
