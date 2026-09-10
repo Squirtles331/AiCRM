@@ -51,6 +51,7 @@
 | `GET /api/v1/orders/{id}/lines` | 查询销售订单不可变商业快照行 | 同订单查看权限 |
 | `POST /api/v1/orders/{id}/actions/confirm|request-cancel|close` | 确认、申请取消或 CRM 内部关闭订单；申请须含 `Idempotency-Key`，关闭原因必填 | `order:confirm` / `order:cancel` / `order:close` |
 | `POST /api/v1/orders/{id}/cancellations/{cancelId}/actions/approve|reject` | 销售管理员决定订单取消；请求须含订单与取消申请版本 | `order:approve-cancel` |
+| `GET /api/v1/workbench/summary?from&to` | 查询 CRM 工作台销售汇总；日期为 UTC 左闭右开区间，省略时为当月 | `analytics:read` + 数据范围 |
 | `POST /api/v1/approval-definitions` | 创建审批定义 | `approval:manage` |
 | `POST /api/v1/approval-definitions/{id}/actions/activate` | 启用审批定义，须含定义版本 | `approval:manage` |
 | `GET /api/v1/approval-tasks/pending` | 当前用户待审批任务 | `approval:task:read` |

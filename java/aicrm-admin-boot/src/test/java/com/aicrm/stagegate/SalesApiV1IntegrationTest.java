@@ -40,6 +40,7 @@ import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
@@ -130,7 +131,8 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/contracts/{id}/changes']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/orders']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/orders/{id}/actions/close']").exists())
-                .andExpect(jsonPath("$.paths['/api/v1/orders/{id}/cancellations/{cancellationId}/actions/approve']").exists());
+                .andExpect(jsonPath("$.paths['/api/v1/orders/{id}/cancellations/{cancellationId}/actions/approve']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/workbench/summary']").exists());
     }
 
     @Test
@@ -577,6 +579,22 @@ class SalesApiV1IntegrationTest {
                 Long.class, TENANT_ID, Long.parseLong(contractId))).isEqualTo(5L);
         assertThat(outboxCount("QUOTE", Long.parseLong(quoteId))).isEqualTo(3L);
         assertThat(jdbcTemplate.queryForObject("select count(*) from crm_approval_instance where tenant_id=? and resource_type='QUOTE' and resource_id=?", Long.class, TENANT_ID, Long.parseLong(quoteId))).isEqualTo(1L);
+
+        mockMvc.perform(get("/api/v1/workbench/summary").header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.openOpportunities", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.quotesSubmitted", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.quotesApproved", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.contractsSigned", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.ordersConfirmed", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.ordersClosed", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.paymentReceived").doesNotExist())
+                .andExpect(jsonPath("$.data.invoiceIssued").doesNotExist())
+                .andExpect(jsonPath("$.data.fulfillmentCompleted").doesNotExist())
+                .andExpect(jsonPath("$.data.aftersalesTickets").doesNotExist());
+        mockMvc.perform(get("/api/v1/workbench/summary?from=2026-01-02&to=2026-01-01")
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 
         String rejectedQuoteId = createQuote(token, opportunityId, listId, productId, priceItemId, "quote-create-2");
         submitQuote(token, rejectedQuoteId, "quote-submit-2");

@@ -105,6 +105,10 @@
 | `crm_approval_task` | `id/tenant_id/instance_id/approver_user_id BIGINT N`；`node_no INT N`；`node_name VARCHAR(100) N`；`decision_mode VARCHAR(16) N`；`status VARCHAR(16) N DEFAULT 'PENDING'`；`transferred_from_task_id BIGINT NULL`；`acted_at TIMESTAMPTZ NULL`；`comment VARCHAR(1000) NULL`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 实例、审批人与转交来源均为同租户复合外键；节点审批人唯一；待办索引 `(tenant_id,approver_user_id,status,created_at)`。 |
 | `crm_approval_action` | `id/tenant_id/instance_id/actor_user_id BIGINT N`；`task_id BIGINT NULL`；`action VARCHAR(16) N`；`comment VARCHAR(1000) NULL`；`before_snapshot/after_snapshot JSONB N`；`operation_id/trace_id VARCHAR(64) NULL`；`created_at TIMESTAMPTZ N` | 实例、任务和操作人均为同租户复合外键；动作固定枚举；触发器禁止更新与删除。 |
 
-## 9. 后续对象登记
+## 10. 工作台与统计
+
+工作台是 V18 引入的只读查询能力，使用已有 CRM 表计算指标；不创建统计、投影、交付、回款、发票或售后表。`analytics:read` 是唯一新增权限，租户创建触发器会同步种子化该权限。
+
+## 11. 后续对象登记
 
 交易域对象不在本冻结版本建表。其主责、主键、租户和跨域引用规则见 [future-contexts.md](future-contexts.md)；任何正式字段必须经对应阶段门并通过新 Flyway 版本创建，禁止提前塞入 `crm_lead.extension`、`crm_customer.extension` 或 `crm_opportunity.extension`。
