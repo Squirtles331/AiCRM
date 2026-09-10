@@ -1,5 +1,9 @@
 # ============ Java / Maven ============
 target/
+!java/aicrm-analytics/src/main/java/com/aicrm/analytics/target/
+!java/aicrm-analytics/src/main/java/com/aicrm/analytics/target/**
+!java/aicrm-web/src/main/java/com/aicrm/web/analytics/target/
+!java/aicrm-web/src/main/java/com/aicrm/web/analytics/target/**
 *.class
 *.jar
 *.war

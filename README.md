@@ -12,7 +12,8 @@
 | 平台域 | 租户、组织、RBAC、数据范围、字段权限、BCrypt 登录、审计、幂等、Outbox/Inbox 已完成 |
 | 销售域 | 线索/客户公私海及第一里程碑正逆向流程已完成 |
 | `/api/v1` | OpenAPI、真实 HTTP、并发与 PostgreSQL 集成测试已覆盖 |
-| 后续交易域 | 尚未实现，必须按阶段门新增领域模块与 Flyway 迁移 |
+| 交易域 | CRM 内报价、合同和销售订单生命周期已完成；不接入履约、库存、财务或售后事实 |
+| 销售分析 | 工作台汇总、CRM 销售目标及结果确认已完成 |
 
 ## 模块
 
@@ -21,6 +22,9 @@
 | `aicrm-shared-kernel` | 共享值对象、错误、分页、ID、安全上下文 |
 | `aicrm-platform` | 身份权限、字段授权、审计、幂等和可靠消息应用能力 |
 | `aicrm-sales` | 线索、客户、联系人、跟进、归属与公海领域 |
+| `aicrm-catalog` | 产品分类、产品、价目表与报价价格快照 |
+| `aicrm-trade` | 报价、合同与销售订单生命周期 |
+| `aicrm-analytics` | CRM 工作台汇总、销售目标与已确认结果 |
 | `aicrm-web` | `/api/v1` DTO、Controller、脱敏和异常映射 |
 | `aicrm-admin-boot` | 应用装配、JWT/RabbitMQ 适配器、Flyway 和运行配置 |
 

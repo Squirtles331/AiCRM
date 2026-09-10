@@ -109,6 +109,8 @@
 
 工作台是 V18 引入的只读查询能力，使用已有 CRM 表计算指标；不创建统计、投影、交付、回款、发票或售后表。`analytics:read` 是唯一新增权限，租户创建触发器会同步种子化该权限。
 
+V19 的 `crm_sales_target` 保存个人、指标、日期区间、目标值、状态和版本；指标仅为 `SIGNED_CONTRACT_AMOUNT/CONFIRMED_ORDER_AMOUNT`，状态为 `DRAFT/ACTIVE/RESULT_CONFIRMED`。`crm_sales_target_result` 对每个目标最多保存一条确认后的实际值、达成率、计算快照、确认人和时间，触发器禁止更新或删除。两表均不保存回款、发票、履约或售后字段。
+
 ## 11. 后续对象登记
 
 交易域对象不在本冻结版本建表。其主责、主键、租户和跨域引用规则见 [future-contexts.md](future-contexts.md)；任何正式字段必须经对应阶段门并通过新 Flyway 版本创建，禁止提前塞入 `crm_lead.extension`、`crm_customer.extension` 或 `crm_opportunity.extension`。

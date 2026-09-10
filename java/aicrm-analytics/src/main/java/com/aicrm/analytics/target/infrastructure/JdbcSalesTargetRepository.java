@@ -1,0 +1,26 @@
+package com.aicrm.analytics.target.infrastructure;
+
+import com.aicrm.analytics.target.domain.SalesTarget;
+import com.aicrm.analytics.target.domain.SalesTargetRepository;
+import com.aicrm.analytics.target.domain.SalesTargetResult;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Optional;
+
+@Repository
+public class JdbcSalesTargetRepository implements SalesTargetRepository {
+    private final JdbcTemplate jdbc;
+    public JdbcSalesTargetRepository(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+    public SalesTarget insert(SalesTarget t, long actor) { jdbc.update("insert into crm_sales_target (id,tenant_id,target_no,name,target_user_id,metric,period_from,period_to,target_value,status,version,created_by,updated_by,created_at,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", t.id(),t.tenantId(),t.targetNo(),t.name(),t.targetUserId(),t.metric().name(),t.periodFrom(),t.periodTo(),t.targetValue(),t.status().name(),t.version(),actor,actor,ts(t.createdAt()),ts(t.updatedAt())); return find(t.tenantId(),t.id()).orElseThrow(); }
+    public Optional<SalesTarget> find(long tenant, long id) { return jdbc.query("select * from crm_sales_target where tenant_id=? and id=? and deleted_at is null", (rs,row)->new SalesTarget(rs.getLong("id"),rs.getLong("tenant_id"),rs.getString("target_no"),rs.getString("name"),rs.getLong("target_user_id"),SalesTarget.Metric.valueOf(rs.getString("metric")),rs.getObject("period_from",java.time.LocalDate.class),rs.getObject("period_to",java.time.LocalDate.class),rs.getBigDecimal("target_value"),SalesTarget.Status.valueOf(rs.getString("status")),rs.getLong("version"),instant(rs,"created_at"),instant(rs,"updated_at")),tenant,id).stream().findFirst(); }
+    public Optional<SalesTargetResult> findResult(long tenant, long target) { return jdbc.query("select * from crm_sales_target_result where tenant_id=? and target_id=?", (rs,row)->new SalesTargetResult(rs.getLong("id"),rs.getLong("target_id"),rs.getBigDecimal("actual_value"),rs.getBigDecimal("achievement_rate"),rs.getString("calculation_snapshot"),rs.getLong("confirmed_by"),instant(rs,"calculated_at"),instant(rs,"confirmed_at")),tenant,target).stream().findFirst(); }
+    public boolean userExists(long tenant,long user) { Boolean value=jdbc.query("select exists(select 1 from crm_user where tenant_id=? and id=? and status=1 and deleted_at is null)",rs->rs.next()&&rs.getBoolean(1),tenant,user); return Boolean.TRUE.equals(value); }
+    public boolean activate(long tenant,long id,long version,long actor) { return jdbc.update("update crm_sales_target set status='ACTIVE',version=version+1,updated_by=?,updated_at=now() where tenant_id=? and id=? and status='DRAFT' and version=? and deleted_at is null",actor,tenant,id,version)==1; }
+    public boolean confirm(long tenant,long id,long version,long actor) { return jdbc.update("update crm_sales_target set status='RESULT_CONFIRMED',version=version+1,updated_by=?,updated_at=now() where tenant_id=? and id=? and status='ACTIVE' and version=? and deleted_at is null",actor,tenant,id,version)==1; }
+    public SalesTargetResult insertResult(SalesTargetResult r,long tenant,long actor) { jdbc.update("insert into crm_sales_target_result (id,tenant_id,target_id,actual_value,achievement_rate,calculation_snapshot,confirmed_by,calculated_at,confirmed_at,created_by,updated_by) values (?,?,?,?,?,?::jsonb,?,?,?,?,?)",r.id(),tenant,r.targetId(),r.actualValue(),r.achievementRate(),r.calculationSnapshot(),r.confirmedBy(),ts(r.calculatedAt()),ts(r.confirmedAt()),actor,actor); return r; }
+    public BigDecimal actualValue(SalesTarget t) { String source=t.metric()==SalesTarget.Metric.SIGNED_CONTRACT_AMOUNT ? "crm_contract c join crm_quote q on q.tenant_id=c.tenant_id and q.id=c.quote_id join crm_opportunity o on o.tenant_id=q.tenant_id and o.id=q.opportunity_id where c.tenant_id=? and c.status='SIGNED' and c.signed_at>=? and c.signed_at<? and c.deleted_at is null and q.deleted_at is null and o.deleted_at is null and o.owner_user_id=?" : "crm_sales_order so join crm_contract c on c.tenant_id=so.tenant_id and c.id=so.contract_id join crm_quote q on q.tenant_id=c.tenant_id and q.id=c.quote_id join crm_opportunity o on o.tenant_id=q.tenant_id and o.id=q.opportunity_id where so.tenant_id=? and so.status in ('CONFIRMED','CANCELLING','CLOSED') and so.confirmed_at>=? and so.confirmed_at<? and so.deleted_at is null and c.deleted_at is null and q.deleted_at is null and o.deleted_at is null and o.owner_user_id=?"; BigDecimal v=jdbc.queryForObject("select coalesce(sum("+(t.metric()==SalesTarget.Metric.SIGNED_CONTRACT_AMOUNT?"c.total_amount":"so.total_amount")+"),0) from "+source,BigDecimal.class,t.tenantId(),Timestamp.from(t.periodFrom().atStartOfDay(java.time.ZoneOffset.UTC).toInstant()),Timestamp.from(t.periodTo().plusDays(1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant()),t.targetUserId()); return v==null?BigDecimal.ZERO:v; }
+    private Instant instant(java.sql.ResultSet rs,String col) throws java.sql.SQLException { Timestamp v=rs.getTimestamp(col); return v==null?null:v.toInstant(); } private Timestamp ts(Instant v){return v==null?null:Timestamp.from(v);}
+}

@@ -52,6 +52,9 @@
 | `POST /api/v1/orders/{id}/actions/confirm|request-cancel|close` | 确认、申请取消或 CRM 内部关闭订单；申请须含 `Idempotency-Key`，关闭原因必填 | `order:confirm` / `order:cancel` / `order:close` |
 | `POST /api/v1/orders/{id}/cancellations/{cancelId}/actions/approve|reject` | 销售管理员决定订单取消；请求须含订单与取消申请版本 | `order:approve-cancel` |
 | `GET /api/v1/workbench/summary?from&to` | 查询 CRM 工作台销售汇总；日期为 UTC 左闭右开区间，省略时为当月 | `analytics:read` + 数据范围 |
+| `POST /api/v1/sales-targets` | 创建个人 CRM 销售目标；须含 `Idempotency-Key` | `target:manage` |
+| `GET /api/v1/sales-targets/{id}` | 查询本人或管理员范围内的销售目标与已确认结果 | `target:read:own/any` |
+| `POST /api/v1/sales-targets/{id}/actions/activate|confirm-result` | 启用目标或确认期末 CRM 结果；请求含 `version` | `target:manage` / `target:confirm` |
 | `POST /api/v1/approval-definitions` | 创建审批定义 | `approval:manage` |
 | `POST /api/v1/approval-definitions/{id}/actions/activate` | 启用审批定义，须含定义版本 | `approval:manage` |
 | `GET /api/v1/approval-tasks/pending` | 当前用户待审批任务 | `approval:task:read` |
@@ -85,6 +88,7 @@
 | `ContractSignatureWithdrawn/ContractVoided` | Contract | `contractId,status,version` | 合同台账、审计 |
 | `ContractChangeCreated/Submitted/Cancelled/Approved/Rejected` | ContractChange | `changeId,contractId,status,version` | 变更台账、审计 |
 | `OrderCreated/Confirmed/CancellationRequested/CancellationRejected/Cancelled/Closed` | Order | `orderId,contractId,status,version` | 销售订单台账、审计 |
+| `SalesTargetCreated/Activated/ResultConfirmed` | SalesTarget | `targetId,targetUserId,metric,status,version` | CRM 目标与确认结果审计 |
 | `ApprovalDefinitionCreated/Activated` | Approval | `definitionId,resourceType,status` | 审计、配置投影 |
 | `ApprovalStarted` | Approval | `instanceId,resourceType,resourceId,definitionVersion` | 待办、提醒 |
 | `ApprovalTaskApproved/Rejected/Transferred` | Approval | `instanceId,taskId,status` | 待办、业务状态同步 |

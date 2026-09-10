@@ -132,7 +132,9 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/orders']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/orders/{id}/actions/close']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/orders/{id}/cancellations/{cancellationId}/actions/approve']").exists())
-                .andExpect(jsonPath("$.paths['/api/v1/workbench/summary']").exists());
+                .andExpect(jsonPath("$.paths['/api/v1/workbench/summary']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/sales-targets']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/sales-targets/{id}/actions/confirm-result']").exists());
     }
 
     @Test
@@ -657,6 +659,46 @@ class SalesApiV1IntegrationTest {
         mockMvc.perform(post("/api/v1/orders/{id}/actions/confirm", 529901L).header("Authorization", bearer(token(ADMIN_USER_ID)))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void managesCrmOnlySalesTargetsAndConfirmsImmutableResults() throws Exception {
+        seedSalesTenant();
+        seedAdminAndExitingUser();
+        String adminToken = token(ADMIN_USER_ID);
+        String response = mockMvc.perform(post("/api/v1/sales-targets").header("Authorization", bearer(adminToken))
+                        .header("Idempotency-Key", "target-create-1").contentType(MediaType.APPLICATION_JSON).content("""
+                                {"name":"2025 合同签约目标","targetUserId":5111,"metric":"SIGNED_CONTRACT_AMOUNT","periodFrom":"2025-01-01","periodTo":"2025-12-31","targetValue":100000}
+                                """))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
+                .andReturn().getResponse().getContentAsString();
+        String targetId = objectMapper.readTree(response).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/sales-targets").header("Authorization", bearer(adminToken))
+                        .header("Idempotency-Key", "target-create-1").contentType(MediaType.APPLICATION_JSON).content("""
+                                {"name":"2025 合同签约目标","targetUserId":5111,"metric":"SIGNED_CONTRACT_AMOUNT","periodFrom":"2025-01-01","periodTo":"2025-12-31","targetValue":100000}
+                                """))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(targetId));
+        mockMvc.perform(get("/api/v1/sales-targets/{id}", targetId).header("Authorization", bearer(token(USER_ONE_ID))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.targetUserId").value("5111"));
+        mockMvc.perform(post("/api/v1/sales-targets/{id}/actions/activate", targetId).header("Authorization", bearer(adminToken))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("ACTIVE"));
+        mockMvc.perform(post("/api/v1/sales-targets/{id}/actions/confirm-result", targetId).header("Authorization", bearer(adminToken))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":1}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("RESULT_CONFIRMED"))
+                .andExpect(jsonPath("$.data.result.actualValue").value(0))
+                .andExpect(jsonPath("$.data.result.achievementRate").value(0));
+        mockMvc.perform(post("/api/v1/sales-targets/{id}/actions/confirm-result", targetId).header("Authorization", bearer(adminToken))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":2}"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
+        mockMvc.perform(post("/api/v1/sales-targets").header("Authorization", bearer(token(USER_ONE_ID)))
+                        .header("Idempotency-Key", "target-forbidden").contentType(MediaType.APPLICATION_JSON).content("""
+                                {"name":"越权目标","targetUserId":5111,"metric":"SIGNED_CONTRACT_AMOUNT","periodFrom":"2025-01-01","periodTo":"2025-12-31","targetValue":1}
+                                """))
+                .andExpect(status().isForbidden());
+        assertThat(outboxCount("SALES_TARGET", Long.parseLong(targetId))).isEqualTo(3L);
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_audit_log where tenant_id=? and resource_type='SALES_TARGET' and resource_id=?",
+                Long.class, TENANT_ID, Long.parseLong(targetId))).isEqualTo(3L);
     }
 
     @Test

@@ -68,6 +68,7 @@ public class PlatformPrincipalService {
                     "contract:submit-signature", "contract:withdraw-signature", "contract:sign", "contract:void", "contract:change", "contract:approve-change"));
             permissions.addAll(Set.of("order:create", "order:read:any", "order:write:any", "order:confirm", "order:cancel", "order:approve-cancel", "order:close"));
             permissions.add("analytics:read");
+            permissions.addAll(Set.of("target:read:any", "target:manage", "target:confirm"));
         }
         if (!roles.isEmpty()) {
             permissions.addAll(Set.of("lead:create", "lead:claim", "lead:read:own", "lead:write:own",
@@ -81,6 +82,7 @@ public class PlatformPrincipalService {
                     "contract:submit-signature", "contract:withdraw-signature"));
             permissions.addAll(Set.of("order:create", "order:read:own", "order:write:own", "order:confirm", "order:cancel", "order:close"));
             permissions.add("analytics:read");
+            permissions.add("target:read:own");
         }
         return permissions;
     }
