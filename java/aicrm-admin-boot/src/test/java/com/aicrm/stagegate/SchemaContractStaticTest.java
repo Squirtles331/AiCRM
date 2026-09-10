@@ -50,7 +50,7 @@ class SchemaContractStaticTest {
         for (String document : List.of(
                 "README.md", "data-dictionary.md", "database-conventions.md", "authorization.md",
                 "state-machines.md", "api-events.md", "error-codes.md", "reliability.md", "adr.md",
-                "module-boundaries.md", "future-contexts.md", "stage-gate.md", "security-nfr.md", "approval.md", "contract-order.md", "analytics.md", "connectors.md", "acquisition-channels.md")) {
+                "module-boundaries.md", "future-contexts.md", "stage-gate.md", "security-nfr.md", "approval.md", "contract-order.md", "analytics.md", "connectors.md", "acquisition-channels.md", "sales-documents.md")) {
             assertTrue(Files.isRegularFile(architecture.resolve(document)),
                     () -> "missing architecture document: " + document);
         }

@@ -151,6 +151,10 @@ stateDiagram-v2
 
 `OPEN -> CLOSED -> OPEN`。会话必须绑定 CRM 客户，可选绑定该客户的联系人；仅打开状态可追加 `INBOUND/OUTBOUND/NOTE` 沟通记录。记录为追加式事实，CRM 不同步呼叫中心或在线客服的原始会话。
 
+## 销售资料状态机
+
+`DRAFT -> PUBLISHED -> ARCHIVED`。资料仅为 CRM 文本内容，发布后可以查询，归档后不可重新发布；资料不承载附件上传、外部网盘同步或交付文档。
+
 ## 私海/公海归属状态机
 
 ```mermaid

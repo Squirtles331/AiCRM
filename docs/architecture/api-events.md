@@ -88,6 +88,7 @@
 |---|---|---|---|
 | `LeadCreated` | Lead | `leadId,ownershipType,sourceType` | 报表、外部同步 |
 | `SalesConversationCreated/EntryAdded/Closed/Reopened` | SalesConversation | `conversationId,customerId,status` | 销售沟通台账、审计 |
+| `SalesDocumentCreated/Published/Archived` | SalesDocument | `documentId,status,category` | 销售资料台账、审计 |
 | `AcquisitionChannelCreated/Activated/Disabled` | AcquisitionChannel | `channelId,status` | 渠道台账、审计 |
 | `LeadClaimed/Released/Assigned/Transferred/Recycled` | Lead | 前后负责人、部门、公海、规则版本 | 审计、提醒 |
 | `LeadInvalidated` | Lead | `leadId,reason` | 渠道质量统计 |

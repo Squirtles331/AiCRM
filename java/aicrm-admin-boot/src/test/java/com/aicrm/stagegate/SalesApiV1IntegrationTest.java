@@ -146,7 +146,9 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/acquisition-channels']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/acquisition-channels/{id}/actions/activate']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/sales-conversations']").exists())
-                .andExpect(jsonPath("$.paths['/api/v1/sales-conversations/{id}/entries']").exists());
+                .andExpect(jsonPath("$.paths['/api/v1/sales-conversations/{id}/entries']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/sales-documents']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/sales-documents/{id}/actions/publish']").exists());
     }
 
     @Test
@@ -264,6 +266,39 @@ class SalesApiV1IntegrationTest {
                 .andReturn().getResponse().getContentAsString();
         assertThat(objectMapper.readTree(userTwoPrivate).path("data").path("items").findValuesAsText("id"))
                 .doesNotContain(privateLeadId);
+    }
+
+    @Test
+    void managesSalesDocumentsWithIdempotencyAndLifecycle() throws Exception {
+        seedSalesTenant();
+        seedAdminAndExitingUser();
+        String admin = token(ADMIN_USER_ID);
+        String body = "{\"title\":\"销售话术一\",\"category\":\"PLAYBOOK\",\"content\":\"先了解客户目标\"}";
+        mockMvc.perform(post("/api/v1/sales-documents").header("Authorization", bearer(token(USER_ONE_ID)))
+                        .header("Idempotency-Key", "document-forbidden").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isForbidden());
+        String created = mockMvc.perform(post("/api/v1/sales-documents").header("Authorization", bearer(admin))
+                        .header("Idempotency-Key", "document-create").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
+                .andReturn().getResponse().getContentAsString();
+        String documentId = objectMapper.readTree(created).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/sales-documents").header("Authorization", bearer(admin))
+                        .header("Idempotency-Key", "document-create").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(documentId));
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_sales_document where tenant_id=?", Long.class, TENANT_ID)).isEqualTo(1L);
+        mockMvc.perform(get("/api/v1/sales-documents").header("Authorization", bearer(admin)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(documentId));
+        mockMvc.perform(post("/api/v1/sales-documents/{id}/actions/archive", documentId).header("Authorization", bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isConflict());
+        mockMvc.perform(post("/api/v1/sales-documents/{id}/actions/publish", documentId).header("Authorization", bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("PUBLISHED"));
+        mockMvc.perform(post("/api/v1/sales-documents/{id}/actions/archive", documentId).header("Authorization", bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":1}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("ARCHIVED"));
+        assertThat(outboxCount("SALES_DOCUMENT", Long.parseLong(documentId))).isEqualTo(3L);
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_audit_log where tenant_id=? and resource_type='SALES_DOCUMENT' and resource_id=?", Long.class, TENANT_ID, Long.parseLong(documentId))).isEqualTo(3L);
     }
 
     @Test
