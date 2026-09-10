@@ -72,7 +72,7 @@ public class LeadV1Controller {
     public ResponseEntity<ApiResponse<SalesApiDtos.LeadView>> create(@Valid @RequestBody SalesApiDtos.CreateLeadRequest request,
                                                                        @RequestHeader("Idempotency-Key") String idempotencyKey) {
         Lead lead = commandService.createLead(actor(), new SalesCommands.CreateLead(request.name(), request.mobile(),
-                request.email(), request.companyName(), request.sourceType(), request.sourceRef(), request.intent(), request.publicPoolId()),
+                request.email(), request.companyName(), request.sourceType(), request.sourceRef(), request.intent(), request.publicPoolId(), request.acquisitionChannelId()),
                 idempotencyKey);
         return ResponseEntity.status(HttpStatus.CREATED).body(success(view(lead, true)));
     }
@@ -133,7 +133,7 @@ public class LeadV1Controller {
 
     static SalesApiDtos.LeadView view(Lead lead) {
         return new SalesApiDtos.LeadView(id(lead.id()), lead.leadNo(), lead.name(), lead.mobile(), lead.email(), lead.companyName(),
-                lead.sourceType(), lead.sourceRef(), lead.intent(), lead.status().name(), lead.ownershipType().name(),
+                lead.sourceType(), lead.sourceRef(), lead.intent(), id(lead.acquisitionChannelId()), lead.acquisitionChannelCode(), lead.status().name(), lead.ownershipType().name(),
                 id(lead.ownerUserId()), id(lead.ownerDeptId()), id(lead.publicPoolId()), id(lead.customerId()), lead.poolEnteredAt(),
                 lead.lastFollowUpAt(), lead.nextFollowUpAt(), lead.version(), lead.createdAt(), lead.updatedAt());
     }
@@ -145,7 +145,7 @@ public class LeadV1Controller {
         return new SalesApiDtos.LeadView(source.id(), source.leadNo(), source.name(),
                 mobileVisible ? source.mobile() : SensitiveFieldMasker.mobile(source.mobile()),
                 emailVisible ? source.email() : SensitiveFieldMasker.email(source.email()), source.companyName(),
-                source.sourceType(), source.sourceRef(), source.intent(), source.status(), source.ownershipType(),
+                source.sourceType(), source.sourceRef(), source.intent(), source.acquisitionChannelId(), source.acquisitionChannelCode(), source.status(), source.ownershipType(),
                 source.ownerUserId(), source.ownerDeptId(), source.publicPoolId(), source.customerId(),
                 source.poolEnteredAt(), source.lastFollowUpAt(), source.nextFollowUpAt(), source.version(),
                 source.createdAt(), source.updatedAt());

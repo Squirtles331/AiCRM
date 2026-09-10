@@ -16,7 +16,7 @@ final class SalesApiDtos {
     }
 
     record CreateLeadRequest(@NotBlank String name, String mobile, String email, String companyName,
-                             @NotBlank String sourceType, String sourceRef, String intent, Long publicPoolId) {
+                             @NotBlank String sourceType, String sourceRef, String intent, Long publicPoolId, Long acquisitionChannelId) {
     }
 
     record CreateCustomerRequest(@NotBlank String name, String industry, String region, Long publicPoolId) {
@@ -68,7 +68,7 @@ final class SalesApiDtos {
     }
 
     record LeadView(String id, String leadNo, String name, String mobile, String email, String companyName,
-                    String sourceType, String sourceRef, String intent, String status, String ownershipType,
+                    String sourceType, String sourceRef, String intent, String acquisitionChannelId, String acquisitionChannelCode, String status, String ownershipType,
                     String ownerUserId, String ownerDeptId, String publicPoolId, String customerId,
                     Instant poolEnteredAt, Instant lastFollowUpAt, Instant nextFollowUpAt, long version,
                     Instant createdAt, Instant updatedAt) {

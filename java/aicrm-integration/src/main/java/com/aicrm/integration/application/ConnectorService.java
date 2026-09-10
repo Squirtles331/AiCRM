@@ -158,7 +158,7 @@ public class ConnectorService {
             Lead created = salesCommandService.createLead(operator, new SalesCommands.CreateLead(
                     requiredText(lead, "name", "线索姓名"), text(lead, "mobile"), text(lead, "email"),
                     text(lead, "companyName"), "MARKETING", connector.connectorNo() + ":" + sha256(externalEventId).substring(0, 24),
-                    text(lead, "intent"), connector.publicPoolId()), leadIdempotencyKey(connector.id(), externalEventId));
+                    text(lead, "intent"), connector.publicPoolId(), null), leadIdempotencyKey(connector.id(), externalEventId));
             outcome = ConnectorEvent.Outcome.LEAD_CREATED;
             leadId = created.id();
         }

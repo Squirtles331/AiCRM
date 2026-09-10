@@ -16,6 +16,8 @@ import com.aicrm.sales.domain.customer.Customer;
 import com.aicrm.sales.domain.lead.Lead;
 import com.aicrm.sales.domain.lead.LeadStatus;
 import com.aicrm.sales.domain.pool.PublicPool;
+import com.aicrm.sales.domain.channel.AcquisitionChannel;
+import com.aicrm.sales.domain.channel.AcquisitionChannelRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -36,16 +38,18 @@ public class SalesCommandService {
     private final AuditLogService auditLogService;
     private final OutboxService outboxService;
     private final ObjectMapper objectMapper;
+    private final AcquisitionChannelRepository acquisitionChannels;
 
     public SalesCommandService(SalesRepository repository, IdGenerator idGenerator,
                                IdempotencyService idempotencyService, AuditLogService auditLogService,
-                               OutboxService outboxService, ObjectMapper objectMapper) {
+                               OutboxService outboxService, ObjectMapper objectMapper, AcquisitionChannelRepository acquisitionChannels) {
         this.repository = repository;
         this.idGenerator = idGenerator;
         this.idempotencyService = idempotencyService;
         this.auditLogService = auditLogService;
         this.outboxService = outboxService;
         this.objectMapper = objectMapper;
+        this.acquisitionChannels = acquisitionChannels;
     }
 
     @Transactional
@@ -56,10 +60,12 @@ public class SalesCommandService {
             if (ownership == OwnershipType.PUBLIC) {
                 requireActivePool(actor, command.publicPoolId(), PublicPool.ResourceType.LEAD);
             }
+            AcquisitionChannel channel = resolveAcquisitionChannel(actor, command.acquisitionChannelId(), command.sourceType());
             Instant now = Instant.now();
             Lead lead = new Lead(idGenerator.nextId(), actor.tenantId(), "LEAD-" + idGenerator.nextId(),
                     required(command.name(), "姓名"), trim(command.mobile()), trim(command.email()), trim(command.companyName()),
-                    required(command.sourceType(), "来源"), trim(command.sourceRef()), trim(command.intent()), LeadStatus.NEW,
+                    required(command.sourceType(), "来源"), trim(command.sourceRef()), trim(command.intent()),
+                    channel == null ? null : channel.id(), channel == null ? null : channel.code(), LeadStatus.NEW,
                     ownership, ownership == OwnershipType.PRIVATE ? actor.userId() : null, null,
                     command.publicPoolId(), null, ownership == OwnershipType.PUBLIC ? now : null,
                     null, null, 0, now, now);
@@ -462,6 +468,21 @@ public class SalesCommandService {
     private Lead lead(Actor actor, long id) {
         return repository.findLead(actor.tenantId(), id)
                 .orElseThrow(() -> new DomainException(ErrorCode.NOT_FOUND, "线索不存在"));
+    }
+
+    private AcquisitionChannel resolveAcquisitionChannel(Actor actor, Long channelId, String sourceType) {
+        if (channelId == null) {
+            return null;
+        }
+        AcquisitionChannel channel = acquisitionChannels.find(actor.tenantId(), channelId)
+                .orElseThrow(() -> new DomainException(ErrorCode.NOT_FOUND, "获客渠道不存在"));
+        if (!channel.active()) {
+            throw new DomainException(ErrorCode.CONFLICT, "获客渠道未启用");
+        }
+        if (!channel.sourceType().equals(required(sourceType, "来源"))) {
+            throw new DomainException(ErrorCode.VALIDATION_ERROR, "线索来源与获客渠道不一致");
+        }
+        return channel;
     }
 
     private Customer customer(Actor actor, long id) {

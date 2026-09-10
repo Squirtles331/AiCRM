@@ -43,7 +43,7 @@ class SalesReadServiceTest {
 
     private Lead lead(long ownerUserId, long ownerDeptId) {
         Instant now = Instant.now();
-        return new Lead(2001L, 1L, "LEAD-1", "张三", null, null, null, "MANUAL", null, null,
+        return new Lead(2001L, 1L, "LEAD-1", "张三", null, null, null, "MANUAL", null, null, null, null,
                 LeadStatus.NEW, OwnershipType.PRIVATE, ownerUserId, ownerDeptId, null, null,
                 null, null, null, 0L, now, now);
     }

@@ -133,6 +133,20 @@ stateDiagram-v2
 - 营销事件只允许创建配置公海中的 CRM 线索；组织事件只保存接收回执，不能创建或更新 CRM 用户、部门、角色和权限。
 - 事件以连接器和外部事件号唯一，接收记录为追加式事实；相同编号但不同载荷拒绝。
 
+## 获客渠道状态机
+
+```mermaid
+stateDiagram-v2
+  [*] --> DRAFT: 创建
+  DRAFT --> ACTIVE: 启用
+  ACTIVE --> DISABLED: 停用
+  DISABLED --> ACTIVE: 重新启用
+```
+
+- 只有 `ACTIVE` 渠道可用于创建新线索；线索的 `sourceType` 必须等于渠道配置的来源类型。
+- 创建需要 `Idempotency-Key`，启用和停用要求 `channel:manage` 与匹配 `version`。每次变更写审计和 Outbox。
+- 渠道 ID 与编码在写入线索时形成归因快照，后续状态或显示名称变更不回写历史线索。
+
 ## 私海/公海归属状态机
 
 ```mermaid

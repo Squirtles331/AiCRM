@@ -24,10 +24,10 @@ class SchemaContractStaticTest {
         Path migrations = repository.resolve("java/aicrm-admin-boot/src/main/resources/db/migration");
         List<Path> files;
         try (var stream = Files.list(migrations)) {
-            files = stream.filter(path -> path.getFileName().toString().matches("V([1-9]|[12][0-9]|21)__.*\\.sql"))
+            files = stream.filter(path -> path.getFileName().toString().matches("V([1-9]|[12][0-9]|2[12])__.*\\.sql"))
                     .sorted(java.util.Comparator.comparingInt(this::version)).toList();
         }
-        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21), files.stream()
+        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22), files.stream()
                 .map(this::version).toList());
 
         String sql = files.stream().map(this::read).reduce("", String::concat).toLowerCase(Locale.ROOT);
@@ -35,7 +35,7 @@ class SchemaContractStaticTest {
                 "data_scope", "crm_role_field_permission", "auto_recycle_enabled", "rule_version",
                 "invalid_reason", "ownership_type", "pool_entered_at", "before_snapshot", "after_snapshot",
                 "idempotency_key", "processing", "completed", "failed", "crm_outbox_event",
-                "crm_inbox_record", "ck_crm_lead_ownership", "ck_crm_customer_ownership")) {
+                "crm_inbox_record", "ck_crm_lead_ownership", "ck_crm_customer_ownership", "crm_acquisition_channel")) {
             assertTrue(sql.contains(required), () -> "missing frozen SQL contract: " + required);
         }
         for (String futureTable : List.of(
@@ -50,7 +50,7 @@ class SchemaContractStaticTest {
         for (String document : List.of(
                 "README.md", "data-dictionary.md", "database-conventions.md", "authorization.md",
                 "state-machines.md", "api-events.md", "error-codes.md", "reliability.md", "adr.md",
-                "module-boundaries.md", "future-contexts.md", "stage-gate.md", "security-nfr.md", "approval.md", "contract-order.md", "analytics.md", "connectors.md")) {
+                "module-boundaries.md", "future-contexts.md", "stage-gate.md", "security-nfr.md", "approval.md", "contract-order.md", "analytics.md", "connectors.md", "acquisition-channels.md")) {
             assertTrue(Files.isRegularFile(architecture.resolve(document)),
                     () -> "missing architecture document: " + document);
         }

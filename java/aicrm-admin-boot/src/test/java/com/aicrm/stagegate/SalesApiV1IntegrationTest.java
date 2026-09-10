@@ -142,7 +142,9 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/connectors']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/connectors/{id}/events']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/connectors/{id}/monitoring']").exists())
-                .andExpect(jsonPath("$.paths['/api/v1/connectors/{id}/outbox/{outboxEventId}/actions/retry']").exists());
+                .andExpect(jsonPath("$.paths['/api/v1/connectors/{id}/outbox/{outboxEventId}/actions/retry']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/acquisition-channels']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/acquisition-channels/{id}/actions/activate']").exists());
     }
 
     @Test
@@ -260,6 +262,31 @@ class SalesApiV1IntegrationTest {
                 .andReturn().getResponse().getContentAsString();
         assertThat(objectMapper.readTree(userTwoPrivate).path("data").path("items").findValuesAsText("id"))
                 .doesNotContain(privateLeadId);
+    }
+
+    @Test
+    void managesAcquisitionChannelsAndWritesImmutableLeadAttribution() throws Exception {
+        seedSalesTenant();
+        String admin = token(ADMIN_USER_ID);
+        String created = mockMvc.perform(post("/api/v1/acquisition-channels").header("Authorization", bearer(admin))
+                        .header("Idempotency-Key", "channel-form-1").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\":\"FORM_2026\",\"name\":\"官网表单\",\"sourceType\":\"FORM\"}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
+                .andReturn().getResponse().getContentAsString();
+        String channelId = objectMapper.readTree(created).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/leads").header("Authorization", bearer(token(USER_ONE_ID))).header("Idempotency-Key", "draft-channel-lead")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"草稿渠道\",\"sourceType\":\"FORM\",\"acquisitionChannelId\":" + channelId + "}"))
+                .andExpect(status().isConflict());
+        mockMvc.perform(post("/api/v1/acquisition-channels/{id}/actions/activate", channelId).header("Authorization", bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("ACTIVE"));
+        String lead = createLead(token(USER_ONE_ID), "active-channel-lead", "{\"name\":\"有效渠道\",\"sourceType\":\"FORM\",\"acquisitionChannelId\":" + channelId + "}");
+        assertThat(objectMapper.readTree(lead).path("data").path("acquisitionChannelCode").asText()).isEqualTo("FORM_2026");
+        mockMvc.perform(post("/api/v1/leads").header("Authorization", bearer(token(USER_ONE_ID))).header("Idempotency-Key", "wrong-source-channel")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"来源不符\",\"sourceType\":\"REFERRAL\",\"acquisitionChannelId\":" + channelId + "}"))
+                .andExpect(status().isBadRequest());
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_audit_log where tenant_id=? and resource_type='ACQUISITION_CHANNEL'", Long.class, TENANT_ID)).isEqualTo(2L);
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_outbox_event where tenant_id=? and aggregate_type='ACQUISITION_CHANNEL'", Long.class, TENANT_ID)).isEqualTo(2L);
     }
 
     @Test

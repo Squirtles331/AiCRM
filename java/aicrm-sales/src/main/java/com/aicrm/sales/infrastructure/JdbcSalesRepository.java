@@ -37,11 +37,11 @@ public class JdbcSalesRepository implements SalesRepository {
     @Override
     public Lead insertLead(Lead lead, long actorId) {
         jdbcTemplate.update("insert into crm_lead (id, tenant_id, lead_no, name, mobile, email, company_name, "
-                        + "source_type, source_ref, intent, status, ownership_type, owner_user_id, owner_dept_id, "
+                        + "source_type, source_ref, intent, acquisition_channel_id, acquisition_channel_code, status, ownership_type, owner_user_id, owner_dept_id, "
                         + "public_pool_id, pool_entered_at, version, created_by, updated_by, created_at, updated_at) "
-                        + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 lead.id(), lead.tenantId(), lead.leadNo(), lead.name(), lead.mobile(), lead.email(), lead.companyName(),
-                lead.sourceType(), lead.sourceRef(), lead.intent(), lead.status().name(), lead.ownershipType().name(),
+                lead.sourceType(), lead.sourceRef(), lead.intent(), lead.acquisitionChannelId(), lead.acquisitionChannelCode(), lead.status().name(), lead.ownershipType().name(),
                 lead.ownerUserId(), lead.ownerDeptId(), lead.publicPoolId(), timestamp(lead.poolEnteredAt()), lead.version(),
                 actorId, actorId, timestamp(lead.createdAt()), timestamp(lead.updatedAt()));
         return findLead(lead.tenantId(), lead.id()).orElseThrow();
@@ -372,7 +372,7 @@ public class JdbcSalesRepository implements SalesRepository {
     private RowMapper<Lead> leadMapper() {
         return (rs, rowNum) -> new Lead(rs.getLong("id"), rs.getLong("tenant_id"), rs.getString("lead_no"),
                 rs.getString("name"), rs.getString("mobile"), rs.getString("email"), rs.getString("company_name"),
-                rs.getString("source_type"), rs.getString("source_ref"), rs.getString("intent"),
+                rs.getString("source_type"), rs.getString("source_ref"), rs.getString("intent"), nullableLong(rs, "acquisition_channel_id"), rs.getString("acquisition_channel_code"),
                 LeadStatus.valueOf(rs.getString("status")), OwnershipType.valueOf(rs.getString("ownership_type")),
                 nullableLong(rs, "owner_user_id"), nullableLong(rs, "owner_dept_id"), nullableLong(rs, "public_pool_id"),
                 nullableLong(rs, "customer_id"), instant(rs, "pool_entered_at"), instant(rs, "last_follow_up_at"),

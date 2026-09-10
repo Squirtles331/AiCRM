@@ -4,7 +4,7 @@
 
 | 验收项 | 证据 | 当前状态 |
 |---|---|---|
-| 平台域、销售域、连接器表名和字段冻结 | 数据字典 + V1-V21 | READY |
+| 平台域、销售域、连接器和获客渠道表名及字段冻结 | 数据字典 + V1-V22 | READY |
 | 类型、默认值、可空性、索引、唯一规则冻结 | 数据字典 + Flyway | READY |
 | 公私海不变量、租户引用、终态保护 | V7 CHECK/复合 FK/触发器 | READY |
 | 空库 Flyway 初始化 | `DatabaseStageGateTest.emptyDatabaseMigratesThroughFrozenVersion` | READY |
@@ -22,7 +22,7 @@
 
 本地需运行 Docker，然后执行 `mvn -f java/pom.xml verify`。CI 使用 `.github/workflows/database-stage-gate.yml` 在 PostgreSQL 16 Testcontainers 上执行同一命令。Windows Docker Desktop 如遇 Testcontainers 命名管道兼容问题，应启用 WSL 集成并在 Linux 环境运行，或使用仅绑定回环地址的受控 Docker API 端点；不得关闭数据库测试或人工改库后标记通过。
 
-最近一次完整自动化验收：2026-09-10，`mvn -f java/pom.xml verify` 通过，共执行 25 个测试且无失败。Testcontainers 连接 Docker Desktop 并验证空库 V1-V21 初始化、旧表退出、JWT 权限与租户隔离、销售/交易生命周期、工作台和目标计分、营销 Webhook 密钥认证与事件重放、营销线索入公海、组织事件只留接收回执、审计、Outbox、OpenAPI、静态契约和 ArchUnit。
+最近一次完整自动化验收：2026-09-11，`mvn -f java/pom.xml verify` 通过，共执行 26 个测试且无失败。Testcontainers 连接 Docker Desktop 并验证空库 V1-V22 初始化、旧表退出、JWT 权限与租户隔离、销售/交易生命周期、工作台和目标计分、营销 Webhook 密钥认证与事件重放、营销线索入公海、组织事件只留接收回执、获客渠道启停与线索归因快照、审计、Outbox、OpenAPI、静态契约和 ArchUnit。
 
 ## 第一里程碑发布门进度
 

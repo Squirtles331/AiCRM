@@ -8,7 +8,7 @@ public final class SalesCommands {
     }
 
     public record CreateLead(String name, String mobile, String email, String companyName,
-                             String sourceType, String sourceRef, String intent, Long publicPoolId) {
+                             String sourceType, String sourceRef, String intent, Long publicPoolId, Long acquisitionChannelId) {
     }
 
     public record CreateCustomer(String name, String industry, String region, Long publicPoolId) {

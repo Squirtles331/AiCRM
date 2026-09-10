@@ -71,6 +71,7 @@ public class PlatformPrincipalService {
             permissions.addAll(Set.of("target:read:any", "target:manage", "target:confirm"));
             permissions.addAll(Set.of("performance:rule:read", "performance:rule:manage"));
             permissions.addAll(Set.of("connector:read", "connector:manage"));
+            permissions.addAll(Set.of("channel:read", "channel:manage"));
             permissions.add("outbox:retry");
         }
         if (!roles.isEmpty()) {
