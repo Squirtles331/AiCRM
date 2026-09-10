@@ -77,7 +77,7 @@
 | `QuoteSubmitted/Approved/Rejected/ApprovalWithdrawn/Expired` | Quote | `quoteId,status,currentVersionNo` | 审批衔接、提醒、报表 |
 | `ContractCreated` | Contract | `contractId,quoteId,quoteVersionId,customerId,totalAmount` | 合同台账、审计 |
 | `ContractSignatureSubmitted/ContractSigned` | Contract | `contractId,status,version` | 待办、订单准入 |
-| `OrderCreated` | Order | `orderId,contractId,customerId,totalAmount` | 交付协调准备、审计 |
+| `OrderCreated` | Order | `orderId,contractId,customerId,totalAmount` | 销售订单台账、审计 |
 | `ApprovalDefinitionCreated/Activated` | Approval | `definitionId,resourceType,status` | 审计、配置投影 |
 | `ApprovalStarted` | Approval | `instanceId,resourceType,resourceId,definitionVersion` | 待办、提醒 |
 | `ApprovalTaskApproved/Rejected/Transferred` | Approval | `instanceId,taskId,status` | 待办、业务状态同步 |

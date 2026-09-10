@@ -1,15 +1,14 @@
-# 阶段 3：合同与订单设计
+# 阶段 3：合同与销售订单设计
 
-状态：设计基线；物理基线：Flyway `V14__contract_and_order_foundation.sql`。本阶段由交易域主责销售合同、合同变更、销售订单和取消申请；交付、库存、实际发货、到账核销和正式发票仍由后续上下文或 ERP/财务系统主责。
+状态：设计基线；物理基线：Flyway `V14__contract_and_order_foundation.sql`。本阶段由交易域主责销售合同、合同变更、销售订单和取消申请；交付、库存、回款、开票和售后不属于 CRM 交易域。
 
 ## 1. 范围与主责
 
 | 对象 | CRM 主责 | ERP/财务主责 | 本阶段边界 |
 |---|---|---|---|
 | 销售合同 | 草稿、提交签署、签署结果、变更和作废 | 归档副本可同步，不反向覆盖 CRM 合同事实 | 仅已批准报价可创建合同。 |
-| 销售订单 | 从已签合同生成、确认、取消申请与取消结果 | 库存预占、实际发货和 WMS 状态 | CRM 不扣减库存、不记录实际发货。 |
+| 销售订单 | 从已签合同生成、确认、取消申请、取消结果与 CRM 内部关闭 | 库存、实际发货、回款、开票和售后状态 | CRM 只维护销售商业事实，不依赖外部结果关闭订单。 |
 | 合同/订单明细 | 固化报价或合同中的商业快照 | 物料、库存和履约事实 | 不随产品目录变化回写。 |
-| ERP 回传 | 记录外部订单号、回传状态和错误 | 外部事实源 | 使用外部系统、业务类型、外部单号组成幂等业务键。 |
 
 ## 2. 聚合、状态与逆向流程
 
@@ -32,7 +31,7 @@ stateDiagram-v2
   CONFIRMED --> CANCELLING: 提交取消申请
   CANCELLING --> CANCELLED: 取消完成
   CANCELLING --> CONFIRMED: 取消驳回
-  CONFIRMED --> CLOSED: ERP 回传全部履约完成
+  CONFIRMED --> CLOSED: CRM 销售流程显式关闭
 ```
 
 - 合同创建仅引用同租户、状态为 `APPROVED` 的报价及其当前批准版本，合同明细复制报价行快照。
@@ -48,7 +47,7 @@ stateDiagram-v2
 | `crm_contract` | 合同根与当前商业事实 | 活跃合同号租户内唯一；状态为 `DRAFT/PENDING_SIGNATURE/SIGNED/VOIDED`；金额非负、币种三位大写。 |
 | `crm_contract_line` | 合同不可变商业快照行 | 每合同号行号唯一；数量正数；金额、折扣、税率受范围检查。 |
 | `crm_contract_change` | 合同变更申请与快照 | 每合同变更号唯一；状态为 `DRAFT/SUBMITTED/APPROVED/REJECTED/CANCELLED`；原始与变更快照为 JSONB。 |
-| `crm_sales_order` | CRM 销售订单协调事实 | 活跃订单号租户内唯一；状态为 `DRAFT/CONFIRMED/CANCELLING/CANCELLED/CLOSED`；外部订单号可回传。 |
+| `crm_sales_order` | CRM 销售订单事实 | 活跃订单号租户内唯一；状态为 `DRAFT/CONFIRMED/CANCELLING/CANCELLED/CLOSED`；关闭由 CRM 销售流程显式完成。 |
 | `crm_sales_order_line` | 订单商业快照行 | 每订单行号唯一；引用仅保存 ID 和快照，不建立跨上下文实体外键。 |
 | `crm_order_cancel` | 取消申请与处理结果 | 每订单取消编号唯一；状态为 `PENDING/APPROVED/REJECTED/COMPLETED`；原订单保持不可变。 |
 
@@ -64,12 +63,11 @@ stateDiagram-v2
 | `POST /api/v1/contracts/{id}/changes` | `contract:change` | `Idempotency-Key`；创建变更快照。 |
 | `POST /api/v1/orders` | `order:create` | `Idempotency-Key`；合同必须已签。 |
 | `POST /api/v1/orders/{id}/actions/confirm|request-cancel` | 对应 `order:*` | 请求含订单 `version`；取消须说明原因。 |
-| `POST /api/v1/integrations/erp/orders/{externalOrderNo}/callbacks` | `integration:erp:callback` | `Idempotency-Key`；按外部单号幂等处理回传。 |
 
-第一实现切片严格限定为“批准报价 -> 合同草稿 -> 签署 -> 订单草稿”。合同变更、作废拦截、订单确认/取消和 ERP 回传在该切片完成验收后逐项实现；交付协调不在本阶段提前建表。
+第一实现切片严格限定为“批准报价 -> 合同草稿 -> 签署 -> 订单草稿”。合同变更、作废拦截、订单确认/取消和 CRM 内部关闭在该切片完成验收后逐项实现；不建设交付、回款、开票或售后表。
 
 ## 5. 事件与验收
 
-事件：`ContractCreated`、`ContractSignatureSubmitted`、`ContractSigned`、`ContractVoided`、`ContractChangeSubmitted`、`OrderCreated`、`OrderConfirmed`、`OrderCancellationRequested`、`OrderCancelled`、`ErpOrderSynced`。
+事件：`ContractCreated`、`ContractSignatureSubmitted`、`ContractSigned`、`ContractVoided`、`ContractChangeSubmitted`、`OrderCreated`、`OrderConfirmed`、`OrderCancellationRequested`、`OrderCancelled`、`OrderClosed`。
 
-阶段门必须验证：跨租户引用拒绝；未批准报价不可创建合同；未签合同不可创建订单；签署、作废、订单确认和取消均有乐观锁冲突测试；重复创建与 ERP 回传不产生重复聚合、审计或 Outbox；产品、价格和报价变更不会回写合同/订单快照。
+阶段门必须验证：跨租户引用拒绝；未批准报价不可创建合同；未签合同不可创建订单；签署、作废、订单确认、取消和关闭均有乐观锁冲突测试；重复创建不产生重复聚合、审计或 Outbox；产品、价格和报价变更不会回写合同/订单快照。
