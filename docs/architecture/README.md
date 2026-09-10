@@ -2,7 +2,7 @@
 
 ## 1. 适用范围
 
-本目录是后端研发、测试和评审的架构基线。当前已交付工程底座、线索/客户私海公海闭环、阶段 2A 的产品与价格目录、阶段 2B 的商机管道、阶段 2C 的报价根/版本/快照行，以及阶段 2D 的审批定义与报价审批闭环。阶段 3 已交付合同草稿、签署撤回、签署、作废、合同变更台账，以及销售订单创建、确认、取消审批和 CRM 内部关闭。阶段 4A 已交付只读销售工作台汇总，阶段 4B 已交付 CRM 销售目标及结果确认，阶段 4C 已交付确定性销售报表，阶段 4D 已交付规则驱动目标计分。交付、库存、回款、开票和售后不属于 CRM 运行范围。
+本目录是后端研发、测试和评审的架构基线。当前已交付工程底座、线索/客户私海公海闭环、阶段 2A 的产品与价格目录、阶段 2B 的商机管道、阶段 2C 的报价根/版本/快照行，以及阶段 2D 的审批定义与报价审批闭环。阶段 3 已交付合同草稿、签署撤回、签署、作废、合同变更台账，以及销售订单创建、确认、取消审批和 CRM 内部关闭。阶段 4A 至 4D 已交付工作台、目标、报表与计分；阶段 4E 已交付受控营销 Webhook 获客和组织事件接收回执。交付、库存、回款、开票和售后不属于 CRM 运行范围。
 
 进入下一阶段必须同时满足：本目录相关设计已评审、Flyway 可从空库初始化、模块边界测试通过、租户与数据范围测试通过、当前阶段端到端用例通过。
 
@@ -15,16 +15,20 @@ flowchart LR
     WEB --> CATALOG["aicrm-catalog\n分类 产品 价目表"]
     WEB --> TRADE["aicrm-trade\n报价 合同 订单"]
     WEB --> ANALYTICS["aicrm-analytics\n工作台 销售目标 销售统计"]
+    WEB --> INTEGRATION["aicrm-integration\n营销获客 组织事件回执"]
     SALES --> KERNEL["aicrm-shared-kernel\n值对象 错误 事件 安全上下文"]
     CATALOG --> KERNEL
     TRADE --> KERNEL
     ANALYTICS --> KERNEL
+    INTEGRATION --> KERNEL
     PLATFORM --> KERNEL
     BOOT["aicrm-admin-boot\n装配与启动"] --> WEB
     CATALOG --> PLATFORM
     TRADE --> PLATFORM
     TRADE --> SALES
     TRADE --> CATALOG
+    INTEGRATION --> PLATFORM
+    INTEGRATION --> SALES
 ```
 
 依赖规则：领域模块内部采用 `api/application/domain/infrastructure`；领域层只依赖共享内核；跨领域只能调用公开应用接口或订阅事件；Controller 不得访问 Repository，应用服务不得访问其他领域的实体或 Mapper。
@@ -38,6 +42,7 @@ flowchart LR
 | catalog | 产品分类、产品、价目表、价格项 | 合同成交价审批与报价折扣 |
 | trade | 报价、报价版本、报价快照行、销售合同、签署状态和销售订单 | 交付、库存、回款、开票、售后事实 |
 | analytics | CRM 工作台聚合、销售目标和已确认结果 | 交付、库存、回款、开票、售后、外部系统业务事实 |
+| integration | 营销线索入站、组织事件回执、连接器凭据和事件幂等 | CRM 用户部门镜像、交付、库存、回款、开票、售后事实 |
 
 ## 4. 阶段门
 
@@ -51,6 +56,7 @@ flowchart LR
 | G4B 目标与结果 | CRM 销售目标、结果快照与确认权限 | 目标启用、期末确认、不可变结果、审计和 Outbox 测试通过 |
 | G4C 确定性报表 | 当前漏斗与区间业绩查询 | CRM 事实、数据范围、时间窗和静态边界测试通过 |
 | G4D 规则计分 | 评分规则、分段和结果快照 | 规则生命周期、目标绑定、不可变评分、审计和 Outbox 测试通过 |
+| G4E 连接器 | 营销线索 Webhook 与组织事件接收回执 | 密钥认证、事件幂等、营销公海入线索、组织事件不镜像主数据测试通过 |
 
 ## 5. 文档索引
 
@@ -72,3 +78,4 @@ flowchart LR
 - [阶段 2D 审批设计](approval.md)
 - [阶段 3 合同与销售订单设计](contract-order.md)
 - [阶段 4 工作台、销售目标与销售统计设计](analytics.md)
+- [阶段 4 组织与营销连接器](connectors.md)

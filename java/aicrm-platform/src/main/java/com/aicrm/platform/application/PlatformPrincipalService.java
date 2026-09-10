@@ -70,6 +70,7 @@ public class PlatformPrincipalService {
             permissions.add("analytics:read");
             permissions.addAll(Set.of("target:read:any", "target:manage", "target:confirm"));
             permissions.addAll(Set.of("performance:rule:read", "performance:rule:manage"));
+            permissions.addAll(Set.of("connector:read", "connector:manage"));
         }
         if (!roles.isEmpty()) {
             permissions.addAll(Set.of("lead:create", "lead:claim", "lead:read:own", "lead:write:own",

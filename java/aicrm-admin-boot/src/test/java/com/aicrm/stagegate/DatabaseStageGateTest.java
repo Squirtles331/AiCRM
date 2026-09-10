@@ -33,8 +33,8 @@ class DatabaseStageGateTest {
     void emptyDatabaseMigratesThroughFrozenVersion() throws Exception {
         resetAndMigrate();
 
-        assertEquals("20", scalar("select version from flyway_schema_history where success order by installed_rank desc limit 1"));
-        assertEquals("44", scalar("select count(*) from information_schema.tables "
+        assertEquals("21", scalar("select version from flyway_schema_history where success order by installed_rank desc limit 1"));
+        assertEquals("46", scalar("select count(*) from information_schema.tables "
                 + "where table_schema = 'public' and table_name like 'crm_%'"));
         assertEquals("4", scalar("select count(*) from pg_constraint "
                 + "where conname in ('ck_crm_lead_ownership','ck_crm_customer_ownership',"

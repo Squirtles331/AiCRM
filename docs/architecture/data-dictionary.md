@@ -1,6 +1,6 @@
-# CRM 数据字典（阶段 4D）
+# CRM 数据字典（阶段 4E）
 
-版本：`M4D-DB-1.0`；状态：产品目录、商机管道、报价审批、合同与销售订单闭环、CRM 工作台、目标、报表与规则驱动评分已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V20` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
+版本：`M4E-DB-1.0`；状态：产品目录、商机管道、报价审批、合同与销售订单闭环、CRM 工作台、目标、报表、规则驱动评分与组织/营销连接器已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V21` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
 
 ## 1. 类型与通用字段组
 
@@ -113,6 +113,13 @@ V19 的 `crm_sales_target` 保存个人、指标、日期区间、目标值、�
 
 V20 的 `crm_performance_score_rule` 保存名称、匹配指标、`DRAFT/ACTIVE/RETIRED` 状态和版本；`crm_performance_score_band` 保存顺序、达成率下限/可选上限和分值，启用或退役规则的分段禁止更新或删除。`crm_sales_target.score_rule_id` 是可选同租户引用，因此历史目标无需回填。`crm_sales_target_score` 对每个目标和目标结果各至多保存一条不可变评分事实，包含达成率、分值、规则和分段快照、确认人及时间。所有评分表仅保存 CRM 目标指标，禁止加入回款、发票、履约、库存或售后字段。
 
-## 11. 后续对象登记
+## 11. 组织与营销连接器
+
+| 表 | 字段（类型；N=NOT NULL；默认值） | 键、检查与主要索引 |
+|---|---|---|
+| `crm_connector` | `id/tenant_id BIGINT N`；`connector_no VARCHAR(32) N`；`name VARCHAR(200) N`；`type/status VARCHAR(32/16) N`；`operator_user_id BIGINT N`；`public_pool_id BIGINT NULL`；`secret_hash VARCHAR(100) N`；`version`、`AUDIT_MUTABLE` | 类型为 `MARKETING_WEBHOOK/ORGANIZATION_WEBHOOK`，状态为 `ACTIVE/DISABLED`；营销连接器必须是启用线索公海，组织连接器不得有公海；执行用户必须为同租户启用用户。密钥只保存 BCrypt 哈希。 |
+| `crm_connector_event` | `id/tenant_id/connector_id BIGINT N`；`external_event_id VARCHAR(128) N`；`event_type VARCHAR(64) N`；`payload JSONB N`；`payload_hash CHAR(64) N`；`outcome VARCHAR(32) N`；`lead_id BIGINT NULL`；`received_at TIMESTAMPTZ N` | `(tenant_id, connector_id, external_event_id)` 唯一且触发器禁止更新/删除；结果为 `LEAD_CREATED/ACCEPTED`，前者必须引用线索，后者禁止引用线索。 |
+
+## 12. 后续对象登记
 
 交易域对象不在本冻结版本建表。其主责、主键、租户和跨域引用规则见 [future-contexts.md](future-contexts.md)；任何正式字段必须经对应阶段门并通过新 Flyway 版本创建，禁止提前塞入 `crm_lead.extension`、`crm_customer.extension` 或 `crm_opportunity.extension`。

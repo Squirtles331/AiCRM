@@ -4,7 +4,7 @@
 
 版本前缀为 `/api/v1`。成功与失败均使用 `code/message/data/traceId`；HTTP 状态码表达真实语义。分页参数从 1 开始，默认 `page=1,size=20`，最大 `size=200`。所有 ID 在 JSON 中表示为字符串。
 
-创建、转换、合并、交接和外部回调必须携带 `Idempotency-Key`。更新命令必须携带聚合 `version`；版本冲突返回 `409 VERSION_CONFLICT`。所有请求接受/返回 `X-Trace-Id`，缺失时服务端生成；写命令的 JSON `Content-Type` 固定为 `application/json`。
+创建、转换、合并、交接和连接器配置必须携带 `Idempotency-Key`。连接器入站回调以受控的 `eventId` 和载荷哈希去重。更新命令必须携带聚合 `version`；版本冲突返回 `409 VERSION_CONFLICT`。所有请求接受/返回 `X-Trace-Id`，缺失时服务端生成；写命令的 JSON `Content-Type` 固定为 `application/json`。
 
 列表响应为 `data.items/page/size/total`；时间为 ISO-8601 UTC，例如 `2026-09-07T02:30:00Z`。手机号、邮箱等字段在无查看权限时返回脱敏值，在完全无字段权限时省略；服务端绝不根据前端隐藏状态授权。
 
@@ -60,6 +60,10 @@
 | `POST /api/v1/performance-score-rules` | 创建 CRM 绩效评分规则与连续达成率分段；须含 `Idempotency-Key` | `performance:rule:manage` |
 | `GET /api/v1/performance-score-rules/{id}` | 查询租户内绩效评分规则和分段 | `performance:rule:read/manage` |
 | `POST /api/v1/performance-score-rules/{id}/actions/activate|retire` | 启用或退役规则；请求含 `version` | `performance:rule:manage` |
+| `POST /api/v1/connectors` | 创建 CRM 组织或营销入站连接器；请求含共享密钥与 `Idempotency-Key` | `connector:manage` |
+| `GET /api/v1/connectors/{id}` | 查询连接器元数据，绝不返回共享密钥或密钥哈希 | `connector:read/manage` |
+| `POST /api/v1/connectors/{id}/actions/activate|disable` | 启用或停用连接器；请求含 `version` | `connector:manage` |
+| `POST /api/v1/connectors/{id}/events` | 使用 `X-Connector-Secret` 接收外部事件；正文含 `eventId/eventType`，营销事件含 `lead` | 匿名密钥认证；同事件号载荷哈希幂等 |
 | `POST /api/v1/approval-definitions` | 创建审批定义 | `approval:manage` |
 | `POST /api/v1/approval-definitions/{id}/actions/activate` | 启用审批定义，须含定义版本 | `approval:manage` |
 | `GET /api/v1/approval-tasks/pending` | 当前用户待审批任务 | `approval:task:read` |
@@ -96,6 +100,8 @@
 | `SalesTargetCreated/Activated/ResultConfirmed` | SalesTarget | `targetId,targetUserId,metric,status,version` | CRM 目标与确认结果审计 |
 | `PerformanceScoreRuleCreated/Activated/Retired` | PerformanceScoreRule | `ruleId,metric,status,version` | 评分规则审计 |
 | `SalesTargetScoreConfirmed` | SalesTargetScore | `targetId,targetResultId,scoreRuleId,achievementRate,score` | CRM 绩效评分审计 |
+| `ConnectorCreated/Activated/Disabled` | Connector | `connectorId,type,status` | 连接器配置审计；不含密钥 |
+| `ConnectorEventAccepted` | ConnectorEvent | `connectorId,externalEventHash,outcome,leadId` | 入站接收审计与下游获客处理 |
 | `ApprovalDefinitionCreated/Activated` | Approval | `definitionId,resourceType,status` | 审计、配置投影 |
 | `ApprovalStarted` | Approval | `instanceId,resourceType,resourceId,definitionVersion` | 待办、提醒 |
 | `ApprovalTaskApproved/Rejected/Transferred` | Approval | `instanceId,taskId,status` | 待办、业务状态同步 |

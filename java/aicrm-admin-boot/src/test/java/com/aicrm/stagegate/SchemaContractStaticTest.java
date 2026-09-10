@@ -24,10 +24,10 @@ class SchemaContractStaticTest {
         Path migrations = repository.resolve("java/aicrm-admin-boot/src/main/resources/db/migration");
         List<Path> files;
         try (var stream = Files.list(migrations)) {
-            files = stream.filter(path -> path.getFileName().toString().matches("V([1-9]|[12][0-9])__.*\\.sql"))
+            files = stream.filter(path -> path.getFileName().toString().matches("V([1-9]|[12][0-9]|21)__.*\\.sql"))
                     .sorted(java.util.Comparator.comparingInt(this::version)).toList();
         }
-        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20), files.stream()
+        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21), files.stream()
                 .map(this::version).toList());
 
         String sql = files.stream().map(this::read).reduce("", String::concat).toLowerCase(Locale.ROOT);
@@ -50,7 +50,7 @@ class SchemaContractStaticTest {
         for (String document : List.of(
                 "README.md", "data-dictionary.md", "database-conventions.md", "authorization.md",
                 "state-machines.md", "api-events.md", "error-codes.md", "reliability.md", "adr.md",
-                "module-boundaries.md", "future-contexts.md", "stage-gate.md", "security-nfr.md", "approval.md", "contract-order.md", "analytics.md")) {
+                "module-boundaries.md", "future-contexts.md", "stage-gate.md", "security-nfr.md", "approval.md", "contract-order.md", "analytics.md", "connectors.md")) {
             assertTrue(Files.isRegularFile(architecture.resolve(document)),
                     () -> "missing architecture document: " + document);
         }

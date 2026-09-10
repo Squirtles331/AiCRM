@@ -33,6 +33,10 @@
             <artifactId>aicrm-analytics</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.aicrm</groupId>
+            <artifactId>aicrm-integration</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>

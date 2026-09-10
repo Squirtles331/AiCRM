@@ -138,7 +138,9 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/sales-targets']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/sales-targets/{id}/actions/confirm-result']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/performance-score-rules']").exists())
-                .andExpect(jsonPath("$.paths['/api/v1/performance-score-rules/{id}/actions/activate']").exists());
+                .andExpect(jsonPath("$.paths['/api/v1/performance-score-rules/{id}/actions/activate']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/connectors']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/connectors/{id}/events']").exists());
     }
 
     @Test
@@ -897,6 +899,62 @@ class SalesApiV1IntegrationTest {
         assertThat(jdbcTemplate.queryForObject("select count(*) from crm_ownership_history "
                         + "where tenant_id=? and resource_id=? and action='RECYCLE' and source='SCHEDULER'",
                 Long.class, TENANT_ID, leadId)).isEqualTo(1L);
+    }
+
+    @Test
+    void acceptsIdempotentMarketingAndOrganizationWebhookEventsWithoutExpandingCrmFacts() throws Exception {
+        seedSalesTenant();
+        seedAdminAndExitingUser();
+        String adminToken = token(ADMIN_USER_ID);
+        String marketing = mockMvc.perform(post("/api/v1/connectors")
+                        .header("Authorization", bearer(adminToken)).header("Idempotency-Key", "connector-marketing-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"name":"官网获客","type":"MARKETING_WEBHOOK","operatorUserId":5111,
+                                 "publicPoolId":5131,"sharedSecret":"marketing-webhook-secret"}
+                                """))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.type").value("MARKETING_WEBHOOK"))
+                .andReturn().getResponse().getContentAsString();
+        String marketingId = objectMapper.readTree(marketing).path("data").path("id").asText();
+        String event = """
+                {"eventId":"form-20260910-001","eventType":"LEAD_CAPTURED",
+                 "lead":{"name":"营销线索","mobile":"13800000000","companyName":"示例公司","intent":"预约演示"}}
+                """;
+        mockMvc.perform(post("/api/v1/connectors/{id}/events", marketingId)
+                        .header("X-Connector-Secret", "marketing-webhook-secret")
+                        .contentType(MediaType.APPLICATION_JSON).content(event))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.outcome").value("LEAD_CREATED"))
+                .andExpect(jsonPath("$.data.replayed").value(false))
+                .andExpect(jsonPath("$.data.leadId").isNotEmpty());
+        mockMvc.perform(post("/api/v1/connectors/{id}/events", marketingId)
+                        .header("X-Connector-Secret", "marketing-webhook-secret")
+                        .contentType(MediaType.APPLICATION_JSON).content(event))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.replayed").value(true));
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_lead where tenant_id=? and source_type='MARKETING'",
+                Long.class, TENANT_ID)).isEqualTo(1L);
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_connector_event where tenant_id=? and connector_id=?",
+                Long.class, TENANT_ID, Long.parseLong(marketingId))).isEqualTo(1L);
+        mockMvc.perform(post("/api/v1/connectors/{id}/events", marketingId)
+                        .header("X-Connector-Secret", "incorrect-secret-value")
+                        .contentType(MediaType.APPLICATION_JSON).content(event))
+                .andExpect(status().isForbidden());
+
+        String organization = mockMvc.perform(post("/api/v1/connectors")
+                        .header("Authorization", bearer(adminToken)).header("Idempotency-Key", "connector-organization-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"name":"组织目录通知","type":"ORGANIZATION_WEBHOOK","operatorUserId":5113,
+                                 "sharedSecret":"organization-webhook-secret"}
+                                """))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        String organizationId = objectMapper.readTree(organization).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/connectors/{id}/events", organizationId)
+                        .header("X-Connector-Secret", "organization-webhook-secret")
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"eventId":"directory-20260910-001","eventType":"USER_CHANGED","user":{"externalId":"u-100"}}
+                                """))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.outcome").value("ACCEPTED"))
+                .andExpect(jsonPath("$.data.leadId").doesNotExist());
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_connector_event where tenant_id=? and connector_id=? and lead_id is null",
+                Long.class, TENANT_ID, Long.parseLong(organizationId))).isEqualTo(1L);
     }
 
     private String createLead(String token, String idempotencyKey, String body) throws Exception {
