@@ -24,10 +24,10 @@ class SchemaContractStaticTest {
         Path migrations = repository.resolve("java/aicrm-admin-boot/src/main/resources/db/migration");
         List<Path> files;
         try (var stream = Files.list(migrations)) {
-            files = stream.filter(path -> path.getFileName().toString().matches("V([1-9]|1[0-6])__.*\\.sql"))
+            files = stream.filter(path -> path.getFileName().toString().matches("V([1-9]|1[0-7])__.*\\.sql"))
                     .sorted(java.util.Comparator.comparingInt(this::version)).toList();
         }
-        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16), files.stream()
+        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17), files.stream()
                 .map(this::version).toList());
 
         String sql = files.stream().map(this::read).reduce("", String::concat).toLowerCase(Locale.ROOT);
@@ -43,6 +43,8 @@ class SchemaContractStaticTest {
             assertFalse(sql.contains("create table " + futureTable),
                     () -> "future context table created before its stage gate: " + futureTable);
         }
+        String lifecycleMigration = read(migrations.resolve("V17__contract_order_lifecycle_closure.sql")).toLowerCase(Locale.ROOT);
+        assertTrue(lifecycleMigration.contains("delete from crm_permission"), "V17 must remove the retired ERP callback permission");
 
         Path architecture = repository.resolve("docs/architecture");
         for (String document : List.of(

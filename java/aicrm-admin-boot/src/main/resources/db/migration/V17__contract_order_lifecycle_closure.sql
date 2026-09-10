@@ -39,6 +39,16 @@ SELECT crm_seed_contract_order_permissions(id) FROM crm_tenant;
 ALTER TABLE crm_sales_order
     ADD COLUMN close_reason VARCHAR(500);
 
+UPDATE crm_sales_order
+SET closed_at = COALESCE(closed_at, updated_at, created_at),
+    close_reason = '历史订单关闭记录'
+WHERE status = 'CLOSED' AND (closed_at IS NULL OR close_reason IS NULL);
+
+UPDATE crm_sales_order
+SET closed_at = NULL,
+    close_reason = NULL
+WHERE status <> 'CLOSED' AND (closed_at IS NOT NULL OR close_reason IS NOT NULL);
+
 ALTER TABLE crm_sales_order
     ADD CONSTRAINT ck_crm_sales_order_close
     CHECK ((status = 'CLOSED' AND closed_at IS NOT NULL AND close_reason IS NOT NULL)

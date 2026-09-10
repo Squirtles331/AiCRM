@@ -33,8 +33,9 @@ public class JdbcSalesOrderRepository implements SalesOrderRepository {
     public List<SalesOrderLine> findLines(long tenantId, long orderId) { return jdbc.query("select * from crm_sales_order_line where tenant_id=? and order_id=? and deleted_at is null order by line_no", lineMapper(), tenantId, orderId); }
     public boolean existsForContract(long tenantId, long contractId) { Boolean value = jdbc.query("select exists(select 1 from crm_sales_order where tenant_id=? and contract_id=? and deleted_at is null)", rs -> rs.next() && rs.getBoolean(1), tenantId, contractId); return Boolean.TRUE.equals(value); }
     public boolean transition(long tenantId, long orderId, SalesOrder.Status from, SalesOrder.Status to, long expectedVersion, long actorId) {
-        String timestamp = switch (to) { case CONFIRMED -> "confirmed_at=now()"; case CANCELLED -> "cancelled_at=now()"; case CANCELLING, DRAFT, CLOSED -> throw new IllegalArgumentException("订单状态必须使用专用操作"); };
-        String sql = "update crm_sales_order set status=?, " + timestamp + ", version=version+1, updated_by=?, updated_at=now() where tenant_id=? and id=? and status=? and version=? and deleted_at is null";
+        String timestamp = switch (to) { case CONFIRMED -> "confirmed_at=now()"; case CANCELLED -> "cancelled_at=now()"; case CANCELLING -> ""; case DRAFT, CLOSED -> throw new IllegalArgumentException("订单状态必须使用专用操作"); };
+        String sql = "update crm_sales_order set status=?" + (timestamp.isEmpty() ? "" : ", " + timestamp)
+                + ", version=version+1, updated_by=?, updated_at=now() where tenant_id=? and id=? and status=? and version=? and deleted_at is null";
         return jdbc.update(sql, to.name(), actorId, tenantId, orderId, from.name(), expectedVersion) == 1;
     }
     public boolean close(long tenantId, long orderId, long expectedVersion, String reason, long actorId) {

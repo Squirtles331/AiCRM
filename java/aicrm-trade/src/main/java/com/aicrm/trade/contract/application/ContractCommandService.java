@@ -90,7 +90,7 @@ public class ContractCommandService {
         if (!repository.transition(actor.tenantId(), contractId, Contract.Status.PENDING_SIGNATURE, Contract.Status.DRAFT, command.version(), actor.userId())) {
             throw conflict("合同已被其他操作修改，或当前状态不可撤回签署");
         }
-        Contract after = existing(actor, contractId); journal(actor, "WITHDRAW_SIGNATURE", after, "ContractSignatureWithdrawn"); return after;
+        Contract after = existing(actor, contractId); journal(actor, "WITHDRAW", after, "ContractSignatureWithdrawn"); return after;
     }
 
     @Transactional
@@ -201,12 +201,13 @@ public class ContractCommandService {
     private String required(String value, String name) { if (value == null || value.isBlank()) throw new DomainException(ErrorCode.VALIDATION_ERROR, name + "不能为空"); return value.trim(); }
     private DomainException conflict(String message) { return new DomainException(ErrorCode.CONFLICT, message); }
     private void journal(Actor actor, String action, Contract contract, String event) {
-        String operation = "contract:" + action + ":" + contract.id() + ":" + ids.nextId(); String data = json(contract);
+        String operationAction = "SUBMIT_SIGNATURE".equals(action) ? "SUBMIT" : action;
+        String operation = "contract:" + operationAction + ":" + contract.id() + ":" + ids.nextId(); String data = json(contract);
         audit.record(actor, action, "CONTRACT", contract.id(), operation, "API", null, "{}", data);
         outbox.append(new DomainEvent(event, "CONTRACT", contract.id(), actor.tenantId(), data, Instant.now()), operation, actor.userId());
     }
     private void journalChange(Actor actor, String action, ContractChange change, String event) {
-        String operation = "contract-change:" + action + ":" + change.id() + ":" + ids.nextId(); String data = json(change);
+        String operation = "chg:" + action + ":" + change.id() + ":" + ids.nextId(); String data = json(change);
         audit.record(actor, action, "CONTRACT_CHANGE", change.id(), operation, "API", null, "{}", data);
         outbox.append(new DomainEvent(event, "CONTRACT_CHANGE", change.id(), actor.tenantId(), data, Instant.now()), operation, actor.userId());
     }

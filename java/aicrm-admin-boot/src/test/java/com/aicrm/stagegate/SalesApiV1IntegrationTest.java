@@ -127,7 +127,10 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/handovers/batch']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/contracts']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/contracts/{id}/actions/submit-signature']").exists())
-                .andExpect(jsonPath("$.paths['/api/v1/orders']").exists());
+                .andExpect(jsonPath("$.paths['/api/v1/contracts/{id}/changes']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/orders']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/orders/{id}/actions/close']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/orders/{id}/cancellations/{cancellationId}/actions/approve']").exists());
     }
 
     @Test
@@ -483,13 +486,47 @@ class SalesApiV1IntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("PENDING_SIGNATURE"))
                 .andExpect(jsonPath("$.data.version").value(1));
-        mockMvc.perform(post("/api/v1/contracts/{id}/actions/submit-signature", contractId).header("Authorization", bearer(token))
-                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
-                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
-        mockMvc.perform(post("/api/v1/contracts/{id}/actions/sign", contractId).header("Authorization", bearer(token))
+        mockMvc.perform(post("/api/v1/contracts/{id}/actions/withdraw-signature", contractId).header("Authorization", bearer(token))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"version\":1}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("SIGNED"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("DRAFT"))
                 .andExpect(jsonPath("$.data.version").value(2));
+        mockMvc.perform(post("/api/v1/contracts/{id}/actions/submit-signature", contractId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":2}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("PENDING_SIGNATURE"))
+                .andExpect(jsonPath("$.data.version").value(3));
+        mockMvc.perform(post("/api/v1/contracts/{id}/actions/sign", contractId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":3}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("SIGNED"))
+                .andExpect(jsonPath("$.data.version").value(4));
+        String changeResponse = mockMvc.perform(post("/api/v1/contracts/{id}/changes", contractId).header("Authorization", bearer(token)).header("Idempotency-Key", "contract-change-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"contractVersion\":4,\"reason\":\"合同名称调整\",\"proposedName\":\"CRM 修订采购合同\"}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
+                .andReturn().getResponse().getContentAsString();
+        String changeId = objectMapper.readTree(changeResponse).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/contracts/{id}/changes/{changeId}/actions/submit", contractId, changeId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("SUBMITTED"));
+        mockMvc.perform(post("/api/v1/contracts/{id}/changes/{changeId}/actions/approve", contractId, changeId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":1}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("APPROVED"));
+        mockMvc.perform(get("/api/v1/contracts/{id}", contractId).header("Authorization", bearer(token)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.name").value("CRM 年度采购合同"))
+                .andExpect(jsonPath("$.data.version").value(4));
+        String cancelledChangeId = objectMapper.readTree(mockMvc.perform(post("/api/v1/contracts/{id}/changes", contractId).header("Authorization", bearer(token)).header("Idempotency-Key", "contract-change-2")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"contractVersion\":4,\"reason\":\"有效期调整\",\"proposedEffectiveTo\":\"2027-01-31\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString()).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/contracts/{id}/changes/{changeId}/actions/cancel", contractId, cancelledChangeId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("CANCELLED"));
+        String rejectedChangeId = objectMapper.readTree(mockMvc.perform(post("/api/v1/contracts/{id}/changes", contractId).header("Authorization", bearer(token)).header("Idempotency-Key", "contract-change-3")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"contractVersion\":4,\"reason\":\"名称调整\",\"proposedName\":\"不批准合同\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString()).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/contracts/{id}/changes/{changeId}/actions/submit", contractId, rejectedChangeId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("SUBMITTED"));
+        mockMvc.perform(post("/api/v1/contracts/{id}/changes/{changeId}/actions/reject", contractId, rejectedChangeId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":1,\"reason\":\"不满足合同约定\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("REJECTED"));
         mockMvc.perform(post("/api/v1/contracts").header("Authorization", bearer(token)).header("Idempotency-Key", "contract-create-2")
                         .contentType(MediaType.APPLICATION_JSON).content("{\"quoteId\":" + quoteId + ",\"name\":\"重复合同\"}"))
                 .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
@@ -507,10 +544,37 @@ class SalesApiV1IntegrationTest {
         mockMvc.perform(post("/api/v1/orders").header("Authorization", bearer(token)).header("Idempotency-Key", "order-create-2")
                         .contentType(MediaType.APPLICATION_JSON).content("{\"contractId\":" + contractId + "}"))
                 .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
-        assertThat(outboxCount("ORDER", Long.parseLong(orderId))).isEqualTo(1L);
-        assertThat(outboxCount("CONTRACT", Long.parseLong(contractId))).isEqualTo(3L);
+        mockMvc.perform(post("/api/v1/contracts/{id}/actions/void", contractId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":4,\"reason\":\"存在订单时不可作废\"}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        mockMvc.perform(post("/api/v1/orders/{id}/actions/confirm", orderId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("CONFIRMED"))
+                .andExpect(jsonPath("$.data.version").value(1));
+        String cancellationResponse = mockMvc.perform(post("/api/v1/orders/{id}/actions/request-cancel", orderId).header("Authorization", bearer(token)).header("Idempotency-Key", "order-cancel-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":1,\"reason\":\"客户调整采购计划\"}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("PENDING"))
+                .andReturn().getResponse().getContentAsString();
+        String cancellationId = objectMapper.readTree(cancellationResponse).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/orders/{id}/actions/request-cancel", orderId).header("Authorization", bearer(token)).header("Idempotency-Key", "order-cancel-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":1,\"reason\":\"客户调整采购计划\"}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(cancellationId));
+        mockMvc.perform(post("/api/v1/orders/{id}/cancellations/{cancellationId}/actions/reject", orderId, cancellationId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"orderVersion\":2,\"cancellationVersion\":0,\"reason\":\"继续跟进成交\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("CONFIRMED"))
+                .andExpect(jsonPath("$.data.version").value(3));
+        mockMvc.perform(post("/api/v1/orders/{id}/actions/close", orderId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":3,\"reason\":\"销售流程内部结案\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("CLOSED"))
+                .andExpect(jsonPath("$.data.closeReason").value("销售流程内部结案"))
+                .andExpect(jsonPath("$.data.version").value(4));
+        mockMvc.perform(post("/api/v1/orders/{id}/actions/close", orderId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":3,\"reason\":\"重复关闭\"}"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
+        assertThat(outboxCount("ORDER", Long.parseLong(orderId))).isEqualTo(5L);
+        assertThat(outboxCount("CONTRACT", Long.parseLong(contractId))).isEqualTo(5L);
         assertThat(jdbcTemplate.queryForObject("select count(*) from crm_audit_log where tenant_id=? and resource_type='CONTRACT' and resource_id=?",
-                Long.class, TENANT_ID, Long.parseLong(contractId))).isEqualTo(3L);
+                Long.class, TENANT_ID, Long.parseLong(contractId))).isEqualTo(5L);
         assertThat(outboxCount("QUOTE", Long.parseLong(quoteId))).isEqualTo(3L);
         assertThat(jdbcTemplate.queryForObject("select count(*) from crm_approval_instance where tenant_id=? and resource_type='QUOTE' and resource_id=?", Long.class, TENANT_ID, Long.parseLong(quoteId))).isEqualTo(1L);
 
@@ -540,6 +604,41 @@ class SalesApiV1IntegrationTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("DRAFT"));
         mockMvc.perform(get("/api/v1/approval-tasks/pending").header("Authorization", bearer(approverToken)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(0));
+    }
+
+    @Test
+    void approvesOrderCancellationAsAnAtomicCrmDecision() throws Exception {
+        seedSalesTenant();
+        seedAdminAndExitingUser();
+        long orderId = 519901L;
+        long cancellationId = 519902L;
+        jdbcTemplate.update("insert into crm_sales_order (id,tenant_id,order_no,contract_id,customer_id,currency,total_amount,status,confirmed_at,version,created_by,updated_by) values (?,?,?,?,?,'CNY',?,'CANCELLING',now(),2,?,?)",
+                orderId, TENANT_ID, "ORD-CANCEL-APPROVE", 519903L, 519904L, 1000, ADMIN_USER_ID, ADMIN_USER_ID);
+        jdbcTemplate.update("insert into crm_order_cancel (id,tenant_id,order_id,cancel_no,status,reason,request_snapshot,version,created_by,updated_by) values (?,?,?,?, 'PENDING', ?, '{}'::jsonb, 0, ?, ?)",
+                cancellationId, TENANT_ID, orderId, "CAN-APPROVE", "客户取消", ADMIN_USER_ID, ADMIN_USER_ID);
+
+        mockMvc.perform(post("/api/v1/orders/{id}/actions/close", orderId).header("Authorization", bearer(token(USER_ONE_ID)))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":2,\"reason\":\"\"}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/v1/orders/{id}/cancellations/{cancellationId}/actions/approve", orderId, cancellationId)
+                        .header("Authorization", bearer(token(USER_ONE_ID))).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"orderVersion\":2,\"cancellationVersion\":0}"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/v1/orders/{id}/cancellations/{cancellationId}/actions/approve", orderId, cancellationId)
+                        .header("Authorization", bearer(token(ADMIN_USER_ID))).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"orderVersion\":2,\"cancellationVersion\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("CANCELLED"))
+                .andExpect(jsonPath("$.data.version").value(3));
+        assertThat(jdbcTemplate.queryForObject("select status || ':' || version from crm_order_cancel where tenant_id=? and id=?", String.class, TENANT_ID, cancellationId))
+                .isEqualTo("COMPLETED:1");
+        assertThat(outboxCount("ORDER", orderId)).isEqualTo(1L);
+
+        jdbcTemplate.update("insert into crm_tenant (id,name) values (?,?)", 52L, "foreign-order-tenant");
+        jdbcTemplate.update("insert into crm_sales_order (id,tenant_id,order_no,contract_id,customer_id,currency,total_amount,status,version,created_by,updated_by) values (?,?,?,?,?,'CNY',?,'DRAFT',0,?,?)",
+                529901L, 52L, "ORD-FOREIGN", 529902L, 529903L, 1000, ADMIN_USER_ID, ADMIN_USER_ID);
+        mockMvc.perform(post("/api/v1/orders/{id}/actions/confirm", 529901L).header("Authorization", bearer(token(ADMIN_USER_ID)))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isNotFound());
     }
 
     @Test

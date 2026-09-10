@@ -44,9 +44,13 @@
 | `GET /api/v1/contracts/{id}/lines` | 查询合同不可变商业快照行 | 同合同查看权限 |
 | `POST /api/v1/contracts/{id}/actions/submit-signature` | 提交草稿合同签署；请求须含 `version` | `contract:submit-signature` |
 | `POST /api/v1/contracts/{id}/actions/sign` | 确认待签署合同已签；请求须含 `version` | `contract:sign` |
+| `POST /api/v1/contracts/{id}/actions/withdraw-signature|void` | 撤回签署或作废合同；请求须含 `version`，作废原因必填 | `contract:withdraw-signature` / `contract:void` |
+| `POST /api/v1/contracts/{id}/changes` 及变更的 `submit|cancel|approve|reject` 动作 | 创建并处理合同变更台账；创建须含 `Idempotency-Key`，状态操作须含变更 `version` | `contract:change` / `contract:approve-change` |
 | `POST /api/v1/orders` | 从已签合同创建完整销售订单草稿；请求含 `expectedDeliveryAt` 和 `Idempotency-Key` | `order:create` + 合同来源数据范围 |
 | `GET /api/v1/orders/{id}` | 查询销售订单根 | `order:read:own/any` + 合同来源数据范围 |
 | `GET /api/v1/orders/{id}/lines` | 查询销售订单不可变商业快照行 | 同订单查看权限 |
+| `POST /api/v1/orders/{id}/actions/confirm|request-cancel|close` | 确认、申请取消或 CRM 内部关闭订单；申请须含 `Idempotency-Key`，关闭原因必填 | `order:confirm` / `order:cancel` / `order:close` |
+| `POST /api/v1/orders/{id}/cancellations/{cancelId}/actions/approve|reject` | 销售管理员决定订单取消；请求须含订单与取消申请版本 | `order:approve-cancel` |
 | `POST /api/v1/approval-definitions` | 创建审批定义 | `approval:manage` |
 | `POST /api/v1/approval-definitions/{id}/actions/activate` | 启用审批定义，须含定义版本 | `approval:manage` |
 | `GET /api/v1/approval-tasks/pending` | 当前用户待审批任务 | `approval:task:read` |
@@ -77,7 +81,9 @@
 | `QuoteSubmitted/Approved/Rejected/ApprovalWithdrawn/Expired` | Quote | `quoteId,status,currentVersionNo` | 审批衔接、提醒、报表 |
 | `ContractCreated` | Contract | `contractId,quoteId,quoteVersionId,customerId,totalAmount` | 合同台账、审计 |
 | `ContractSignatureSubmitted/ContractSigned` | Contract | `contractId,status,version` | 待办、订单准入 |
-| `OrderCreated` | Order | `orderId,contractId,customerId,totalAmount` | 销售订单台账、审计 |
+| `ContractSignatureWithdrawn/ContractVoided` | Contract | `contractId,status,version` | 合同台账、审计 |
+| `ContractChangeCreated/Submitted/Cancelled/Approved/Rejected` | ContractChange | `changeId,contractId,status,version` | 变更台账、审计 |
+| `OrderCreated/Confirmed/CancellationRequested/CancellationRejected/Cancelled/Closed` | Order | `orderId,contractId,status,version` | 销售订单台账、审计 |
 | `ApprovalDefinitionCreated/Activated` | Approval | `definitionId,resourceType,status` | 审计、配置投影 |
 | `ApprovalStarted` | Approval | `instanceId,resourceType,resourceId,definitionVersion` | 待办、提醒 |
 | `ApprovalTaskApproved/Rejected/Transferred` | Approval | `instanceId,taskId,status` | 待办、业务状态同步 |
