@@ -147,6 +147,10 @@ stateDiagram-v2
 - 创建需要 `Idempotency-Key`，启用和停用要求 `channel:manage` 与匹配 `version`。每次变更写审计和 Outbox。
 - 渠道 ID 与编码在写入线索时形成归因快照，后续状态或显示名称变更不回写历史线索。
 
+## 销售会话状态机
+
+`OPEN -> CLOSED -> OPEN`。会话必须绑定 CRM 客户，可选绑定该客户的联系人；仅打开状态可追加 `INBOUND/OUTBOUND/NOTE` 沟通记录。记录为追加式事实，CRM 不同步呼叫中心或在线客服的原始会话。
+
 ## 私海/公海归属状态机
 
 ```mermaid

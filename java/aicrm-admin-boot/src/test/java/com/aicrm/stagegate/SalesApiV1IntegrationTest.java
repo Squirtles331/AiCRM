@@ -144,7 +144,9 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/connectors/{id}/monitoring']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/connectors/{id}/outbox/{outboxEventId}/actions/retry']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/acquisition-channels']").exists())
-                .andExpect(jsonPath("$.paths['/api/v1/acquisition-channels/{id}/actions/activate']").exists());
+                .andExpect(jsonPath("$.paths['/api/v1/acquisition-channels/{id}/actions/activate']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/sales-conversations']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/sales-conversations/{id}/entries']").exists());
     }
 
     @Test
@@ -262,6 +264,42 @@ class SalesApiV1IntegrationTest {
                 .andReturn().getResponse().getContentAsString();
         assertThat(objectMapper.readTree(userTwoPrivate).path("data").path("items").findValuesAsText("id"))
                 .doesNotContain(privateLeadId);
+    }
+
+    @Test
+    void managesSalesConversationLifecycleWithOwnershipAndIdempotency() throws Exception {
+        seedSalesTenant();
+        seedAdminAndExitingUser();
+        String owner = token(USER_ONE_ID);
+        String customerId = createCustomerId(owner, "conversation-customer", "会话客户");
+        String created = mockMvc.perform(post("/api/v1/sales-conversations").header("Authorization", bearer(owner))
+                        .header("Idempotency-Key", "conversation-create").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"customerId\":" + customerId + ",\"subject\":\"首次沟通\",\"channel\":\"PHONE\",\"summary\":\"确认需求\"}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("OPEN"))
+                .andReturn().getResponse().getContentAsString();
+        String conversationId = objectMapper.readTree(created).path("data").path("id").asText();
+        mockMvc.perform(get("/api/v1/sales-conversations/{id}", conversationId).header("Authorization", bearer(token(USER_TWO_ID))))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/v1/sales-conversations/{id}", conversationId).header("Authorization", bearer(token(ADMIN_USER_ID))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.conversation.customerId").value(customerId));
+        String entry = "{\"direction\":\"OUTBOUND\",\"content\":\"已介绍报价方案\"}";
+        mockMvc.perform(post("/api/v1/sales-conversations/{id}/entries", conversationId).header("Authorization", bearer(owner))
+                        .header("Idempotency-Key", "conversation-entry").contentType(MediaType.APPLICATION_JSON).content(entry))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/v1/sales-conversations/{id}/entries", conversationId).header("Authorization", bearer(owner))
+                        .header("Idempotency-Key", "conversation-entry").contentType(MediaType.APPLICATION_JSON).content(entry))
+                .andExpect(status().isOk());
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_sales_conversation_entry where tenant_id=? and conversation_id=?", Long.class, TENANT_ID, Long.parseLong(conversationId))).isEqualTo(1L);
+        mockMvc.perform(post("/api/v1/sales-conversations/{id}/actions/close", conversationId).header("Authorization", bearer(owner))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("CLOSED"));
+        mockMvc.perform(post("/api/v1/sales-conversations/{id}/entries", conversationId).header("Authorization", bearer(owner))
+                        .header("Idempotency-Key", "closed-entry").contentType(MediaType.APPLICATION_JSON).content(entry))
+                .andExpect(status().isConflict());
+        mockMvc.perform(post("/api/v1/sales-conversations/{id}/actions/reopen", conversationId).header("Authorization", bearer(owner))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":1}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("OPEN"));
+        assertThat(outboxCount("SALES_CONVERSATION", Long.parseLong(conversationId))).isEqualTo(4L);
     }
 
     @Test
