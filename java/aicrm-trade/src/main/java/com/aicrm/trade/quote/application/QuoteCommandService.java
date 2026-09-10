@@ -10,6 +10,7 @@ import com.aicrm.kernel.event.DomainEvent;
 import com.aicrm.kernel.id.IdGenerator;
 import com.aicrm.kernel.security.Actor;
 import com.aicrm.platform.application.AuditLogService;
+import com.aicrm.platform.application.ApprovalService;
 import com.aicrm.platform.application.IdempotencyService;
 import com.aicrm.platform.application.OutboxService;
 import com.aicrm.sales.application.OpportunityReadService;
@@ -38,18 +39,20 @@ public class QuoteCommandService {
     private final CatalogReadService catalog;
     private final IdGenerator ids;
     private final IdempotencyService idempotency;
+    private final ApprovalService approvals;
     private final AuditLogService audit;
     private final OutboxService outbox;
     private final ObjectMapper mapper;
 
     public QuoteCommandService(QuoteRepository repository, OpportunityReadService opportunities, CatalogReadService catalog,
-                               IdGenerator ids, IdempotencyService idempotency, AuditLogService audit, OutboxService outbox,
+                               IdGenerator ids, IdempotencyService idempotency, ApprovalService approvals, AuditLogService audit, OutboxService outbox,
                                ObjectMapper mapper) {
         this.repository = repository;
         this.opportunities = opportunities;
         this.catalog = catalog;
         this.ids = ids;
         this.idempotency = idempotency;
+        this.approvals = approvals;
         this.audit = audit;
         this.outbox = outbox;
         this.mapper = mapper;
@@ -92,32 +95,59 @@ public class QuoteCommandService {
     }
 
     @Transactional
-    public Quote submit(Actor actor, long quoteId, long rootVersion, long currentVersionVersion) {
+    public Quote submit(Actor actor, long quoteId, long rootVersion, long currentVersionVersion, String approvalDefinitionCode, String key) {
         require(actor, "quote:submit");
-        Quote quote = quote(actor, quoteId);
-        requireWrite(actor, quote);
-        QuoteVersion draft = currentVersion(actor, quote);
-        if (draft.status() != QuoteVersion.Status.DRAFT) throw conflict("只有草稿报价可以提交");
-        if (!repository.submit(actor.tenantId(), quoteId, draft.versionNo(), rootVersion, currentVersionVersion, actor.userId())) throw conflict("报价已被其他操作修改");
-        Quote after = quote(actor, quoteId);
-        journal(actor, "SUBMIT", after, "QuoteSubmitted");
+        Submit request = new Submit(quoteId, rootVersion, currentVersionVersion, required(approvalDefinitionCode, "审批定义编码"));
+        return idempotency.execute(actor, "quote:submit", key, request, Quote.class, () -> {
+            Quote quote = quote(actor, quoteId);
+            requireWrite(actor, quote);
+            QuoteVersion draft = currentVersion(actor, quote);
+            if (draft.status() != QuoteVersion.Status.DRAFT) throw conflict("只有草稿报价可以提交");
+            if (!repository.submit(actor.tenantId(), quoteId, draft.versionNo(), rootVersion, currentVersionVersion, actor.userId())) throw conflict("报价已被其他操作修改");
+            Quote after = quote(actor, quoteId);
+            approvals.start(actor, new ApprovalService.StartApproval("QUOTE", quoteId, request.approvalDefinitionCode(),
+                    new ApprovalContext(after.quoteNo(), draft.totalAmount(), after.currency(), after.opportunityId(), after.customerId())));
+            journal(actor, "SUBMIT", after, "QuoteSubmitted");
+            return after;
+        });
+    }
+
+    @Transactional
+    public Quote applyApprovalDecision(Actor actor, ApprovalService.Decision decision, String rejectionReason) {
+        if (!"QUOTE".equals(decision.resourceType()) || (decision.status() != ApprovalService.InstanceStatus.APPROVED && decision.status() != ApprovalService.InstanceStatus.REJECTED)) {
+            throw new DomainException(ErrorCode.VALIDATION_ERROR, "审批结论不属于报价终态");
+        }
+        Quote quote = quote(actor, decision.resourceId());
+        QuoteVersion current = currentVersion(actor, quote);
+        boolean changed = decision.status() == ApprovalService.InstanceStatus.APPROVED
+                ? repository.approve(actor.tenantId(), quote.id(), current.versionNo(), quote.version(), current.version(), actor.userId())
+                : repository.reject(actor.tenantId(), quote.id(), current.versionNo(), quote.version(), current.version(), required(rejectionReason, "驳回意见"), actor.userId());
+        if (!changed) throw conflict("报价已被其他操作修改");
+        Quote after = quote(actor, quote.id());
+        journal(actor, decision.status() == ApprovalService.InstanceStatus.APPROVED ? "APPROVE" : "REJECT", after,
+                decision.status() == ApprovalService.InstanceStatus.APPROVED ? "QuoteApproved" : "QuoteRejected");
         return after;
     }
 
     @Transactional
-    public Quote reject(Actor actor, long quoteId, long rootVersion, long currentVersionVersion, String reason) {
-        require(actor, "quote:reject");
-        Quote quote = quote(actor, quoteId); requireWrite(actor, quote);
-        String normalized = required(reason, "拒绝原因");
+    public Quote withdrawApproval(Actor actor, long quoteId) {
+        require(actor, "quote:withdraw");
+        Quote quote = quote(actor, quoteId);
+        requireWrite(actor, quote);
         QuoteVersion current = currentVersion(actor, quote);
-        if (!repository.reject(actor.tenantId(), quoteId, current.versionNo(), rootVersion, currentVersionVersion, normalized, actor.userId())) throw conflict("报价已被其他操作修改");
-        Quote after = quote(actor, quoteId); journal(actor, "REJECT", after, "QuoteRejected"); return after;
+        if (!repository.withdrawApproval(actor.tenantId(), quote.id(), current.versionNo(), quote.version(), current.version(), actor.userId())) {
+            throw conflict("报价已被其他操作修改");
+        }
+        Quote after = quote(actor, quote.id());
+        journal(actor, "WITHDRAW_APPROVAL", after, "QuoteApprovalWithdrawn");
+        return after;
     }
 
     @Transactional
     public Quote expire(Actor actor, long quoteId, long rootVersion, long currentVersionVersion) {
         require(actor, "quote:expire");
         Quote quote = quote(actor, quoteId); requireWrite(actor, quote);
+        if (quote.status() == Quote.Status.SUBMITTED) throw new DomainException(ErrorCode.VALIDATION_ERROR, "审批中的报价必须先撤回审批");
         if (quote.validUntil() == null || !quote.validUntil().isBefore(LocalDate.now())) throw new DomainException(ErrorCode.VALIDATION_ERROR, "报价尚未到期");
         QuoteVersion current = currentVersion(actor, quote);
         if (!repository.expire(actor.tenantId(), quoteId, current.versionNo(), rootVersion, currentVersionVersion, actor.userId())) throw conflict("报价已被其他操作修改");
@@ -167,4 +197,6 @@ public class QuoteCommandService {
     private DomainException conflict(String message) { return new DomainException(ErrorCode.CONFLICT, message); }
     private String json(Object value) { try { return mapper.writeValueAsString(value); } catch (JsonProcessingException e) { throw new IllegalStateException("无法序列化报价", e); } }
     private record QuoteTotals(BigDecimal subtotal, BigDecimal discountAmount, BigDecimal taxAmount, BigDecimal totalAmount, BigDecimal discountRate, List<QuoteLine> lines) { }
+    private record Submit(long quoteId, long rootVersion, long version, String approvalDefinitionCode) { }
+    private record ApprovalContext(String quoteNo, BigDecimal totalAmount, String currency, long opportunityId, long customerId) { }
 }

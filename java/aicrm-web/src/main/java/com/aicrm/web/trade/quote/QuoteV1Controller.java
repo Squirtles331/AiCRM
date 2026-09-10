@@ -6,6 +6,7 @@ import com.aicrm.kernel.security.TraceContext;
 import com.aicrm.trade.quote.application.QuoteCommandService;
 import com.aicrm.trade.quote.application.QuoteCommands;
 import com.aicrm.trade.quote.application.QuoteReadService;
+import com.aicrm.trade.quote.application.QuoteApprovalWorkflowService;
 import com.aicrm.trade.quote.domain.Quote;
 import com.aicrm.trade.quote.domain.QuoteLine;
 import com.aicrm.trade.quote.domain.QuoteVersion;
@@ -35,8 +36,9 @@ import java.util.List;
 public class QuoteV1Controller {
     private final QuoteCommandService commands;
     private final QuoteReadService reads;
+    private final QuoteApprovalWorkflowService approvalWorkflow;
 
-    public QuoteV1Controller(QuoteCommandService commands, QuoteReadService reads) { this.commands = commands; this.reads = reads; }
+    public QuoteV1Controller(QuoteCommandService commands, QuoteReadService reads, QuoteApprovalWorkflowService approvalWorkflow) { this.commands = commands; this.reads = reads; this.approvalWorkflow = approvalWorkflow; }
 
     @PostMapping
     @Operation(summary = "创建报价")
@@ -65,20 +67,21 @@ public class QuoteV1Controller {
 
     @PostMapping("/{id}/actions/submit")
     @Operation(summary = "提交报价")
-    public ApiResponse<QuoteApiDtos.QuoteView> submit(@PathVariable long id, @Valid @RequestBody QuoteApiDtos.VersionRequest request) {
-        return success(view(commands.submit(actor(), id, request.rootVersion(), request.version())));
-    }
-
-    @PostMapping("/{id}/actions/reject")
-    @Operation(summary = "拒绝报价")
-    public ApiResponse<QuoteApiDtos.QuoteView> reject(@PathVariable long id, @Valid @RequestBody QuoteApiDtos.RejectRequest request) {
-        return success(view(commands.reject(actor(), id, request.rootVersion(), request.version(), request.reason())));
+    public ApiResponse<QuoteApiDtos.QuoteView> submit(@PathVariable long id, @Valid @RequestBody QuoteApiDtos.SubmitRequest request,
+            @RequestHeader("Idempotency-Key") String key) {
+        return success(view(commands.submit(actor(), id, request.rootVersion(), request.version(), request.approvalDefinitionCode(), key)));
     }
 
     @PostMapping("/{id}/actions/expire")
     @Operation(summary = "标记报价过期")
     public ApiResponse<QuoteApiDtos.QuoteView> expire(@PathVariable long id, @Valid @RequestBody QuoteApiDtos.VersionRequest request) {
         return success(view(commands.expire(actor(), id, request.rootVersion(), request.version())));
+    }
+
+    @PostMapping("/{id}/actions/withdraw-approval")
+    @Operation(summary = "撤回报价审批")
+    public ApiResponse<QuoteApiDtos.QuoteView> withdrawApproval(@PathVariable long id, @Valid @RequestBody QuoteApiDtos.WithdrawApprovalRequest request) {
+        return success(view(approvalWorkflow.withdraw(actor(), id, request.approvalInstanceId(), request.instanceVersion(), request.comment())));
     }
 
     private static QuoteApiDtos.QuoteView view(Quote q) { return new QuoteApiDtos.QuoteView(id(q.id()), q.quoteNo(), id(q.opportunityId()), id(q.customerId()), id(q.priceListId()), q.currency(), q.status().name(), q.currentVersionNo(), q.validUntil(), q.version(), q.createdAt(), q.updatedAt()); }

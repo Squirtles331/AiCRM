@@ -71,15 +71,17 @@ stateDiagram-v2
 ```mermaid
 stateDiagram-v2
   [*] --> DRAFT: 创建报价和版本 1
-  DRAFT --> SUBMITTED: 提交
-  SUBMITTED --> REJECTED: 拒绝
+  DRAFT --> SUBMITTED: 提交并发起审批
+  SUBMITTED --> REJECTED: 审批任务驳回
+  SUBMITTED --> DRAFT: 撤回审批
   SUBMITTED --> EXPIRED: 到期
   APPROVED --> EXPIRED: 到期
   REJECTED --> DRAFT: 后续版本重报
 ```
 
 - 创建仅允许引用进行中或赢单商机和生效价目表；成交价必须落在价格项的目录价和最低价范围内。
-- 提交、拒绝和到期同时校验报价根 `rootVersion` 与当前版本 `version`。任一条件更新失败返回 `409 CONFLICT`，同一事务中的版本、根、审计与 Outbox 全部回滚。
+- 提交同时校验报价根 `rootVersion` 与当前版本 `version`，并要求启用的审批定义；重复提交由 `Idempotency-Key` 返回首次结果。审批任务通过或驳回时使用实例与任务乐观锁，报价状态在同一事务同步。
+- 撤回审批要求实例处于 `PENDING` 且为申请人或审批管理员，报价根和当前版本恢复 `DRAFT`。审批中报价不可直接过期。
 - `REJECTED`、`EXPIRED`、`APPROVED` 的版本以及全部报价行不可更新或删除。重新报价必须新增版本，不能修改历史行。
 
 ## 私海/公海归属状态机

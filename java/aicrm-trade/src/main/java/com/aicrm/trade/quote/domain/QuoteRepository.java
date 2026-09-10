@@ -12,8 +12,10 @@ public interface QuoteRepository {
     List<QuoteVersion> findVersions(long tenantId, long quoteId);
     List<QuoteLine> findLines(long tenantId, long quoteVersionId);
     boolean submit(long tenantId, long quoteId, int versionNo, long expectedRootVersion, long expectedCurrentVersionVersion, long actorId);
+    boolean approve(long tenantId, long quoteId, int versionNo, long expectedRootVersion, long expectedCurrentVersionVersion, long actorId);
     boolean reject(long tenantId, long quoteId, int versionNo, long expectedRootVersion, long expectedCurrentVersionVersion, String reason, long actorId);
     boolean expire(long tenantId, long quoteId, int versionNo, long expectedRootVersion, long expectedCurrentVersionVersion, long actorId);
+    boolean withdrawApproval(long tenantId, long quoteId, int versionNo, long expectedRootVersion, long expectedCurrentVersionVersion, long actorId);
     boolean hasQuoteVersion(long tenantId, long quoteId, int versionNo);
     boolean addVersion(long tenantId, long quoteId, long expectedQuoteVersion, QuoteVersion version, long actorId);
 }

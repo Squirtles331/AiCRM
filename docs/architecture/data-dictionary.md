@@ -80,8 +80,18 @@
 | `crm_quote_version` | `id/tenant_id/quote_id BIGINT N`；`version_no INTEGER N`；`status VARCHAR(16) N DEFAULT 'DRAFT'`；`subtotal/discount_amount/tax_amount/total_amount NUMERIC(18,2) N DEFAULT 0`；`discount_rate NUMERIC(5,4) N DEFAULT 0`；`rejection_reason VARCHAR(500) NULL`；`submitted_at/approved_at/rejected_at/expired_at TIMESTAMPTZ NULL`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 每报价版本号唯一；同租户报价根复合 FK；金额非负、折扣率 0 到 1；拒绝、过期和批准版本不可修改或删除；按版本号倒序查询。 |
 | `crm_quote_line` | `id/tenant_id/quote_version_id BIGINT N`；`line_no INTEGER N`；`product_id/price_item_id BIGINT N`；`product_no_snapshot/sku_snapshot VARCHAR`；`product_name_snapshot VARCHAR(200) N`；`unit VARCHAR(32) N`；`quantity NUMERIC(18,4) N`；`list_price/minimum_price/unit_price/line_amount NUMERIC(18,2)`；`discount_rate/tax_rate NUMERIC(5,4)`；`AUDIT_MUTABLE` | 每版本行号唯一；同租户版本复合 FK；数量正数、金额非负、成交价不低于最低价、折扣和税率 0 到 1；行永久不可更新和删除。 |
 
-报价创建只允许引用进行中或赢单商机与生效价目表，并将产品与价格复制到版本行。报价根 `version` 和当前报价版本 `version` 是独立乐观锁；所有状态命令必须同时提供 `rootVersion` 和 `version`，分别校验两个聚合记录。创建、提交、拒绝和过期均同事务写审计和 Outbox，Outbox 断言和查询必须使用 `tenant_id + aggregate_type + aggregate_id` 精确定位，不以租户内事件总数推断状态。
+报价创建只允许引用进行中或赢单商机与生效价目表，并将产品与价格复制到版本行。报价根 `version` 和当前报价版本 `version` 是独立乐观锁；提交和过期命令必须同时提供 `rootVersion` 和 `version`，分别校验两个聚合记录。提交创建审批实例；审批结论同步报价，不存在绕过审批的报价直接驳回命令。Outbox 断言和查询必须使用 `tenant_id + aggregate_type + aggregate_id` 精确定位，不以租户内事件总数推断状态。
 
-## 8. 后续对象登记
+## 8. 审批
+
+| 表 | 字段（类型；N=NOT NULL；默认值） | 键、检查与主要索引 |
+|---|---|---|
+| `crm_approval_definition` | `id/tenant_id BIGINT N`；`code VARCHAR(64) N`；`name VARCHAR(100) N`；`resource_type VARCHAR(32) N`；`definition_version INT N DEFAULT 1`；`status VARCHAR(16) N DEFAULT 'DRAFT'`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 同编码定义版本唯一；每租户、资源类型、编码最多一个启用定义；状态为 `DRAFT/ACTIVE/RETIRED/DISABLED`。 |
+| `crm_approval_definition_node` | `id/tenant_id/definition_id BIGINT N`；`node_no INT N`；`name VARCHAR(100) N`；`decision_mode VARCHAR(16) N DEFAULT 'ALL'`；`approver_user_id BIGINT N`；`condition_expression JSONB N DEFAULT '{}'`；`AUDIT_MUTABLE` | 定义和审批人为同租户复合外键；同一节点审批人唯一；决策方式为 `ANY/ALL`；条件是受控字段、比较符和值的 JSON，不执行脚本。 |
+| `crm_approval_instance` | `id/tenant_id BIGINT N`；`resource_type VARCHAR(32) N`；`resource_id/definition_id/applicant_user_id BIGINT N`；`definition_code VARCHAR(64) N`；`definition_version INT N`；`definition_snapshot JSONB N`；`status VARCHAR(16) N DEFAULT 'PENDING'`；`current_node_no INT NULL`；`submitted_at/completed_at TIMESTAMPTZ`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 定义和申请人复合外键；同资源只允许一个未结束实例；状态为 `PENDING/APPROVED/REJECTED/WITHDRAWN`。 |
+| `crm_approval_task` | `id/tenant_id/instance_id/approver_user_id BIGINT N`；`node_no INT N`；`node_name VARCHAR(100) N`；`decision_mode VARCHAR(16) N`；`status VARCHAR(16) N DEFAULT 'PENDING'`；`transferred_from_task_id BIGINT NULL`；`acted_at TIMESTAMPTZ NULL`；`comment VARCHAR(1000) NULL`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 实例、审批人与转交来源均为同租户复合外键；节点审批人唯一；待办索引 `(tenant_id,approver_user_id,status,created_at)`。 |
+| `crm_approval_action` | `id/tenant_id/instance_id/actor_user_id BIGINT N`；`task_id BIGINT NULL`；`action VARCHAR(16) N`；`comment VARCHAR(1000) NULL`；`before_snapshot/after_snapshot JSONB N`；`operation_id/trace_id VARCHAR(64) NULL`；`created_at TIMESTAMPTZ N` | 实例、任务和操作人均为同租户复合外键；动作固定枚举；触发器禁止更新与删除。 |
+
+## 9. 后续对象登记
 
 交易域对象不在本冻结版本建表。其主责、主键、租户和跨域引用规则见 [future-contexts.md](future-contexts.md)；任何正式字段必须经对应阶段门并通过新 Flyway 版本创建，禁止提前塞入 `crm_lead.extension`、`crm_customer.extension` 或 `crm_opportunity.extension`。

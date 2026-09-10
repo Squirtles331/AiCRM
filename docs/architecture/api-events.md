@@ -35,7 +35,13 @@
 | `GET /api/v1/quotes/{id}` | 查询报价根 | `quote:read:own/any` + 商机数据范围 |
 | `GET /api/v1/quotes/{id}/versions` | 查询报价版本 | 同报价查看权限 |
 | `GET /api/v1/quotes/{id}/versions/{versionNo}/lines` | 查询指定版本快照行 | 同报价查看权限 |
-| `POST /api/v1/quotes/{id}/actions/submit|reject|expire` | 提交、拒绝和过期；请求须含 `rootVersion,version`，分别校验报价根和当前报价版本 | 对应 `quote:*` 命令权限 |
+| `POST /api/v1/quotes/{id}/actions/submit` | 提交报价；请求须含 `rootVersion,version,approvalDefinitionCode` 和 `Idempotency-Key` | `quote:submit` |
+| `POST /api/v1/quotes/{id}/actions/withdraw-approval` | 撤回在途报价审批；请求须含 `approvalInstanceId,instanceVersion` | `quote:withdraw` |
+| `POST /api/v1/quotes/{id}/actions/expire` | 已批准报价到期处理；请求须含 `rootVersion,version` | `quote:expire` |
+| `POST /api/v1/approval-definitions` | 创建审批定义 | `approval:manage` |
+| `POST /api/v1/approval-definitions/{id}/actions/activate` | 启用审批定义，须含定义版本 | `approval:manage` |
+| `GET /api/v1/approval-tasks/pending` | 当前用户待审批任务 | `approval:task:read` |
+| `POST /api/v1/approval-tasks/{id}/actions/approve|reject|transfer` | 处理当前用户的审批任务，须含任务版本 | `approval:task:act` |
 
 命令成功返回更新后的资源摘要及新 `version`；创建返回 201，幂等重放返回原 HTTP 状态和原响应。认领/版本竞争返回 409；池停用返回 422；跨租户 ID 与不存在统一返回 404。批量接口必须返回逐项结果，且 `batchNo` 可用于审计检索。
 
@@ -59,7 +65,11 @@
 | `OpportunityStageChanged` | Opportunity | `opportunityId,stage,probability` | 漏斗报表、提醒 |
 | `OpportunityWon/Lost/Restarted` | Opportunity | `opportunityId,status,reason` | 后续报价、经营报表 |
 | `QuoteCreated` | Quote | `quoteId,opportunityId,priceListId,currentVersionNo` | 审计、工作台 |
-| `QuoteSubmitted/Rejected/Expired` | Quote | `quoteId,status,currentVersionNo` | 审批衔接、提醒、报表 |
+| `QuoteSubmitted/Approved/Rejected/ApprovalWithdrawn/Expired` | Quote | `quoteId,status,currentVersionNo` | 审批衔接、提醒、报表 |
+| `ApprovalDefinitionCreated/Activated` | Approval | `definitionId,resourceType,status` | 审计、配置投影 |
+| `ApprovalStarted` | Approval | `instanceId,resourceType,resourceId,definitionVersion` | 待办、提醒 |
+| `ApprovalTaskApproved/Rejected/Transferred` | Approval | `instanceId,taskId,status` | 待办、业务状态同步 |
+| `ApprovalWithdrawn` | Approval | `instanceId,resourceType,resourceId` | 待办取消、业务状态同步 |
 
 事件信封固定包含 `eventId,eventType,eventVersion,tenantId,aggregateType,aggregateId,operationId,occurredAt,traceId,payload`。新增可选字段保持同版本，删除/改义或类型变化必须升 `eventVersion` 并提供兼容期。
 

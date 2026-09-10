@@ -19,7 +19,8 @@ final class QuoteApiDtos {
     record CreateRequest(@NotNull Long opportunityId, @NotNull Long priceListId, LocalDate validUntil,
                          @NotEmpty List<@Valid Line> lines) { }
     record VersionRequest(@NotNull Long rootVersion, @NotNull Long version) { }
-    record RejectRequest(@NotNull Long rootVersion, @NotNull Long version, @NotBlank String reason) { }
+    record SubmitRequest(@NotNull Long rootVersion, @NotNull Long version, @NotBlank String approvalDefinitionCode) { }
+    record WithdrawApprovalRequest(@NotNull Long approvalInstanceId, @NotNull Long instanceVersion, String comment) { }
     record QuoteView(String id, String quoteNo, String opportunityId, String customerId, String priceListId, String currency,
                      String status, int currentVersionNo, LocalDate validUntil, long version, Instant createdAt, Instant updatedAt) { }
     record VersionView(String id, String quoteId, int versionNo, String status, BigDecimal subtotal, BigDecimal discountAmount,

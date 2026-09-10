@@ -81,6 +81,15 @@ public class JdbcQuoteRepository implements QuoteRepository {
     }
 
     @Override
+    public boolean approve(long tenantId, long quoteId, int versionNo, long expectedRootVersion, long expectedCurrentVersionVersion, long actorId) {
+        int changed = jdbc.update("update crm_quote_version set status='APPROVED',approved_at=now(),version=version+1,updated_by=?,updated_at=now() where tenant_id=? and quote_id=? and version_no=? and status='SUBMITTED' and version=? and deleted_at is null",
+                actorId, tenantId, quoteId, versionNo, expectedCurrentVersionVersion);
+        if (changed != 1) return false;
+        return jdbc.update("update crm_quote set status='APPROVED',version=version+1,updated_by=?,updated_at=now() where tenant_id=? and id=? and status='SUBMITTED' and version=? and deleted_at is null",
+                actorId, tenantId, quoteId, expectedRootVersion) == 1;
+    }
+
+    @Override
     public boolean reject(long tenantId, long quoteId, int versionNo, long expectedRootVersion, long expectedCurrentVersionVersion, String reason, long actorId) {
         int changed = jdbc.update("update crm_quote_version set status='REJECTED',rejection_reason=?,rejected_at=now(),version=version+1,updated_by=?,updated_at=now() where tenant_id=? and quote_id=? and version_no=? and status='SUBMITTED' and version=? and deleted_at is null",
                 reason, actorId, tenantId, quoteId, versionNo, expectedCurrentVersionVersion);
@@ -95,6 +104,15 @@ public class JdbcQuoteRepository implements QuoteRepository {
                 actorId, tenantId, quoteId, versionNo, expectedCurrentVersionVersion);
         if (changed != 1) return false;
         return jdbc.update("update crm_quote set status='EXPIRED',version=version+1,updated_by=?,updated_at=now() where tenant_id=? and id=? and status in ('SUBMITTED','APPROVED') and version=? and deleted_at is null",
+                actorId, tenantId, quoteId, expectedRootVersion) == 1;
+    }
+
+    @Override
+    public boolean withdrawApproval(long tenantId, long quoteId, int versionNo, long expectedRootVersion, long expectedCurrentVersionVersion, long actorId) {
+        int changed = jdbc.update("update crm_quote_version set status='DRAFT',submitted_at=null,version=version+1,updated_by=?,updated_at=now() where tenant_id=? and quote_id=? and version_no=? and status='SUBMITTED' and version=? and deleted_at is null",
+                actorId, tenantId, quoteId, versionNo, expectedCurrentVersionVersion);
+        if (changed != 1) return false;
+        return jdbc.update("update crm_quote set status='DRAFT',version=version+1,updated_by=?,updated_at=now() where tenant_id=? and id=? and status='SUBMITTED' and version=? and deleted_at is null",
                 actorId, tenantId, quoteId, expectedRootVersion) == 1;
     }
 

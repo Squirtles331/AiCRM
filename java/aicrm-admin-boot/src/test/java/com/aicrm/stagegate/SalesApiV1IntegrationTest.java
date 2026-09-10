@@ -396,7 +396,7 @@ class SalesApiV1IntegrationTest {
     }
 
     @Test
-    void createsSubmitsAndRejectsQuoteUsingPublishedPriceSnapshots() throws Exception {
+    void createsSubmitsAndApprovesQuoteUsingConfiguredWorkflow() throws Exception {
         seedSalesTenant();
         seedAdminAndExitingUser();
         String token = token(ADMIN_USER_ID);
@@ -425,6 +425,14 @@ class SalesApiV1IntegrationTest {
         mockMvc.perform(post("/api/v1/catalog/price-lists/{id}/actions/publish", listId).header("Authorization", bearer(token))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
                 .andExpect(status().isOk());
+        String definitionId = objectMapper.readTree(mockMvc.perform(post("/api/v1/approval-definitions")
+                        .header("Authorization", bearer(token)).contentType(MediaType.APPLICATION_JSON).content("""
+                                {"code":"QUOTE_STANDARD","name":"报价标准审批","resourceType":"QUOTE","nodes":[{"name":"销售经理审批","decisionMode":"ALL","approverUserIds":[%d],"condition":{"field":"totalAmount","operator":"GTE","value":1000}}]}
+                                """.formatted(USER_TWO_ID)))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString()).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/approval-definitions/{id}/actions/activate", definitionId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("ACTIVE"));
 
         String quoteId = objectMapper.readTree(mockMvc.perform(post("/api/v1/quotes")
                         .header("Authorization", bearer(token)).header("Idempotency-Key", "quote-create-1")
@@ -437,18 +445,42 @@ class SalesApiV1IntegrationTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].lineAmount").value(1800));
         mockMvc.perform(post("/api/v1/quotes/{id}/actions/submit", quoteId).header("Authorization", bearer(token))
-                        .contentType(MediaType.APPLICATION_JSON).content("{\"rootVersion\":0,\"version\":0}"))
+                        .header("Idempotency-Key", "quote-submit-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"rootVersion\":0,\"version\":0,\"approvalDefinitionCode\":\"QUOTE_STANDARD\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("SUBMITTED"));
-        mockMvc.perform(post("/api/v1/quotes/{id}/actions/reject", quoteId).header("Authorization", bearer(token))
-                        .contentType(MediaType.APPLICATION_JSON).content("{\"rootVersion\":0,\"version\":1,\"reason\":\"陈旧根版本\"}"))
-                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
-        mockMvc.perform(post("/api/v1/quotes/{id}/actions/reject", quoteId).header("Authorization", bearer(token))
-                        .contentType(MediaType.APPLICATION_JSON).content("{\"rootVersion\":1,\"version\":0,\"reason\":\"陈旧版本记录\"}"))
-                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
-        mockMvc.perform(post("/api/v1/quotes/{id}/actions/reject", quoteId).header("Authorization", bearer(token))
-                        .contentType(MediaType.APPLICATION_JSON).content("{\"rootVersion\":1,\"version\":1,\"reason\":\"折扣不符合政策\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("REJECTED"));
+        mockMvc.perform(post("/api/v1/quotes/{id}/actions/submit", quoteId).header("Authorization", bearer(token))
+                        .header("Idempotency-Key", "quote-submit-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"rootVersion\":0,\"version\":0,\"approvalDefinitionCode\":\"QUOTE_STANDARD\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("SUBMITTED"));
+        String approverToken = token(USER_TWO_ID);
+        String taskResponse = mockMvc.perform(get("/api/v1/approval-tasks/pending").header("Authorization", bearer(approverToken)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1)).andReturn().getResponse().getContentAsString();
+        String taskId = objectMapper.readTree(taskResponse).path("data").get(0).path("id").asText();
+        mockMvc.perform(post("/api/v1/approval-tasks/{id}/actions/approve", taskId).header("Authorization", bearer(approverToken))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0,\"comment\":\"审批通过\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("APPROVED"))
+                .andExpect(jsonPath("$.data.quoteStatus").value("APPROVED"));
+        mockMvc.perform(get("/api/v1/quotes/{id}", quoteId).header("Authorization", bearer(token)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("APPROVED"));
         assertThat(outboxCount("QUOTE", Long.parseLong(quoteId))).isEqualTo(3L);
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_approval_instance where tenant_id=? and resource_type='QUOTE' and resource_id=?", Long.class, TENANT_ID, Long.parseLong(quoteId))).isEqualTo(1L);
+
+        String rejectedQuoteId = createQuote(token, opportunityId, listId, productId, priceItemId, "quote-create-2");
+        submitQuote(token, rejectedQuoteId, "quote-submit-2");
+        String rejectedTaskId = pendingTask(approverToken).path("id").asText();
+        mockMvc.perform(post("/api/v1/approval-tasks/{id}/actions/reject", rejectedTaskId).header("Authorization", bearer(approverToken))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0,\"comment\":\"折扣不符合要求\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("REJECTED"))
+                .andExpect(jsonPath("$.data.quoteStatus").value("REJECTED"));
+
+        String withdrawnQuoteId = createQuote(token, opportunityId, listId, productId, priceItemId, "quote-create-3");
+        submitQuote(token, withdrawnQuoteId, "quote-submit-3");
+        JsonNode withdrawalTask = pendingTask(approverToken);
+        mockMvc.perform(post("/api/v1/quotes/{id}/actions/withdraw-approval", withdrawnQuoteId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"approvalInstanceId\":" + withdrawalTask.path("instanceId").asText() + ",\"instanceVersion\":0,\"comment\":\"修订报价\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("DRAFT"));
+        mockMvc.perform(get("/api/v1/approval-tasks/pending").header("Authorization", bearer(approverToken)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(0));
     }
 
     @Test
@@ -623,6 +655,31 @@ class SalesApiV1IntegrationTest {
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(response).path("data").path("id").asText();
+    }
+
+    private String createQuote(String token, String opportunityId, String priceListId, String productId, String priceItemId, String idempotencyKey) throws Exception {
+        String response = mockMvc.perform(post("/api/v1/quotes")
+                        .header("Authorization", bearer(token)).header("Idempotency-Key", idempotencyKey)
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"opportunityId":%s,"priceListId":%s,"lines":[{"productId":%s,"priceItemId":%s,"quantity":2,"unitPrice":900,"discountRate":0.1}]}
+                                """.formatted(opportunityId, priceListId, productId, priceItemId)))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readTree(response).path("data").path("id").asText();
+    }
+
+    private void submitQuote(String token, String quoteId, String idempotencyKey) throws Exception {
+        mockMvc.perform(post("/api/v1/quotes/{id}/actions/submit", quoteId).header("Authorization", bearer(token))
+                        .header("Idempotency-Key", idempotencyKey).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"rootVersion\":0,\"version\":0,\"approvalDefinitionCode\":\"QUOTE_STANDARD\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("SUBMITTED"));
+    }
+
+    private JsonNode pendingTask(String token) throws Exception {
+        String response = mockMvc.perform(get("/api/v1/approval-tasks/pending").header("Authorization", bearer(token)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1))
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readTree(response).path("data").get(0);
     }
 
     private int claimStatus(String token, String leadId, CountDownLatch ready, CountDownLatch start) throws Exception {
