@@ -133,6 +133,8 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/orders/{id}/actions/close']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/orders/{id}/cancellations/{cancellationId}/actions/approve']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/workbench/summary']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/reports/sales-funnel']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/reports/sales-performance']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/sales-targets']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/sales-targets/{id}/actions/confirm-result']").exists());
     }
@@ -595,6 +597,20 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.data.fulfillmentCompleted").doesNotExist())
                 .andExpect(jsonPath("$.data.aftersalesTickets").doesNotExist());
         mockMvc.perform(get("/api/v1/workbench/summary?from=2026-01-02&to=2026-01-01")
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        mockMvc.perform(get("/api/v1/reports/sales-funnel").header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.asOf").exists())
+                .andExpect(jsonPath("$.data.stages[0].opportunityCount", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.paymentReceived").doesNotExist())
+                .andExpect(jsonPath("$.data.fulfillmentCompleted").doesNotExist());
+        mockMvc.perform(get("/api/v1/reports/sales-performance").header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.owners[?(@.contractsSigned >= 1)]").isNotEmpty())
+                .andExpect(jsonPath("$.data.owners[?(@.ordersConfirmed >= 1)]").isNotEmpty())
+                .andExpect(jsonPath("$.data.invoiceIssued").doesNotExist());
+        mockMvc.perform(get("/api/v1/reports/sales-performance?from=2026-01-02&to=2026-01-01")
                         .header("Authorization", bearer(token)))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 

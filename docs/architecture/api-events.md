@@ -52,6 +52,8 @@
 | `POST /api/v1/orders/{id}/actions/confirm|request-cancel|close` | 确认、申请取消或 CRM 内部关闭订单；申请须含 `Idempotency-Key`，关闭原因必填 | `order:confirm` / `order:cancel` / `order:close` |
 | `POST /api/v1/orders/{id}/cancellations/{cancelId}/actions/approve|reject` | 销售管理员决定订单取消；请求须含订单与取消申请版本 | `order:approve-cancel` |
 | `GET /api/v1/workbench/summary?from&to` | 查询 CRM 工作台销售汇总；日期为 UTC 左闭右开区间，省略时为当月 | `analytics:read` + 数据范围 |
+| `GET /api/v1/reports/sales-funnel` | 查询当前可见 CRM 商机漏斗快照；含阶段数量、预计及加权金额 | `analytics:read` + 数据范围 |
+| `GET /api/v1/reports/sales-performance?from&to` | 查询区间 CRM 赢单、合同签署和订单确认业绩；日期为 UTC 左闭右开区间 | `analytics:read` + 数据范围 |
 | `POST /api/v1/sales-targets` | 创建个人 CRM 销售目标；须含 `Idempotency-Key` | `target:manage` |
 | `GET /api/v1/sales-targets/{id}` | 查询本人或管理员范围内的销售目标与已确认结果 | `target:read:own/any` |
 | `POST /api/v1/sales-targets/{id}/actions/activate|confirm-result` | 启用目标或确认期末 CRM 结果；请求含 `version` | `target:manage` / `target:confirm` |
