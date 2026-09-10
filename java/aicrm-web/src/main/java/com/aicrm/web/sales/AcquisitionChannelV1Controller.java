@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/acquisition-channels")
@@ -30,6 +31,8 @@ public class AcquisitionChannelV1Controller {
     }
     @GetMapping("/{id}") @Operation(summary = "查询获客渠道")
     public ApiResponse<AcquisitionChannelApiDtos.View> detail(@PathVariable long id) { return success(AcquisitionChannelApiDtos.view(service.get(ActorContext.require(), id))); }
+    @GetMapping @Operation(summary = "查询获客渠道列表")
+    public ApiResponse<List<AcquisitionChannelApiDtos.View>> list() { return success(service.list(ActorContext.require()).stream().map(AcquisitionChannelApiDtos::view).toList()); }
     @PostMapping("/{id}/actions/activate") @Operation(summary = "启用获客渠道")
     public ApiResponse<AcquisitionChannelApiDtos.View> activate(@PathVariable long id, @Valid @RequestBody AcquisitionChannelApiDtos.VersionRequest request) { return success(AcquisitionChannelApiDtos.view(service.activate(ActorContext.require(), id, new AcquisitionChannelCommands.Versioned(request.version())))); }
     @PostMapping("/{id}/actions/disable") @Operation(summary = "停用获客渠道")

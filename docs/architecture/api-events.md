@@ -17,7 +17,7 @@
 | `GET /api/v1/leads/public` | 线索公海 | 已登录用户 |
 | `POST /api/v1/leads` | 创建私海或公海线索 | `lead:create` |
 | `POST /api/v1/acquisition-channels` | 创建 CRM 获客渠道；请求含 `code/name/sourceType` 和 `Idempotency-Key` | `channel:manage` |
-| `GET /api/v1/acquisition-channels/{id}` | 查询获客渠道 | `channel:read/manage` |
+| `GET /api/v1/acquisition-channels`、`GET /api/v1/acquisition-channels/{id}` | 查询获客渠道列表或详情 | `channel:read/manage` |
 | `POST /api/v1/acquisition-channels/{id}/actions/activate|disable` | 启用或停用渠道；请求含 `version` | `channel:manage` |
 | `POST /api/v1/leads/{id}/actions/claim` | 认领 | `lead:claim` |
 | `POST /api/v1/leads/{id}/actions/release|assign|transfer|convert|invalidate` | 归属与状态命令，请求含 `version/reason` 及目标 ID | 对应独立权限 |

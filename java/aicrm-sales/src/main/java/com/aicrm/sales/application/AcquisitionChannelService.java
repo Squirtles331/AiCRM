@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Map;
+import java.util.List;
 
 @Service
 public class AcquisitionChannelService {
@@ -33,6 +34,7 @@ public class AcquisitionChannelService {
         });
     }
     public AcquisitionChannel get(Actor actor,long id) { requireRead(actor); return channel(actor,id); }
+    public List<AcquisitionChannel> list(Actor actor) { requireRead(actor); return repository.list(actor.tenantId()); }
     @Transactional public AcquisitionChannel activate(Actor actor,long id,AcquisitionChannelCommands.Versioned command) { return transition(actor,id,command,AcquisitionChannelStatus.ACTIVE,"启用获客渠道","AcquisitionChannelActivated"); }
     @Transactional public AcquisitionChannel disable(Actor actor,long id,AcquisitionChannelCommands.Versioned command) { return transition(actor,id,command,AcquisitionChannelStatus.DISABLED,"停用获客渠道","AcquisitionChannelDisabled"); }
     private AcquisitionChannel transition(Actor actor,long id,AcquisitionChannelCommands.Versioned command,AcquisitionChannelStatus target,String reason,String event) {
