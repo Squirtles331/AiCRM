@@ -27,6 +27,15 @@
 | `POST /api/v1/customers/{id}/follow-ups` | 记录跟进 | `customer:write:own/any` |
 | `POST /api/v1/handovers` | 指定资源离职交接 | `lead:handover/customer:handover` |
 | `POST /api/v1/handovers/batch` | 批量离职交接，含 `batchNo/fromUserId/toUserId/pageSize` | 同时具备 `lead:handover` 与 `customer:handover` |
+| `GET/POST /api/v1/opportunities` | 商机列表与创建 | `opportunity:read:own/any` + 数据范围；`opportunity:create` |
+| `GET /api/v1/opportunities/{id}` | 商机详情 | `opportunity:read:own/any` + 数据范围 |
+| `GET /api/v1/opportunities/{id}/stage-history` | 商机阶段历史 | 商机查看权限 |
+| `POST /api/v1/opportunities/{id}/actions/stage|win|lose|restart` | 推进、赢单、输单和重启，请求含 `version` | 对应 `opportunity:*` 命令权限 |
+| `POST /api/v1/quotes` | 以生效价目表创建带快照行的报价 | `quote:create` + `Idempotency-Key` |
+| `GET /api/v1/quotes/{id}` | 查询报价根 | `quote:read:own/any` + 商机数据范围 |
+| `GET /api/v1/quotes/{id}/versions` | 查询报价版本 | 同报价查看权限 |
+| `GET /api/v1/quotes/{id}/versions/{versionNo}/lines` | 查询指定版本快照行 | 同报价查看权限 |
+| `POST /api/v1/quotes/{id}/actions/submit|reject|expire` | 提交、拒绝和过期；请求须含 `rootVersion,version`，分别校验报价根和当前报价版本 | 对应 `quote:*` 命令权限 |
 
 命令成功返回更新后的资源摘要及新 `version`；创建返回 201，幂等重放返回原 HTTP 状态和原响应。认领/版本竞争返回 409；池停用返回 422；跨租户 ID 与不存在统一返回 404。批量接口必须返回逐项结果，且 `batchNo` 可用于审计检索。
 
@@ -46,6 +55,11 @@
 | `ProductCreated` | Product | `productId,sku` | 目录同步、报价可选产品投影 |
 | `PriceListCreated/PriceItemCreated` | PriceList / PriceItem | 价目表和价格项快照 | 报价准备、审计 |
 | `PriceListPublished` | PriceList | `priceListId,currency,effectiveFrom` | 报价可用价格表投影 |
+| `OpportunityCreated` | Opportunity | `opportunityId,customerId,stage` | 工作台、报表 |
+| `OpportunityStageChanged` | Opportunity | `opportunityId,stage,probability` | 漏斗报表、提醒 |
+| `OpportunityWon/Lost/Restarted` | Opportunity | `opportunityId,status,reason` | 后续报价、经营报表 |
+| `QuoteCreated` | Quote | `quoteId,opportunityId,priceListId,currentVersionNo` | 审计、工作台 |
+| `QuoteSubmitted/Rejected/Expired` | Quote | `quoteId,status,currentVersionNo` | 审批衔接、提醒、报表 |
 
 事件信封固定包含 `eventId,eventType,eventVersion,tenantId,aggregateType,aggregateId,operationId,occurredAt,traceId,payload`。新增可选字段保持同版本，删除/改义或类型变化必须升 `eventVersion` 并提供兼容期。
 

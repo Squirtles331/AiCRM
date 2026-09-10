@@ -60,10 +60,18 @@ public class PlatformPrincipalService {
             permissions.addAll(Set.of("lead:read:any", "lead:write:any", "lead:assign", "lead:handover",
                     "customer:read:any", "customer:write:any", "customer:assign", "customer:handover"));
             permissions.addAll(Set.of("catalog:read", "catalog:write", "catalog:publish"));
+            permissions.addAll(Set.of("opportunity:read:any", "opportunity:write:any", "opportunity:stage",
+                    "opportunity:win", "opportunity:lose", "opportunity:restart"));
+            permissions.addAll(Set.of("quote:read:any", "quote:write:any", "quote:submit", "quote:reject", "quote:expire"));
         }
         if (!roles.isEmpty()) {
             permissions.addAll(Set.of("lead:create", "lead:claim", "lead:read:own", "lead:write:own",
-                    "customer:create", "customer:claim", "customer:read:own", "customer:write:own"));
+                    "customer:create", "customer:claim", "customer:read:own", "customer:write:own",
+                    "opportunity:create", "opportunity:read:own", "opportunity:write:own",
+                    "opportunity:stage", "opportunity:win", "opportunity:lose", "opportunity:restart"));
+            permissions.add("catalog:read");
+            permissions.addAll(Set.of("quote:create", "quote:read:own", "quote:write:own", "quote:submit",
+                    "quote:reject", "quote:expire"));
         }
         return permissions;
     }

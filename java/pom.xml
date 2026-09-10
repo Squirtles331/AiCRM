@@ -23,6 +23,7 @@
         <module>aicrm-platform</module>
         <module>aicrm-sales</module>
         <module>aicrm-catalog</module>
+        <module>aicrm-trade</module>
         <module>aicrm-web</module>
         <module>aicrm-admin-boot</module>
     </modules>
@@ -69,6 +70,11 @@
             <dependency>
                 <groupId>com.aicrm</groupId>
                 <artifactId>aicrm-web</artifactId>
+                <version>${aicrm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aicrm</groupId>
+                <artifactId>aicrm-trade</artifactId>
                 <version>${aicrm.version}</version>
             </dependency>
             <!-- 三方组件版本统一 -->

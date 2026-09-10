@@ -4,8 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.DecimalMin;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 final class SalesApiDtos {
@@ -46,6 +49,21 @@ final class SalesApiDtos {
                                 @Min(0) @Max(500) int pageSize, String reason) {
     }
 
+    record CreateOpportunityRequest(@NotNull Long customerId, Long contactId, Long sourceLeadId, @NotBlank String name,
+                                    @NotNull @DecimalMin("0.00") BigDecimal expectedAmount, @NotBlank String currency,
+                                    @Min(0) @Max(100) short probability, LocalDate expectedCloseDate) {
+    }
+
+    record ChangeOpportunityStageRequest(@NotNull Long version, @NotBlank String stage,
+                                         @Min(0) @Max(100) short probability) {
+    }
+
+    record OpportunityVersionRequest(@NotNull Long version) {
+    }
+
+    record LoseOpportunityRequest(@NotNull Long version, @NotBlank String reason) {
+    }
+
     record PageView<T>(List<T> items, long page, long size, long total) {
     }
 
@@ -64,5 +82,16 @@ final class SalesApiDtos {
 
     record ContactView(String id, String customerId, String name, String mobile, String email, String department,
                        String title, boolean decisionMaker, long version) {
+    }
+
+    record OpportunityView(String id, String opportunityNo, String name, String customerId, String contactId,
+                           String sourceLeadId, String stage, String status, BigDecimal expectedAmount, String currency,
+                           short probability, LocalDate expectedCloseDate, String ownerUserId, String ownerDeptId,
+                           String lostReason, Instant lostAt, Instant wonAt, long version, Instant createdAt, Instant updatedAt) {
+    }
+
+    record OpportunityStageHistoryView(String id, String opportunityId, String action, String fromStage, String toStage,
+                                       String fromStatus, String toStatus, Short fromProbability, short toProbability,
+                                       String reason, String operatorUserId, Instant createdAt) {
     }
 }

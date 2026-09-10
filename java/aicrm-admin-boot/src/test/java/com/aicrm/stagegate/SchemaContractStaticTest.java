@@ -24,11 +24,11 @@ class SchemaContractStaticTest {
         Path migrations = repository.resolve("java/aicrm-admin-boot/src/main/resources/db/migration");
         List<Path> files;
         try (var stream = Files.list(migrations)) {
-            files = stream.filter(path -> path.getFileName().toString().matches("V[1-7]__.*\\.sql"))
-                    .sorted().toList();
+            files = stream.filter(path -> path.getFileName().toString().matches("V([1-9]|1[0-2])__.*\\.sql"))
+                    .sorted(java.util.Comparator.comparingInt(this::version)).toList();
         }
-        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7), files.stream()
-                .map(path -> Integer.parseInt(path.getFileName().toString().substring(1, 2))).toList());
+        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), files.stream()
+                .map(this::version).toList());
 
         String sql = files.stream().map(this::read).reduce("", String::concat).toLowerCase(Locale.ROOT);
         for (String required : List.of(
@@ -39,7 +39,7 @@ class SchemaContractStaticTest {
             assertTrue(sql.contains(required), () -> "missing frozen SQL contract: " + required);
         }
         for (String futureTable : List.of(
-                "crm_product", "crm_opportunity", "crm_quote", "crm_contract", "crm_order",
+                "crm_contract", "crm_order",
                 "crm_delivery", "crm_payment", "crm_invoice", "crm_ticket")) {
             assertFalse(sql.contains("create table " + futureTable),
                     () -> "future context table created before its stage gate: " + futureTable);
@@ -61,5 +61,10 @@ class SchemaContractStaticTest {
         } catch (IOException exception) {
             throw new IllegalStateException(exception);
         }
+    }
+
+    private int version(Path path) {
+        String filename = path.getFileName().toString();
+        return Integer.parseInt(filename.substring(1, filename.indexOf("__")));
     }
 }

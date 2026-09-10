@@ -344,8 +344,111 @@ class SalesApiV1IntegrationTest {
                         .content("{\"productId\":" + productId + ",\"listPrice\":1000.00}"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 
-        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_outbox_event where tenant_id=? and aggregate_type='PRICE_LIST'",
-                Long.class, TENANT_ID)).isEqualTo(2L);
+        assertThat(outboxCount("PRICE_LIST", Long.parseLong(priceListId))).isEqualTo(2L);
+    }
+
+    @Test
+    void managesOpportunityStagesLossRestartAndWinWithImmutableHistory() throws Exception {
+        seedSalesTenant();
+        seedAdminAndExitingUser();
+        String adminToken = token(ADMIN_USER_ID);
+        String customerId = createCustomerId(adminToken, "opportunity-customer-1", "商机测试客户");
+
+        String created = mockMvc.perform(post("/api/v1/opportunities")
+                        .header("Authorization", bearer(adminToken))
+                        .header("Idempotency-Key", "opportunity-create-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"customerId":%s,"name":"年度 CRM 项目","expectedAmount":120000.00,
+                                 "currency":"CNY","probability":10,"expectedCloseDate":"2026-12-31"}
+                                """.formatted(customerId)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.stage").value("DISCOVERY"))
+                .andExpect(jsonPath("$.data.status").value("OPEN"))
+                .andReturn().getResponse().getContentAsString();
+        String opportunityId = objectMapper.readTree(created).path("data").path("id").asText();
+
+        mockMvc.perform(post("/api/v1/opportunities/{id}/actions/stage", opportunityId)
+                        .header("Authorization", bearer(adminToken)).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"version\":0,\"stage\":\"QUALIFICATION\",\"probability\":25}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.version").value(1));
+        mockMvc.perform(post("/api/v1/opportunities/{id}/actions/lose", opportunityId)
+                        .header("Authorization", bearer(adminToken)).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"version\":1,\"reason\":\"预算暂缓\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("LOST"));
+        mockMvc.perform(post("/api/v1/opportunities/{id}/actions/restart", opportunityId)
+                        .header("Authorization", bearer(adminToken)).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"version\":2}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.stage").value("DISCOVERY"))
+                .andExpect(jsonPath("$.data.status").value("OPEN"));
+        mockMvc.perform(post("/api/v1/opportunities/{id}/actions/win", opportunityId)
+                        .header("Authorization", bearer(adminToken)).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"version\":3}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.stage").value("CLOSED_WON"))
+                .andExpect(jsonPath("$.data.probability").value(100));
+
+        mockMvc.perform(get("/api/v1/opportunities/{id}/stage-history", opportunityId)
+                        .header("Authorization", bearer(adminToken)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(5));
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_audit_log where tenant_id=? and resource_type='OPPORTUNITY' and resource_id=?",
+                Long.class, TENANT_ID, Long.parseLong(opportunityId))).isEqualTo(5L);
+        assertThat(outboxCount("OPPORTUNITY", Long.parseLong(opportunityId))).isEqualTo(5L);
+    }
+
+    @Test
+    void createsSubmitsAndRejectsQuoteUsingPublishedPriceSnapshots() throws Exception {
+        seedSalesTenant();
+        seedAdminAndExitingUser();
+        String token = token(ADMIN_USER_ID);
+        String customerId = createCustomerId(token, "quote-customer-1", "报价测试客户");
+        String opportunityId = objectMapper.readTree(mockMvc.perform(post("/api/v1/opportunities")
+                        .header("Authorization", bearer(token)).header("Idempotency-Key", "quote-opportunity-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"customerId\":" + customerId + ",\"name\":\"报价商机\",\"expectedAmount\":5000,\"currency\":\"CNY\",\"probability\":30}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString()).path("data").path("id").asText();
+        String categoryId = objectMapper.readTree(mockMvc.perform(post("/api/v1/catalog/categories")
+                        .header("Authorization", bearer(token)).header("Idempotency-Key", "quote-category-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"code\":\"QUOTE\",\"name\":\"报价分类\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString()).path("data").path("id").asText();
+        String productId = objectMapper.readTree(mockMvc.perform(post("/api/v1/catalog/products")
+                        .header("Authorization", bearer(token)).header("Idempotency-Key", "quote-product-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"categoryId\":" + categoryId + ",\"sku\":\"QUOTE-STD\",\"name\":\"报价产品\",\"unit\":\"套\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString()).path("data").path("id").asText();
+        String listId = objectMapper.readTree(mockMvc.perform(post("/api/v1/catalog/price-lists")
+                        .header("Authorization", bearer(token)).header("Idempotency-Key", "quote-list-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"code\":\"QUOTE-2026\",\"name\":\"报价价目表\",\"currency\":\"CNY\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString()).path("data").path("id").asText();
+        String priceItemId = objectMapper.readTree(mockMvc.perform(post("/api/v1/catalog/price-lists/{id}/items", listId)
+                        .header("Authorization", bearer(token)).header("Idempotency-Key", "quote-price-item-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"productId\":" + productId + ",\"listPrice\":1000,\"minimumPrice\":800,\"taxRate\":0.06}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString()).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/catalog/price-lists/{id}/actions/publish", listId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk());
+
+        String quoteId = objectMapper.readTree(mockMvc.perform(post("/api/v1/quotes")
+                        .header("Authorization", bearer(token)).header("Idempotency-Key", "quote-create-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"opportunityId":%s,"priceListId":%s,"lines":[{"productId":%s,"priceItemId":%s,"quantity":2,"unitPrice":900,"discountRate":0.1}]}
+                                """.formatted(opportunityId, listId, productId, priceItemId)))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
+                .andReturn().getResponse().getContentAsString()).path("data").path("id").asText();
+        mockMvc.perform(get("/api/v1/quotes/{id}/versions/1/lines", quoteId).header("Authorization", bearer(token)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].lineAmount").value(1800));
+        mockMvc.perform(post("/api/v1/quotes/{id}/actions/submit", quoteId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"rootVersion\":0,\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("SUBMITTED"));
+        mockMvc.perform(post("/api/v1/quotes/{id}/actions/reject", quoteId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"rootVersion\":0,\"version\":1,\"reason\":\"陈旧根版本\"}"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
+        mockMvc.perform(post("/api/v1/quotes/{id}/actions/reject", quoteId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"rootVersion\":1,\"version\":0,\"reason\":\"陈旧版本记录\"}"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
+        mockMvc.perform(post("/api/v1/quotes/{id}/actions/reject", quoteId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"rootVersion\":1,\"version\":1,\"reason\":\"折扣不符合政策\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("REJECTED"));
+        assertThat(outboxCount("QUOTE", Long.parseLong(quoteId))).isEqualTo(3L);
     }
 
     @Test
@@ -577,6 +680,18 @@ class SalesApiV1IntegrationTest {
                         + "(id,tenant_id,aggregate_type,aggregate_id,event_type,payload,occurred_at) "
                         + "values (?,?,'Reliability',?,?, '{}'::jsonb,now()) on conflict (id) do nothing",
                 id, TENANT_ID, id, eventType);
+    }
+
+    /**
+     * Outbox assertions must be scoped to the aggregate created by the test.
+     * The integration container is shared by test methods, so tenant-wide
+     * fixed counts are inherently order-dependent and can hide regressions.
+     */
+    private long outboxCount(String aggregateType, long aggregateId) {
+        Long count = jdbcTemplate.queryForObject(
+                "select count(*) from crm_outbox_event where tenant_id=? and aggregate_type=? and aggregate_id=?",
+                Long.class, TENANT_ID, aggregateType, aggregateId);
+        return count == null ? 0L : count;
     }
 
     private String outboxStatus(long eventId) {

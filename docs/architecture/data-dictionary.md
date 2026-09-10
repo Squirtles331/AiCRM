@@ -1,6 +1,6 @@
-# CRM 数据字典（阶段 2A）
+# CRM 数据字典（阶段 2C）
 
-版本：`M2A-DB-1.0`；状态：产品目录已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V10` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
+版本：`M2C-DB-1.0`；状态：产品目录、商机管道和报价基础已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V12` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
 
 ## 1. 类型与通用字段组
 
@@ -63,6 +63,25 @@
 
 目录权限为 `catalog:read`、`catalog:write`、`catalog:publish`。产品目录写操作与审计、Outbox 同事务保存；发布后价目表不允许继续新增价格项。
 
-## 6. 后续对象登记
+## 6. 商机管道
 
-交易域对象不在本冻结版本建表。其主责、主键、租户和跨域引用规则见 [future-contexts.md](future-contexts.md)；任何正式字段必须经对应阶段门并通过新 Flyway 版本创建，禁止提前塞入 `crm_lead.extension` 或 `crm_customer.extension`。
+| 表 | 字段（类型；N=NOT NULL；默认值） | 键、检查与主要索引 |
+|---|---|---|
+| `crm_opportunity` | `id/tenant_id BIGINT N`；`opportunity_no VARCHAR(32) N`；`name VARCHAR(200) N`；`customer_id BIGINT N`；`contact_id/source_lead_id BIGINT NULL`；`stage VARCHAR(32) N DEFAULT 'DISCOVERY'`；`status VARCHAR(16) N DEFAULT 'OPEN'`；`expected_amount NUMERIC(18,2) N DEFAULT 0`；`currency CHAR(3) N`；`probability SMALLINT N DEFAULT 0`；`expected_close_date DATE NULL`；`owner_user_id/owner_dept_id BIGINT N`；`lost_reason VARCHAR(500) NULL`；`lost_at/won_at TIMESTAMPTZ NULL`；`extension JSONB N DEFAULT '{}'`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 活跃 `(tenant_id,opportunity_no)` 唯一；客户、联系人、来源线索、负责人和部门均为同租户复合 FK；联系人必须属于客户，客户必须有效且未合并，负责人必须启用。阶段为 `DISCOVERY/QUALIFICATION/SOLUTION/QUOTATION/NEGOTIATION/CLOSED_WON/CLOSED_LOST`；状态为 `OPEN/WON/LOST`。终态形状、金额、概率和币种均由 CHECK 约束验证；负责人管道和客户管道索引支持工作台和列表。 |
+| `crm_opportunity_stage_history` | `id/tenant_id/opportunity_id BIGINT N`；`action VARCHAR(32) N`；`from_stage/from_status/from_probability NULL`；`to_stage/to_status/to_probability N`；`reason VARCHAR(500) NULL`；`operator_user_id BIGINT N`；`created_at TIMESTAMPTZ N DEFAULT now()` | 动作为 `CREATE/STAGE_CHANGED/WON/LOST/RESTARTED`；商机与操作者使用同租户复合 FK；按 `(tenant_id,opportunity_id,created_at,id)` 查询；仅允许新增。 |
+
+商机创建和每次阶段、状态或概率变化必须在同一事务写阶段历史、`crm_audit_log` 与 `crm_outbox_event`。数据库用延迟约束触发器拦截缺少历史或审计记录的写入；Outbox 由应用服务同事务写入。商机不写入 `crm_ownership_history`，归属历史仅记录私海/公海资源。
+
+## 7. 报价
+
+| 表 | 字段（类型；N=NOT NULL；默认值） | 键、检查与主要索引 |
+|---|---|---|
+| `crm_quote` | `id/tenant_id BIGINT N`；`quote_no VARCHAR(32) N`；`opportunity_id/customer_id/price_list_id BIGINT N`；`currency CHAR(3) N`；`status VARCHAR(16) N DEFAULT 'DRAFT'`；`current_version_no INTEGER N DEFAULT 1`；`valid_until DATE NULL`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 活跃 `(tenant_id,quote_no)` 唯一；商机和客户为同租户复合 FK；状态为 `DRAFT/SUBMITTED/APPROVED/REJECTED/EXPIRED/CANCELLED`；有效版本号至少为 1；按商机、状态和更新时间查询。 |
+| `crm_quote_version` | `id/tenant_id/quote_id BIGINT N`；`version_no INTEGER N`；`status VARCHAR(16) N DEFAULT 'DRAFT'`；`subtotal/discount_amount/tax_amount/total_amount NUMERIC(18,2) N DEFAULT 0`；`discount_rate NUMERIC(5,4) N DEFAULT 0`；`rejection_reason VARCHAR(500) NULL`；`submitted_at/approved_at/rejected_at/expired_at TIMESTAMPTZ NULL`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 每报价版本号唯一；同租户报价根复合 FK；金额非负、折扣率 0 到 1；拒绝、过期和批准版本不可修改或删除；按版本号倒序查询。 |
+| `crm_quote_line` | `id/tenant_id/quote_version_id BIGINT N`；`line_no INTEGER N`；`product_id/price_item_id BIGINT N`；`product_no_snapshot/sku_snapshot VARCHAR`；`product_name_snapshot VARCHAR(200) N`；`unit VARCHAR(32) N`；`quantity NUMERIC(18,4) N`；`list_price/minimum_price/unit_price/line_amount NUMERIC(18,2)`；`discount_rate/tax_rate NUMERIC(5,4)`；`AUDIT_MUTABLE` | 每版本行号唯一；同租户版本复合 FK；数量正数、金额非负、成交价不低于最低价、折扣和税率 0 到 1；行永久不可更新和删除。 |
+
+报价创建只允许引用进行中或赢单商机与生效价目表，并将产品与价格复制到版本行。报价根 `version` 和当前报价版本 `version` 是独立乐观锁；所有状态命令必须同时提供 `rootVersion` 和 `version`，分别校验两个聚合记录。创建、提交、拒绝和过期均同事务写审计和 Outbox，Outbox 断言和查询必须使用 `tenant_id + aggregate_type + aggregate_id` 精确定位，不以租户内事件总数推断状态。
+
+## 8. 后续对象登记
+
+交易域对象不在本冻结版本建表。其主责、主键、租户和跨域引用规则见 [future-contexts.md](future-contexts.md)；任何正式字段必须经对应阶段门并通过新 Flyway 版本创建，禁止提前塞入 `crm_lead.extension`、`crm_customer.extension` 或 `crm_opportunity.extension`。

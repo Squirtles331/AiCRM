@@ -35,6 +35,53 @@ stateDiagram-v2
 
 首期同租户不允许两个活跃客户名称忽略大小写后相同。发现疑似重复时必须走合并，不允许绕过唯一索引加空格或把重复信息塞进扩展字段。
 
+## 商机状态机
+
+商机归属于创建人私海，不进入公海。`stage` 描述销售推进位置，`status` 只表示是否已形成赢单或输单终态；二者由数据库组合约束同时保护。
+
+```mermaid
+stateDiagram-v2
+  [*] --> DISCOVERY
+  DISCOVERY --> QUALIFICATION: 推进阶段
+  QUALIFICATION --> SOLUTION: 推进阶段
+  SOLUTION --> QUOTATION: 推进阶段
+  QUOTATION --> NEGOTIATION: 推进阶段
+  DISCOVERY --> CLOSED_WON: 赢单
+  QUALIFICATION --> CLOSED_WON: 赢单
+  SOLUTION --> CLOSED_WON: 赢单
+  QUOTATION --> CLOSED_WON: 赢单
+  NEGOTIATION --> CLOSED_WON: 赢单
+  DISCOVERY --> CLOSED_LOST: 输单
+  QUALIFICATION --> CLOSED_LOST: 输单
+  SOLUTION --> CLOSED_LOST: 输单
+  QUOTATION --> CLOSED_LOST: 输单
+  NEGOTIATION --> CLOSED_LOST: 输单
+  CLOSED_LOST --> DISCOVERY: 重启
+  CLOSED_WON --> [*]
+```
+
+- `OPEN` 只能使用五个进行中阶段，不得有输单或赢单时间；`WON` 必须为 `CLOSED_WON`、概率 100 且有 `won_at`；`LOST` 必须为 `CLOSED_LOST`、有 `lost_reason/lost_at`。
+- 创建、阶段推进、赢单、输单和重启均要求乐观锁版本一致；只有 `LOST` 可重启，`WON` 不可逆。
+- 每个动作写一条不可变 `crm_opportunity_stage_history`，并在同一事务写审计与 Outbox；数据库拒绝无历史或审计的阶段、状态、概率变更。
+
+## 报价状态机
+
+报价根状态和当前报价版本状态保持一致；报价版本固化产品和价格快照，不能用后续目录变更修订历史报价。
+
+```mermaid
+stateDiagram-v2
+  [*] --> DRAFT: 创建报价和版本 1
+  DRAFT --> SUBMITTED: 提交
+  SUBMITTED --> REJECTED: 拒绝
+  SUBMITTED --> EXPIRED: 到期
+  APPROVED --> EXPIRED: 到期
+  REJECTED --> DRAFT: 后续版本重报
+```
+
+- 创建仅允许引用进行中或赢单商机和生效价目表；成交价必须落在价格项的目录价和最低价范围内。
+- 提交、拒绝和到期同时校验报价根 `rootVersion` 与当前版本 `version`。任一条件更新失败返回 `409 CONFLICT`，同一事务中的版本、根、审计与 Outbox 全部回滚。
+- `REJECTED`、`EXPIRED`、`APPROVED` 的版本以及全部报价行不可更新或删除。重新报价必须新增版本，不能修改历史行。
+
 ## 私海/公海归属状态机
 
 ```mermaid
