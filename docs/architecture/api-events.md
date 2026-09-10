@@ -57,6 +57,9 @@
 | `POST /api/v1/sales-targets` | 创建个人 CRM 销售目标；须含 `Idempotency-Key` | `target:manage` |
 | `GET /api/v1/sales-targets/{id}` | 查询本人或管理员范围内的销售目标与已确认结果 | `target:read:own/any` |
 | `POST /api/v1/sales-targets/{id}/actions/activate|confirm-result` | 启用目标或确认期末 CRM 结果；请求含 `version` | `target:manage` / `target:confirm` |
+| `POST /api/v1/performance-score-rules` | 创建 CRM 绩效评分规则与连续达成率分段；须含 `Idempotency-Key` | `performance:rule:manage` |
+| `GET /api/v1/performance-score-rules/{id}` | 查询租户内绩效评分规则和分段 | `performance:rule:read/manage` |
+| `POST /api/v1/performance-score-rules/{id}/actions/activate|retire` | 启用或退役规则；请求含 `version` | `performance:rule:manage` |
 | `POST /api/v1/approval-definitions` | 创建审批定义 | `approval:manage` |
 | `POST /api/v1/approval-definitions/{id}/actions/activate` | 启用审批定义，须含定义版本 | `approval:manage` |
 | `GET /api/v1/approval-tasks/pending` | 当前用户待审批任务 | `approval:task:read` |
@@ -91,6 +94,8 @@
 | `ContractChangeCreated/Submitted/Cancelled/Approved/Rejected` | ContractChange | `changeId,contractId,status,version` | 变更台账、审计 |
 | `OrderCreated/Confirmed/CancellationRequested/CancellationRejected/Cancelled/Closed` | Order | `orderId,contractId,status,version` | 销售订单台账、审计 |
 | `SalesTargetCreated/Activated/ResultConfirmed` | SalesTarget | `targetId,targetUserId,metric,status,version` | CRM 目标与确认结果审计 |
+| `PerformanceScoreRuleCreated/Activated/Retired` | PerformanceScoreRule | `ruleId,metric,status,version` | 评分规则审计 |
+| `SalesTargetScoreConfirmed` | SalesTargetScore | `targetId,targetResultId,scoreRuleId,achievementRate,score` | CRM 绩效评分审计 |
 | `ApprovalDefinitionCreated/Activated` | Approval | `definitionId,resourceType,status` | 审计、配置投影 |
 | `ApprovalStarted` | Approval | `instanceId,resourceType,resourceId,definitionVersion` | 待办、提醒 |
 | `ApprovalTaskApproved/Rejected/Transferred` | Approval | `instanceId,taskId,status` | 待办、业务状态同步 |

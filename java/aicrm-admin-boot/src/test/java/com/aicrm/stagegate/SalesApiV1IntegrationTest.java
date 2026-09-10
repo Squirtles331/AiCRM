@@ -136,7 +136,9 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/reports/sales-funnel']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/reports/sales-performance']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/sales-targets']").exists())
-                .andExpect(jsonPath("$.paths['/api/v1/sales-targets/{id}/actions/confirm-result']").exists());
+                .andExpect(jsonPath("$.paths['/api/v1/sales-targets/{id}/actions/confirm-result']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/performance-score-rules']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/performance-score-rules/{id}/actions/activate']").exists());
     }
 
     @Test
@@ -682,17 +684,42 @@ class SalesApiV1IntegrationTest {
         seedSalesTenant();
         seedAdminAndExitingUser();
         String adminToken = token(ADMIN_USER_ID);
+        String ruleResponse = mockMvc.perform(post("/api/v1/performance-score-rules").header("Authorization", bearer(adminToken))
+                        .header("Idempotency-Key", "score-rule-create-1").contentType(MediaType.APPLICATION_JSON).content("""
+                                {"name":"合同签约达成率评分","metric":"SIGNED_CONTRACT_AMOUNT","bands":[
+                                  {"minimumAchievementRate":0,"maximumAchievementRate":1,"score":20},
+                                  {"minimumAchievementRate":1,"maximumAchievementRate":1.2,"score":80},
+                                  {"minimumAchievementRate":1.2,"score":100}
+                                ]}
+                                """))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
+                .andReturn().getResponse().getContentAsString();
+        String ruleId = objectMapper.readTree(ruleResponse).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/performance-score-rules").header("Authorization", bearer(adminToken))
+                        .header("Idempotency-Key", "score-rule-create-1").contentType(MediaType.APPLICATION_JSON).content("""
+                                {"name":"合同签约达成率评分","metric":"SIGNED_CONTRACT_AMOUNT","bands":[
+                                  {"minimumAchievementRate":0,"maximumAchievementRate":1,"score":20},
+                                  {"minimumAchievementRate":1,"maximumAchievementRate":1.2,"score":80},
+                                  {"minimumAchievementRate":1.2,"score":100}
+                                ]}
+                                """))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(ruleId));
+        mockMvc.perform(post("/api/v1/performance-score-rules/{id}/actions/activate", ruleId).header("Authorization", bearer(adminToken))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("ACTIVE"));
+        mockMvc.perform(get("/api/v1/performance-score-rules/{id}", ruleId).header("Authorization", bearer(token(USER_ONE_ID))))
+                .andExpect(status().isForbidden());
         String response = mockMvc.perform(post("/api/v1/sales-targets").header("Authorization", bearer(adminToken))
                         .header("Idempotency-Key", "target-create-1").contentType(MediaType.APPLICATION_JSON).content("""
-                                {"name":"2025 合同签约目标","targetUserId":5111,"metric":"SIGNED_CONTRACT_AMOUNT","periodFrom":"2025-01-01","periodTo":"2025-12-31","targetValue":100000}
-                                """))
+                                {"name":"2025 合同签约目标","targetUserId":5111,"metric":"SIGNED_CONTRACT_AMOUNT","periodFrom":"2025-01-01","periodTo":"2025-12-31","targetValue":100000,"scoreRuleId":%s}
+                                """.formatted(ruleId)))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
                 .andReturn().getResponse().getContentAsString();
         String targetId = objectMapper.readTree(response).path("data").path("id").asText();
         mockMvc.perform(post("/api/v1/sales-targets").header("Authorization", bearer(adminToken))
                         .header("Idempotency-Key", "target-create-1").contentType(MediaType.APPLICATION_JSON).content("""
-                                {"name":"2025 合同签约目标","targetUserId":5111,"metric":"SIGNED_CONTRACT_AMOUNT","periodFrom":"2025-01-01","periodTo":"2025-12-31","targetValue":100000}
-                                """))
+                                {"name":"2025 合同签约目标","targetUserId":5111,"metric":"SIGNED_CONTRACT_AMOUNT","periodFrom":"2025-01-01","periodTo":"2025-12-31","targetValue":100000,"scoreRuleId":%s}
+                                """.formatted(ruleId)))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(targetId));
         mockMvc.perform(get("/api/v1/sales-targets/{id}", targetId).header("Authorization", bearer(token(USER_ONE_ID))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.targetUserId").value("5111"));
@@ -703,7 +730,8 @@ class SalesApiV1IntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).content("{\"version\":1}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("RESULT_CONFIRMED"))
                 .andExpect(jsonPath("$.data.result.actualValue").value(0))
-                .andExpect(jsonPath("$.data.result.achievementRate").value(0));
+                .andExpect(jsonPath("$.data.result.achievementRate").value(0))
+                .andExpect(jsonPath("$.data.result.score.score").value(20));
         mockMvc.perform(post("/api/v1/sales-targets/{id}/actions/confirm-result", targetId).header("Authorization", bearer(adminToken))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"version\":2}"))
                 .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
@@ -715,6 +743,8 @@ class SalesApiV1IntegrationTest {
         assertThat(outboxCount("SALES_TARGET", Long.parseLong(targetId))).isEqualTo(3L);
         assertThat(jdbcTemplate.queryForObject("select count(*) from crm_audit_log where tenant_id=? and resource_type='SALES_TARGET' and resource_id=?",
                 Long.class, TENANT_ID, Long.parseLong(targetId))).isEqualTo(3L);
+        assertThat(outboxCount("PERFORMANCE_SCORE_RULE", Long.parseLong(ruleId))).isEqualTo(2L);
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_outbox_event where tenant_id=? and aggregate_type='SALES_TARGET_SCORE'", Long.class, TENANT_ID)).isEqualTo(1L);
     }
 
     @Test

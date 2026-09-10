@@ -22,7 +22,7 @@
 
 本地需运行 Docker，然后执行 `mvn -f java/pom.xml verify`。CI 使用 `.github/workflows/database-stage-gate.yml` 在 PostgreSQL 16 Testcontainers 上执行同一命令。Windows Docker Desktop 如遇 Testcontainers 命名管道兼容问题，应启用 WSL 集成并在 Linux 环境运行，或使用仅绑定回环地址的受控 Docker API 端点；不得关闭数据库测试或人工改库后标记通过。
 
-最近一次完整自动化验收：2026-09-10，`mvn -f java/pom.xml test` 通过，共执行 24 个测试且无失败。Testcontainers 连接 Docker Desktop 并启动 PostgreSQL 16，验证空库 V1-V19 初始化、旧表删除且不导入数据、旧 URL 返回 404、新登录、真实 HTTP 端口、私海公海约束、租户隔离、功能权限与数据范围、字段脱敏、接口并发认领、请求哈希幂等、线索转换、客户合并、批量离职交接、自动回收、产品目录、商机创建至赢单与输单重启、报价创建与价格快照、报价重报版本、审批定义启用、条件路由、报价幂等提交、审批通过/驳回/撤回、合同与订单生命周期、CRM 工作台汇总、CRM 销售目标创建、启用与结果确认、CRM 销售漏斗和区间业绩报表、聚合范围 Outbox 断言、审计、Outbox 领取与失败重试、Inbox 去重、OpenAPI 契约、静态契约和 ArchUnit。
+最近一次完整自动化验收：2026-09-10，`mvn -f java/pom.xml test` 通过，共执行 24 个测试且无失败。Testcontainers 连接 Docker Desktop 并启动 PostgreSQL 16，验证空库 V1-V20 初始化、旧表删除且不导入数据、旧 URL 返回 404、新登录、真实 HTTP 端口、私海公海约束、租户隔离、功能权限与数据范围、字段脱敏、接口并发认领、请求哈希幂等、线索转换、客户合并、批量离职交接、自动回收、产品目录、商机创建至赢单与输单重启、报价创建与价格快照、报价重报版本、审批定义启用、条件路由、报价幂等提交、审批通过/驳回/撤回、合同与订单生命周期、CRM 工作台汇总、CRM 销售目标创建、启用与结果确认、CRM 销售漏斗和区间业绩报表、CRM 评分规则、目标绑定与不可变评分、聚合范围 Outbox 断言、审计、Outbox 领取与失败重试、Inbox 去重、OpenAPI 契约、静态契约和 ArchUnit。
 
 ## 第一里程碑发布门进度
 

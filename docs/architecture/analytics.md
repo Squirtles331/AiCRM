@@ -28,6 +28,14 @@ V19 增加个人销售目标与不可变结果快照。目标可为 `DRAFT`、`A
 
 权限为 `target:read:own`、`target:read:any`、`target:manage` 和 `target:confirm`。不存在以到账、开票、履约、退货、退款、工单或外部系统数据作为目标或绩效依据的字段、表或接口。
 
+## 规则驱动计分
+
+V20 增加评分规则、达成率分段与目标评分快照。规则只能匹配 `SIGNED_CONTRACT_AMOUNT` 或 `CONFIRMED_ORDER_AMOUNT` 两种既有 CRM 指标；管理员创建连续覆盖 `[0,+∞)` 的达成率区间和对应分值，并将规则从 `DRAFT` 启用，之后可退役但不可修改其分段。
+
+创建销售目标时可选绑定同指标的已启用规则。目标期结束并确认结果时，系统从该规则中选择 `[minimumAchievementRate, maximumAchievementRate)` 分段，固化规则编号、指标、分段、达成率和分值到不可变 `crm_sales_target_score`。未绑定规则的既有目标保持原有结果确认行为；规则退役后不再允许新绑定，但已绑定目标仍使用原分段完成一次评分。
+
+规则权限为 `performance:rule:read` 与 `performance:rule:manage`。评分仍只依赖 CRM 内目标实际金额和达成率，不能使用到账、发票、履约、库存、退货、退款、工单或外部事实。
+
 ## 确定性销售报表
 
 `GET /api/v1/reports/sales-funnel` 返回当前时刻的可见 `OPEN` 商机阶段分布、预计金额与按商机概率计算的加权金额。它是当前快照，不能也不会用当前状态伪造任意历史时点的漏斗。

@@ -69,6 +69,7 @@ public class PlatformPrincipalService {
             permissions.addAll(Set.of("order:create", "order:read:any", "order:write:any", "order:confirm", "order:cancel", "order:approve-cancel", "order:close"));
             permissions.add("analytics:read");
             permissions.addAll(Set.of("target:read:any", "target:manage", "target:confirm"));
+            permissions.addAll(Set.of("performance:rule:read", "performance:rule:manage"));
         }
         if (!roles.isEmpty()) {
             permissions.addAll(Set.of("lead:create", "lead:claim", "lead:read:own", "lead:write:own",
