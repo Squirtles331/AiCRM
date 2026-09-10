@@ -59,6 +59,15 @@ public class QuoteV1Controller {
         return success(reads.versions(actor(), id).stream().map(QuoteV1Controller::view).toList());
     }
 
+    @PostMapping("/{id}/versions")
+    @Operation(summary = "为已驳回报价新增重报版本")
+    public ResponseEntity<ApiResponse<QuoteApiDtos.QuoteView>> addVersion(@PathVariable long id, @Valid @RequestBody QuoteApiDtos.AddVersionRequest request,
+            @RequestHeader("Idempotency-Key") String key) {
+        QuoteCommands.AddVersion command = new QuoteCommands.AddVersion(request.expectedQuoteVersion(), request.validUntil(),
+                request.lines().stream().map(line -> new QuoteCommands.Line(line.productId(), line.priceItemId(), line.quantity(), line.unitPrice(), line.discountRate())).toList());
+        return ResponseEntity.status(HttpStatus.CREATED).body(success(view(commands.addVersion(actor(), id, command, key))));
+    }
+
     @GetMapping("/{id}/versions/{versionNo}/lines")
     @Operation(summary = "查询报价版本明细")
     public ApiResponse<List<QuoteApiDtos.LineView>> lines(@PathVariable long id, @PathVariable @Min(1) int versionNo) {

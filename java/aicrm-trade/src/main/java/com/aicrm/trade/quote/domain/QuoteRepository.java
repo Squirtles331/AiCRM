@@ -2,6 +2,7 @@ package com.aicrm.trade.quote.domain;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 public interface QuoteRepository {
     Quote insertQuote(Quote quote, long actorId);
@@ -17,5 +18,5 @@ public interface QuoteRepository {
     boolean expire(long tenantId, long quoteId, int versionNo, long expectedRootVersion, long expectedCurrentVersionVersion, long actorId);
     boolean withdrawApproval(long tenantId, long quoteId, int versionNo, long expectedRootVersion, long expectedCurrentVersionVersion, long actorId);
     boolean hasQuoteVersion(long tenantId, long quoteId, int versionNo);
-    boolean addVersion(long tenantId, long quoteId, long expectedQuoteVersion, QuoteVersion version, long actorId);
+    boolean addVersion(long tenantId, long quoteId, long expectedQuoteVersion, LocalDate validUntil, QuoteVersion version, long actorId);
 }

@@ -130,6 +130,38 @@ public class QuoteCommandService {
     }
 
     @Transactional
+    public Quote addVersion(Actor actor, long quoteId, QuoteCommands.AddVersion command, String key) {
+        return idempotency.execute(actor, "quote:add-version", key, command, Quote.class, () -> {
+            Quote quote = quote(actor, quoteId);
+            requireWrite(actor, quote);
+            if (quote.status() != Quote.Status.REJECTED) throw conflict("只有已驳回报价可以新增版本");
+            if (command.expectedQuoteVersion() != quote.version()) throw conflict("报价已被其他操作修改");
+            if (command.validUntil() != null && command.validUntil().isBefore(LocalDate.now())) {
+                throw new DomainException(ErrorCode.VALIDATION_ERROR, "报价有效期不能早于今天");
+            }
+            List<QuoteCommands.Line> requested = command.lines() == null ? List.of() : command.lines();
+            if (requested.isEmpty() || requested.size() > 100) throw new DomainException(ErrorCode.VALIDATION_ERROR, "报价行数必须在 1 到 100 之间");
+            PriceList priceList = catalog.priceList(actor, quote.priceListId());
+            if (priceList.status() != PriceList.Status.ACTIVE) throw new DomainException(ErrorCode.VALIDATION_ERROR, "价目表未生效");
+            Instant now = Instant.now();
+            QuoteVersion version = new QuoteVersion(ids.nextId(), actor.tenantId(), quote.id(), quote.currentVersionNo() + 1, QuoteVersion.Status.DRAFT,
+                    BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                    null, null, null, null, null, 0, now, now);
+            QuoteTotals totals = lines(actor, quote, requested, catalog.priceItems(actor, priceList.id()), priceList.currency(), now);
+            version = new QuoteVersion(version.id(), version.tenantId(), version.quoteId(), version.versionNo(), version.status(),
+                    totals.subtotal(), totals.discountAmount(), totals.taxAmount(), totals.totalAmount(), totals.discountRate(),
+                    null, null, null, null, null, 0, now, now);
+            if (!repository.addVersion(actor.tenantId(), quote.id(), command.expectedQuoteVersion(), command.validUntil(), version, actor.userId())) {
+                throw conflict("报价已被其他操作修改");
+            }
+            insertLines(actor, version, totals.lines());
+            Quote after = quote(actor, quote.id());
+            journal(actor, "ADD_VERSION", after, "QuoteVersionCreated");
+            return after;
+        });
+    }
+
+    @Transactional
     public Quote withdrawApproval(Actor actor, long quoteId) {
         require(actor, "quote:withdraw");
         Quote quote = quote(actor, quoteId);

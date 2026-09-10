@@ -35,6 +35,7 @@
 | `GET /api/v1/quotes/{id}` | 查询报价根 | `quote:read:own/any` + 商机数据范围 |
 | `GET /api/v1/quotes/{id}/versions` | 查询报价版本 | 同报价查看权限 |
 | `GET /api/v1/quotes/{id}/versions/{versionNo}/lines` | 查询指定版本快照行 | 同报价查看权限 |
+| `POST /api/v1/quotes/{id}/versions` | 为已驳回报价创建重报版本；请求须含 `expectedQuoteVersion`、报价行和 `Idempotency-Key` | `quote:write:own/any` + 商机数据范围 |
 | `POST /api/v1/quotes/{id}/actions/submit` | 提交报价；请求须含 `rootVersion,version,approvalDefinitionCode` 和 `Idempotency-Key` | `quote:submit` |
 | `POST /api/v1/quotes/{id}/actions/withdraw-approval` | 撤回在途报价审批；请求须含 `approvalInstanceId,instanceVersion` | `quote:withdraw` |
 | `POST /api/v1/quotes/{id}/actions/expire` | 已批准报价到期处理；请求须含 `rootVersion,version` | `quote:expire` |

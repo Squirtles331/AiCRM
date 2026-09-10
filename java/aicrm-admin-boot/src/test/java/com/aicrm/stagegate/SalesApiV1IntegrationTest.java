@@ -468,10 +468,20 @@ class SalesApiV1IntegrationTest {
         String rejectedQuoteId = createQuote(token, opportunityId, listId, productId, priceItemId, "quote-create-2");
         submitQuote(token, rejectedQuoteId, "quote-submit-2");
         String rejectedTaskId = pendingTask(approverToken).path("id").asText();
-        mockMvc.perform(post("/api/v1/approval-tasks/{id}/actions/reject", rejectedTaskId).header("Authorization", bearer(approverToken))
+        String rejectionResponse = mockMvc.perform(post("/api/v1/approval-tasks/{id}/actions/reject", rejectedTaskId).header("Authorization", bearer(approverToken))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0,\"comment\":\"折扣不符合要求\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("REJECTED"))
-                .andExpect(jsonPath("$.data.quoteStatus").value("REJECTED"));
+                .andExpect(jsonPath("$.data.quoteStatus").value("REJECTED")).andReturn().getResponse().getContentAsString();
+        long rejectedQuoteVersion = objectMapper.readTree(rejectionResponse).path("data").path("quoteVersion").asLong();
+        mockMvc.perform(post("/api/v1/quotes/{id}/versions", rejectedQuoteId).header("Authorization", bearer(token))
+                        .header("Idempotency-Key", "quote-add-version-2").contentType(MediaType.APPLICATION_JSON).content("""
+                                {"expectedQuoteVersion":%d,"lines":[{"productId":%s,"priceItemId":%s,"quantity":2,"unitPrice":850,"discountRate":0.15}]}
+                                """.formatted(rejectedQuoteVersion, productId, priceItemId)))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
+                .andExpect(jsonPath("$.data.currentVersionNo").value(2));
+        mockMvc.perform(get("/api/v1/quotes/{id}/versions/2/lines", rejectedQuoteId).header("Authorization", bearer(token)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].unitPrice").value(850));
 
         String withdrawnQuoteId = createQuote(token, opportunityId, listId, productId, priceItemId, "quote-create-3");
         submitQuote(token, withdrawnQuoteId, "quote-submit-3");

@@ -124,10 +124,10 @@ public class JdbcQuoteRepository implements QuoteRepository {
     }
 
     @Override
-    public boolean addVersion(long tenantId, long quoteId, long expectedQuoteVersion, QuoteVersion value, long actorId) {
+    public boolean addVersion(long tenantId, long quoteId, long expectedQuoteVersion, LocalDate validUntil, QuoteVersion value, long actorId) {
         insertVersion(value, actorId);
-        return jdbc.update("update crm_quote set status='DRAFT',current_version_no=?,version=version+1,updated_by=?,updated_at=now() where tenant_id=? and id=? and status='REJECTED' and version=? and deleted_at is null",
-                value.versionNo(), actorId, tenantId, quoteId, expectedQuoteVersion) == 1;
+        return jdbc.update("update crm_quote set status='DRAFT',current_version_no=?,valid_until=?,version=version+1,updated_by=?,updated_at=now() where tenant_id=? and id=? and status='REJECTED' and version=? and deleted_at is null",
+                value.versionNo(), validUntil, actorId, tenantId, quoteId, expectedQuoteVersion) == 1;
     }
 
     private RowMapper<Quote> quoteMapper() { return (rs, row) -> new Quote(rs.getLong("id"), rs.getLong("tenant_id"), rs.getString("quote_no"),

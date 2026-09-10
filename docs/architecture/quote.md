@@ -21,7 +21,7 @@ stateDiagram-v2
     SUBMITTED --> REJECTED: 审批任务驳回
     SUBMITTED --> DRAFT: 撤回审批
     APPROVED --> EXPIRED: 到期处理
-    REJECTED --> DRAFT: 后续新增版本
+    REJECTED --> DRAFT: 创建重报版本
 ```
 
 提交和过期请求必须同时携带 `rootVersion` 与 `version`。前者只校验 `crm_quote.version`，后者只校验当前 `crm_quote_version.version`；任一条件更新失败即返回 `409 CONFLICT`，整个事务回滚。提交还必须给出启用审批定义和 `Idempotency-Key`；审批中的报价须先撤回审批才能回到草稿或执行其他后续动作。
@@ -37,8 +37,11 @@ stateDiagram-v2
 | `POST /api/v1/quotes/{id}/actions/submit` | `quote:submit` | 请求包含 `rootVersion`、`version`、`approvalDefinitionCode` 和 `Idempotency-Key`。 |
 | `POST /api/v1/quotes/{id}/actions/withdraw-approval` | `quote:withdraw` | 请求包含审批实例 ID 与审批实例版本；仅申请人或审批管理员可撤回。 |
 | `POST /api/v1/quotes/{id}/actions/expire` | `quote:expire` | 仅已批准且确已到期的报价；请求包含根和当前版本乐观锁。 |
+| `POST /api/v1/quotes/{id}/versions` | `quote:write:own/any` | 仅当前报价为 `REJECTED`；请求包含 `expectedQuoteVersion`、新快照行和 `Idempotency-Key`。 |
 
 每次状态变化写一条审计和一条 Outbox 事件：`QuoteCreated`、`QuoteSubmitted`、`QuoteApproved`、`QuoteRejected`、`QuoteApprovalWithdrawn`、`QuoteExpired`。所有按事件验证或运营查询都必须以 `tenant_id + aggregate_type + aggregate_id` 定位单个聚合；租户范围的数量仅用于明确的统计报表，不用于业务状态判断。
+
+重报不会修改被拒绝版本或其行。它使用报价根的 `expectedQuoteVersion` 做条件更新，创建 `current_version_no + 1` 的草稿版本，按当前生效价目表重新校验并固化新行快照，同时将根切换为 `DRAFT`。根切换、版本与行插入、审计、Outbox 和幂等记录在同一事务内完成，任一步失败均回滚。
 
 ## 4. 测试边界
 

@@ -18,6 +18,7 @@ final class QuoteApiDtos {
                 @NotNull @DecimalMin("0.00") BigDecimal unitPrice, BigDecimal discountRate) { }
     record CreateRequest(@NotNull Long opportunityId, @NotNull Long priceListId, LocalDate validUntil,
                          @NotEmpty List<@Valid Line> lines) { }
+    record AddVersionRequest(@NotNull Long expectedQuoteVersion, LocalDate validUntil, @NotEmpty List<@Valid Line> lines) { }
     record VersionRequest(@NotNull Long rootVersion, @NotNull Long version) { }
     record SubmitRequest(@NotNull Long rootVersion, @NotNull Long version, @NotBlank String approvalDefinitionCode) { }
     record WithdrawApprovalRequest(@NotNull Long approvalInstanceId, @NotNull Long instanceVersion, String comment) { }

@@ -1,6 +1,6 @@
-# CRM 数据字典（阶段 2C）
+# CRM 数据字典（阶段 2D）
 
-版本：`M2C-DB-1.0`；状态：产品目录、商机管道和报价基础已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V12` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
+版本：`M2D-DB-1.0`；状态：产品目录、商机管道、报价与审批基础已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V13` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
 
 ## 1. 类型与通用字段组
 
@@ -80,7 +80,7 @@
 | `crm_quote_version` | `id/tenant_id/quote_id BIGINT N`；`version_no INTEGER N`；`status VARCHAR(16) N DEFAULT 'DRAFT'`；`subtotal/discount_amount/tax_amount/total_amount NUMERIC(18,2) N DEFAULT 0`；`discount_rate NUMERIC(5,4) N DEFAULT 0`；`rejection_reason VARCHAR(500) NULL`；`submitted_at/approved_at/rejected_at/expired_at TIMESTAMPTZ NULL`；`version BIGINT N DEFAULT 0`；`AUDIT_MUTABLE` | 每报价版本号唯一；同租户报价根复合 FK；金额非负、折扣率 0 到 1；拒绝、过期和批准版本不可修改或删除；按版本号倒序查询。 |
 | `crm_quote_line` | `id/tenant_id/quote_version_id BIGINT N`；`line_no INTEGER N`；`product_id/price_item_id BIGINT N`；`product_no_snapshot/sku_snapshot VARCHAR`；`product_name_snapshot VARCHAR(200) N`；`unit VARCHAR(32) N`；`quantity NUMERIC(18,4) N`；`list_price/minimum_price/unit_price/line_amount NUMERIC(18,2)`；`discount_rate/tax_rate NUMERIC(5,4)`；`AUDIT_MUTABLE` | 每版本行号唯一；同租户版本复合 FK；数量正数、金额非负、成交价不低于最低价、折扣和税率 0 到 1；行永久不可更新和删除。 |
 
-报价创建只允许引用进行中或赢单商机与生效价目表，并将产品与价格复制到版本行。报价根 `version` 和当前报价版本 `version` 是独立乐观锁；提交和过期命令必须同时提供 `rootVersion` 和 `version`，分别校验两个聚合记录。提交创建审批实例；审批结论同步报价，不存在绕过审批的报价直接驳回命令。Outbox 断言和查询必须使用 `tenant_id + aggregate_type + aggregate_id` 精确定位，不以租户内事件总数推断状态。
+报价创建只允许引用进行中或赢单商机与生效价目表，并将产品与价格复制到版本行。报价根 `version` 和当前报价版本 `version` 是独立乐观锁；提交和过期命令必须同时提供 `rootVersion` 和 `version`，分别校验两个聚合记录。提交创建审批实例；审批结论同步报价，不存在绕过审批的报价直接驳回命令。当前报价被拒绝后，可使用根版本创建 `current_version_no + 1` 的草稿重报版本，原版本与行保持不可变。Outbox 断言和查询必须使用 `tenant_id + aggregate_type + aggregate_id` 精确定位，不以租户内事件总数推断状态。
 
 ## 8. 审批
 
