@@ -57,10 +57,29 @@ public class JdbcContractRepository implements ContractRepository {
 
     @Override
     public boolean transition(long tenantId, long contractId, Contract.Status from, Contract.Status to, long expectedVersion, long actorId) {
-        String timestampColumn = to == Contract.Status.PENDING_SIGNATURE ? "submitted_at" : "signed_at";
-        String sql = "update crm_contract set status=?, " + timestampColumn + "=now(), version=version+1, updated_by=?, updated_at=now() "
+        String updates = switch (to) {
+            case PENDING_SIGNATURE -> "submitted_at=now()";
+            case DRAFT -> "submitted_at=null";
+            case SIGNED -> "signed_at=now()";
+            case VOIDED -> throw new IllegalArgumentException("作废必须记录原因");
+        };
+        String sql = "update crm_contract set status=?, " + updates + ", version=version+1, updated_by=?, updated_at=now() "
                 + "where tenant_id=? and id=? and status=? and version=? and deleted_at is null";
         return jdbc.update(sql, to.name(), actorId, tenantId, contractId, from.name(), expectedVersion) == 1;
+    }
+
+    @Override
+    public boolean voidContract(long tenantId, long contractId, Contract.Status from, long expectedVersion, String reason, long actorId) {
+        String sql = "update crm_contract set status='VOIDED', voided_at=now(), void_reason=?, version=version+1, updated_by=?, updated_at=now() "
+                + "where tenant_id=? and id=? and status=? and version=? and deleted_at is null";
+        return jdbc.update(sql, reason, actorId, tenantId, contractId, from.name(), expectedVersion) == 1;
+    }
+
+    @Override
+    public boolean hasNonCancelledOrder(long tenantId, long contractId) {
+        Boolean value = jdbc.query("select exists(select 1 from crm_sales_order where tenant_id=? and contract_id=? and status <> 'CANCELLED' and deleted_at is null)",
+                rs -> rs.next() && rs.getBoolean(1), tenantId, contractId);
+        return Boolean.TRUE.equals(value);
     }
 
     private RowMapper<Contract> contractMapper() { return (rs, row) -> new Contract(rs.getLong("id"), rs.getLong("tenant_id"), rs.getString("contract_no"),

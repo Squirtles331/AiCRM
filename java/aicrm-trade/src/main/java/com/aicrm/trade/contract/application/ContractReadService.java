@@ -4,6 +4,8 @@ import com.aicrm.kernel.error.DomainException;
 import com.aicrm.kernel.error.ErrorCode;
 import com.aicrm.kernel.security.Actor;
 import com.aicrm.trade.contract.domain.Contract;
+import com.aicrm.trade.contract.domain.ContractChange;
+import com.aicrm.trade.contract.domain.ContractChangeRepository;
 import com.aicrm.trade.contract.domain.ContractLine;
 import com.aicrm.trade.contract.domain.ContractRepository;
 import com.aicrm.trade.quote.application.QuoteReadService;
@@ -15,9 +17,10 @@ import java.util.List;
 @Service
 public class ContractReadService {
     private final ContractRepository repository;
+    private final ContractChangeRepository changes;
     private final QuoteReadService quotes;
 
-    public ContractReadService(ContractRepository repository, QuoteReadService quotes) { this.repository = repository; this.quotes = quotes; }
+    public ContractReadService(ContractRepository repository, ContractChangeRepository changes, QuoteReadService quotes) { this.repository = repository; this.changes = changes; this.quotes = quotes; }
 
     public Contract contract(Actor actor, long id) {
         requireAny(actor, "contract:read:own", "contract:read:any", "contract:write:own", "contract:write:any");
@@ -27,6 +30,13 @@ public class ContractReadService {
     }
 
     public List<ContractLine> lines(Actor actor, long id) { return repository.findLines(actor.tenantId(), contract(actor, id).id()); }
+
+    public ContractChange change(Actor actor, long contractId, long changeId) {
+        contract(actor, contractId);
+        ContractChange change = changes.find(actor.tenantId(), changeId).orElseThrow(() -> new DomainException(ErrorCode.NOT_FOUND, "合同变更不存在"));
+        if (change.contractId() != contractId) throw new DomainException(ErrorCode.NOT_FOUND, "合同变更不存在");
+        return change;
+    }
 
     /** Public order-source contract; order code does not import Contract domain objects. */
     public SignedOrderSource signedOrderSource(Actor actor, long id) {

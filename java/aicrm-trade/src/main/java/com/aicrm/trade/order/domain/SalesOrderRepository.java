@@ -9,4 +9,6 @@ public interface SalesOrderRepository {
     Optional<SalesOrder> find(long tenantId, long orderId);
     List<SalesOrderLine> findLines(long tenantId, long orderId);
     boolean existsForContract(long tenantId, long contractId);
+    boolean transition(long tenantId, long orderId, SalesOrder.Status from, SalesOrder.Status to, long expectedVersion, long actorId);
+    boolean close(long tenantId, long orderId, long expectedVersion, String reason, long actorId);
 }

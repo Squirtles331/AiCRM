@@ -65,8 +65,8 @@ public class PlatformPrincipalService {
             permissions.addAll(Set.of("quote:read:any", "quote:write:any", "quote:submit", "quote:expire"));
             permissions.addAll(Set.of("quote:withdraw", "approval:manage", "approval:task:read", "approval:task:act"));
             permissions.addAll(Set.of("contract:create", "contract:read:any", "contract:write:any",
-                    "contract:submit-signature", "contract:sign", "contract:void", "contract:change"));
-            permissions.addAll(Set.of("order:create", "order:read:any", "order:write:any", "order:confirm", "order:cancel"));
+                    "contract:submit-signature", "contract:withdraw-signature", "contract:sign", "contract:void", "contract:change", "contract:approve-change"));
+            permissions.addAll(Set.of("order:create", "order:read:any", "order:write:any", "order:confirm", "order:cancel", "order:approve-cancel", "order:close"));
         }
         if (!roles.isEmpty()) {
             permissions.addAll(Set.of("lead:create", "lead:claim", "lead:read:own", "lead:write:own",
@@ -77,8 +77,8 @@ public class PlatformPrincipalService {
             permissions.addAll(Set.of("quote:create", "quote:read:own", "quote:write:own", "quote:submit",
                     "quote:expire", "quote:withdraw", "approval:task:read", "approval:task:act"));
             permissions.addAll(Set.of("contract:create", "contract:read:own", "contract:write:own",
-                    "contract:submit-signature"));
-            permissions.addAll(Set.of("order:create", "order:read:own", "order:write:own"));
+                    "contract:submit-signature", "contract:withdraw-signature"));
+            permissions.addAll(Set.of("order:create", "order:read:own", "order:write:own", "order:confirm", "order:cancel", "order:close"));
         }
         return permissions;
     }
