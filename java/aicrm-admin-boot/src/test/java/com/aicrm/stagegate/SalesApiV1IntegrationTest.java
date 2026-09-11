@@ -227,6 +227,32 @@ class SalesApiV1IntegrationTest {
     }
 
     @Test
+    void exposesTenantAdministrationOnlyToAdministrators() throws Exception {
+        seedSalesTenant();
+        seedAdminAndExitingUser();
+        String authorization = bearer(token(ADMIN_USER_ID));
+
+        mockMvc.perform(get("/api/v1/administration/users").header("Authorization", authorization))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.records").isArray())
+                .andExpect(jsonPath("$.data.records[0].id").isString());
+        mockMvc.perform(get("/api/v1/administration/roles").header("Authorization", authorization))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.records").isArray())
+                .andExpect(jsonPath("$.data.records[0].id").isString());
+        mockMvc.perform(get("/api/v1/administration/departments").header("Authorization", authorization))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").isString());
+        mockMvc.perform(get("/api/v1/administration/permissions").header("Authorization", authorization))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray());
+
+        mockMvc.perform(get("/api/v1/administration/users")
+                        .header("Authorization", bearer(token(USER_ONE_ID))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void servesTheV1ApiOnARealHttpPort() throws Exception {
         seedSalesTenant();
         HttpHeaders headers = new HttpHeaders();
