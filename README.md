@@ -27,6 +27,7 @@
 | `aicrm-analytics` | CRM 工作台汇总、销售目标与已确认结果 |
 | `aicrm-web` | `/api/v1` DTO、Controller、脱敏和异常映射 |
 | `aicrm-admin-boot` | 应用装配、JWT/RabbitMQ 适配器、Flyway 和运行配置 |
+| `aicrm-coverage` | 仅构建期使用的全工程 JaCoCo 覆盖率聚合报告 |
 
 ```mermaid
 flowchart LR
@@ -63,11 +64,14 @@ V9 完成单轨切换：增加 `crm_user.password_hash`，并删除检测到的�
 ```bash
 docker compose up -d postgres
 mvn -f java/pom.xml clean verify
+mvn -f java/pom.xml verify "-Daicrm.rabbitmq.integration.enabled=true"
 mvn -f java/pom.xml -DskipTests package
 java -jar java/aicrm-admin-boot/target/aicrm.jar
 ```
 
-构建产物为 `java/aicrm-admin-boot/target/aicrm.jar`。完整验收必须执行 `clean verify`，Docker 未启动、测试被跳过或任一测试失败都不算通过。
+构建产物为 `java/aicrm-admin-boot/target/aicrm.jar`。`clean verify` 覆盖数据库和应用集成测试；发布前还必须以 `aicrm.rabbitmq.integration.enabled=true` 运行 RabbitMQ Testcontainers 验收。Docker 未启动、测试被跳过或任一测试失败都不算通过。
+
+每次根工程 `verify` 在 `java/aicrm-coverage/target/site/jacoco-aggregate/index.html` 生成全工程覆盖率报告。当前基线为 82.32% 指令覆盖率；销售域为 69.78%，尚未达到核心领域 80% 的发布标准，因此覆盖率门禁仍未关闭。
 
 ## 登录与接口
 

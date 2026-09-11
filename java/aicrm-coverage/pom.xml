@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.aicrm</groupId>
+        <artifactId>aicrm</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>aicrm-coverage</artifactId>
+    <packaging>pom</packaging>
+    <name>aicrm-coverage</name>
+    <description>仅用于发布门禁的 CRM 全工程覆盖率聚合报告</description>
+
+    <dependencies>
+        <dependency><groupId>com.aicrm</groupId><artifactId>aicrm-shared-kernel</artifactId></dependency>
+        <dependency><groupId>com.aicrm</groupId><artifactId>aicrm-platform</artifactId></dependency>
+        <dependency><groupId>com.aicrm</groupId><artifactId>aicrm-sales</artifactId></dependency>
+        <dependency><groupId>com.aicrm</groupId><artifactId>aicrm-catalog</artifactId></dependency>
+        <dependency><groupId>com.aicrm</groupId><artifactId>aicrm-trade</artifactId></dependency>
+        <dependency><groupId>com.aicrm</groupId><artifactId>aicrm-analytics</artifactId></dependency>
+        <dependency><groupId>com.aicrm</groupId><artifactId>aicrm-integration</artifactId></dependency>
+        <dependency><groupId>com.aicrm</groupId><artifactId>aicrm-web</artifactId></dependency>
+        <dependency>
+            <groupId>com.aicrm</groupId>
+            <artifactId>aicrm-admin-boot</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>aggregate-coverage-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report-aggregate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

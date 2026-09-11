@@ -16,5 +16,5 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
-      - name: Verify migrations, database invariants and module boundaries
-        run: mvn -B -f java/pom.xml verify
+      - name: Verify migrations, database invariants, module boundaries and RabbitMQ transport
+        run: mvn -B -f java/pom.xml verify -Daicrm.rabbitmq.integration.enabled=true
