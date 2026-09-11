@@ -22,9 +22,12 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @Testcontainers
 @EnabledIfSystemProperty(named = "aicrm.rabbitmq.integration.enabled", matches = "true")
@@ -78,7 +81,9 @@ class RabbitOutboxEventPublisherIntegrationTest {
             assertThat(delivery).isNotNull();
             assertThat(delivery.getProps().getMessageId()).isEqualTo("90001");
             assertThat(delivery.getProps().getDeliveryMode()).isEqualTo(2);
-            assertThat(delivery.getProps().getHeaders()).containsEntry("tenantId", "51").containsEntry("eventType", "LeadCreated");
+            assertThat(delivery.getProps().getHeaders()).containsKeys("tenantId", "eventType");
+            assertThat(String.valueOf(delivery.getProps().getHeaders().get("tenantId"))).isEqualTo("51");
+            assertThat(String.valueOf(delivery.getProps().getHeaders().get("eventType"))).isEqualTo("LeadCreated");
             JsonNode envelope = JSON.readTree(new String(delivery.getBody(), StandardCharsets.UTF_8));
             assertThat(envelope.path("eventId").asText()).isEqualTo("90001");
             assertThat(envelope.path("tenantId").asText()).isEqualTo("51");
@@ -86,7 +91,8 @@ class RabbitOutboxEventPublisherIntegrationTest {
             assertThat(envelope.path("payload").path("leadId").asText()).isEqualTo("90002");
 
             channel.basicReject(delivery.getEnvelope().getDeliveryTag(), false);
-            GetResponse deadLetter = channel.basicGet(DomainEventTopology.DEAD_LETTER_QUEUE, true);
+            GetResponse deadLetter = await().atMost(Duration.ofSeconds(5))
+                    .until(() -> channel.basicGet(DomainEventTopology.DEAD_LETTER_QUEUE, true), Objects::nonNull);
             assertThat(deadLetter).isNotNull();
             assertThat(deadLetter.getProps().getMessageId()).isEqualTo("90001");
             assertThat(JSON.readTree(new String(deadLetter.getBody(), StandardCharsets.UTF_8)).path("eventType").asText())
