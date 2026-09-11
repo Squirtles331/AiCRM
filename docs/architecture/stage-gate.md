@@ -38,7 +38,7 @@
 | 独立端口真实 HTTP 服务 | READY | `servesTheV1ApiOnARealHttpPort` 在随机真实端口完成创建线索请求 |
 | 真实 RabbitMQ 验收 | PENDING-RUN | 已新增 `RabbitOutboxEventPublisherIntegrationTest`，检查持久化消息信封、Broker Confirm 与拒绝后死信投递；GitHub Actions 强制以 `-Daicrm.rabbitmq.integration.enabled=true` 运行。当前本机 Docker Hub 无法拉取 `rabbitmq:3.13-management-alpine`，待网络恢复后执行同一命令。 |
 | 覆盖率硬门禁 | READY | 根工程 `verify` 在 `aicrm-coverage/target/site/jacoco-aggregate/` 生成全工程 JaCoCo 报告，并由 `CoverageGate` 强制检查全工程至少 70%、销售域至少 80%。本次指令覆盖率为 84.93%，销售域为 80.69%。 |
-| 百万级性能验收 | PENDING-RUN | 4C8G、10 租户、百万级销售数据执行 P95 基准 |
+| 百万级性能验收 | PENDING-RUN | `tools/performance/run-stage-gate.ps1` 强制校验 Docker 至少 4C8G，并要求经数据装载流程生成的 10 租户、至少百万销售记录数据证明。k6 执行真实 API 基准：常用线索列表 P95 必须低于 300ms，真实跟进命令 P95 必须低于 500ms；输出环境、数据证明 SHA-256 与结果摘要。待隔离预发布环境完成实跑后提交结果。 |
 
 第一里程碑的 RabbitMQ 实机和性能发布门仍待关闭。项目已按产品负责人指令进入阶段 2 的增量开发；这些待办项继续作为发布门，不得被标记为完成或绕过。
 

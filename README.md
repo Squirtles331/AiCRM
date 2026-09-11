@@ -73,6 +73,8 @@ java -jar java/aicrm-admin-boot/target/aicrm.jar
 
 每次根工程 `verify` 在 `java/aicrm-coverage/target/site/jacoco-aggregate/index.html` 生成全工程覆盖率报告，并强制检查全工程不低于 70%、销售域不低于 80%。当前基线为 84.93% 指令覆盖率；销售域为 80.69%。
 
+百万级性能发布门使用 [tools/performance/README.md](tools/performance/README.md) 中的 k6 API 基准执行。它必须在独立的 4C8G、10 租户、百万级销售数据预发布环境实跑，不能以本地单测或数据库直连脚本替代。
+
 ## 登录与接口
 
 数据库不会创建可登录的默认管理员。初始化流程必须创建租户、部门、用户、角色，并在 `crm_user.password_hash` 保存 BCrypt 哈希。系统任务用户的密码字段为 NULL，不能登录。
