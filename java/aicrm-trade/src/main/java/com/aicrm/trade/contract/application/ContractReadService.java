@@ -2,6 +2,7 @@ package com.aicrm.trade.contract.application;
 
 import com.aicrm.kernel.error.DomainException;
 import com.aicrm.kernel.error.ErrorCode;
+import com.aicrm.kernel.page.PageResult;
 import com.aicrm.kernel.security.Actor;
 import com.aicrm.trade.contract.domain.Contract;
 import com.aicrm.trade.contract.domain.ContractChange;
@@ -27,6 +28,11 @@ public class ContractReadService {
         Contract contract = repository.find(actor.tenantId(), id).orElseThrow(() -> new DomainException(ErrorCode.NOT_FOUND, "合同不存在"));
         quotes.quote(actor, contract.quoteId());
         return contract;
+    }
+
+    public PageResult<Contract> page(Actor actor, long page, long size) {
+        requireAny(actor, "contract:read:own", "contract:read:any", "contract:write:own", "contract:write:any");
+        return repository.page(actor, page, size);
     }
 
     public List<ContractLine> lines(Actor actor, long id) { return repository.findLines(actor.tenantId(), contract(actor, id).id()); }

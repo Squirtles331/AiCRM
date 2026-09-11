@@ -1,5 +1,8 @@
 package com.aicrm.trade.contract.infrastructure;
 
+import com.aicrm.kernel.page.PageResult;
+import com.aicrm.kernel.security.Actor;
+import com.aicrm.kernel.security.DataScope;
 import com.aicrm.trade.contract.domain.Contract;
 import com.aicrm.trade.contract.domain.ContractLine;
 import com.aicrm.trade.contract.domain.ContractRepository;
@@ -13,6 +16,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Repository
@@ -41,6 +45,19 @@ public class JdbcContractRepository implements ContractRepository {
     @Override
     public Optional<Contract> find(long tenantId, long contractId) {
         return jdbc.query("select * from crm_contract where tenant_id=? and id=? and deleted_at is null", contractMapper(), tenantId, contractId).stream().findFirst();
+    }
+
+    @Override
+    public PageResult<Contract> page(Actor actor, long page, long size) {
+        StringBuilder where = new StringBuilder(" from crm_contract c join crm_quote q on q.tenant_id=c.tenant_id and q.id=c.quote_id join crm_opportunity o on o.tenant_id=q.tenant_id and o.id=q.opportunity_id where c.tenant_id=? and c.deleted_at is null and q.deleted_at is null and o.deleted_at is null");
+        List<Object> args = new ArrayList<>(List.of(actor.tenantId()));
+        appendOwnerScope(where, args, actor, "o");
+        Long total = jdbc.queryForObject("select count(1)" + where, Long.class, args.toArray());
+        List<Object> pageArgs = new ArrayList<>(args);
+        pageArgs.add(size);
+        pageArgs.add((page - 1) * size);
+        List<Contract> records = jdbc.query("select c.*" + where + " order by c.updated_at desc, c.id desc limit ? offset ?", contractMapper(), pageArgs.toArray());
+        return new PageResult<>(records, page, size, total == null ? 0 : total);
     }
 
     @Override
@@ -94,4 +111,13 @@ public class JdbcContractRepository implements ContractRepository {
             rs.getBigDecimal("discount_rate"), rs.getBigDecimal("tax_rate"), rs.getBigDecimal("line_amount"), instant(rs, "created_at"), instant(rs, "updated_at")); }
     private Instant instant(ResultSet rs, String column) throws SQLException { Timestamp value = rs.getTimestamp(column); return value == null ? null : value.toInstant(); }
     private Timestamp timestamp(Instant value) { return value == null ? null : Timestamp.from(value); }
+
+    private void appendOwnerScope(StringBuilder sql, List<Object> args, Actor actor, String alias) {
+        if (actor.hasDataScope(DataScope.ALL)) return;
+        List<String> scopes = new ArrayList<>();
+        if (actor.hasDataScope(DataScope.SELF)) { scopes.add(alias + ".owner_user_id=?"); args.add(actor.userId()); }
+        if (actor.hasDataScope(DataScope.DEPARTMENT)) { scopes.add(alias + ".owner_dept_id=?"); args.add(actor.departmentId()); }
+        if (actor.hasDataScope(DataScope.DEPARTMENT_AND_SUB)) { scopes.add(alias + ".owner_dept_id in (select id from crm_department where tenant_id=? and path like ? and deleted_at is null)"); args.add(actor.tenantId()); args.add(actor.departmentPath() + "%"); }
+        sql.append(scopes.isEmpty() ? " and 1=0" : " and (" + String.join(" or ", scopes) + ")");
+    }
 }

@@ -1,5 +1,8 @@
 package com.aicrm.trade.quote.infrastructure;
 
+import com.aicrm.kernel.page.PageResult;
+import com.aicrm.kernel.security.Actor;
+import com.aicrm.kernel.security.DataScope;
 import com.aicrm.trade.quote.domain.Quote;
 import com.aicrm.trade.quote.domain.QuoteLine;
 import com.aicrm.trade.quote.domain.QuoteRepository;
@@ -14,6 +17,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Repository
@@ -51,6 +55,19 @@ public class JdbcQuoteRepository implements QuoteRepository {
     @Override
     public Optional<Quote> findQuote(long tenantId, long quoteId) {
         return jdbc.query("select * from crm_quote where tenant_id=? and id=? and deleted_at is null", quoteMapper(), tenantId, quoteId).stream().findFirst();
+    }
+
+    @Override
+    public PageResult<Quote> page(Actor actor, long page, long size) {
+        StringBuilder where = new StringBuilder(" from crm_quote q join crm_opportunity o on o.tenant_id=q.tenant_id and o.id=q.opportunity_id where q.tenant_id=? and q.deleted_at is null and o.deleted_at is null");
+        List<Object> args = new ArrayList<>(List.of(actor.tenantId()));
+        appendOwnerScope(where, args, actor, "o");
+        Long total = jdbc.queryForObject("select count(1)" + where, Long.class, args.toArray());
+        List<Object> pageArgs = new ArrayList<>(args);
+        pageArgs.add(size);
+        pageArgs.add((page - 1) * size);
+        List<Quote> records = jdbc.query("select q.*" + where + " order by q.updated_at desc, q.id desc limit ? offset ?", quoteMapper(), pageArgs.toArray());
+        return new PageResult<>(records, page, size, total == null ? 0 : total);
     }
 
     @Override
@@ -146,4 +163,13 @@ public class JdbcQuoteRepository implements QuoteRepository {
             instant(rs, "created_at"), instant(rs, "updated_at")); }
     private Instant instant(ResultSet rs, String name) throws SQLException { Timestamp value = rs.getTimestamp(name); return value == null ? null : value.toInstant(); }
     private Timestamp timestamp(Instant value) { return value == null ? null : Timestamp.from(value); }
+
+    private void appendOwnerScope(StringBuilder sql, List<Object> args, Actor actor, String alias) {
+        if (actor.hasDataScope(DataScope.ALL)) return;
+        List<String> scopes = new ArrayList<>();
+        if (actor.hasDataScope(DataScope.SELF)) { scopes.add(alias + ".owner_user_id=?"); args.add(actor.userId()); }
+        if (actor.hasDataScope(DataScope.DEPARTMENT)) { scopes.add(alias + ".owner_dept_id=?"); args.add(actor.departmentId()); }
+        if (actor.hasDataScope(DataScope.DEPARTMENT_AND_SUB)) { scopes.add(alias + ".owner_dept_id in (select id from crm_department where tenant_id=? and path like ? and deleted_at is null)"); args.add(actor.tenantId()); args.add(actor.departmentPath() + "%"); }
+        sql.append(scopes.isEmpty() ? " and 1=0" : " and (" + String.join(" or ", scopes) + ")");
+    }
 }

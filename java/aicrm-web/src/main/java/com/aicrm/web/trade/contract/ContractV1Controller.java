@@ -13,6 +13,8 @@ import com.aicrm.web.api.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -41,6 +44,12 @@ public class ContractV1Controller {
             @RequestHeader("Idempotency-Key") String key) {
         Contract contract = commands.create(actor(), new ContractCommands.Create(request.quoteId(), request.name(), request.effectiveFrom(), request.effectiveTo()), key);
         return ResponseEntity.status(HttpStatus.CREATED).body(success(view(contract)));
+    }
+    @GetMapping @Operation(summary = "分页查询合同")
+    public ApiResponse<ContractApiDtos.PageView<ContractApiDtos.ContractView>> page(@RequestParam(defaultValue = "1") @Min(1) long page,
+                                                                                       @RequestParam(defaultValue = "20") @Min(1) @Max(200) long size) {
+        var result = reads.page(actor(), page, size);
+        return success(new ContractApiDtos.PageView<>(result.records().stream().map(ContractV1Controller::view).toList(), result.page(), result.size(), result.total()));
     }
     @GetMapping("/{id}") @Operation(summary = "查询合同")
     public ApiResponse<ContractApiDtos.ContractView> detail(@PathVariable long id) { return success(view(reads.contract(actor(), id))); }

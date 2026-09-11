@@ -1,5 +1,8 @@
 package com.aicrm.trade.order.infrastructure;
 
+import com.aicrm.kernel.page.PageResult;
+import com.aicrm.kernel.security.Actor;
+import com.aicrm.kernel.security.DataScope;
 import com.aicrm.trade.order.domain.SalesOrder;
 import com.aicrm.trade.order.domain.SalesOrderLine;
 import com.aicrm.trade.order.domain.SalesOrderRepository;
@@ -12,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Repository
@@ -30,6 +34,17 @@ public class JdbcSalesOrderRepository implements SalesOrderRepository {
                 l.quantity(), l.unitPrice(), l.taxRate(), l.lineAmount(), actorId, actorId, timestamp(l.createdAt()), timestamp(l.updatedAt()));
     }
     public Optional<SalesOrder> find(long tenantId, long orderId) { return jdbc.query("select * from crm_sales_order where tenant_id=? and id=? and deleted_at is null", orderMapper(), tenantId, orderId).stream().findFirst(); }
+    public PageResult<SalesOrder> page(Actor actor, long page, long size) {
+        StringBuilder where = new StringBuilder(" from crm_sales_order so join crm_contract c on c.tenant_id=so.tenant_id and c.id=so.contract_id join crm_quote q on q.tenant_id=c.tenant_id and q.id=c.quote_id join crm_opportunity o on o.tenant_id=q.tenant_id and o.id=q.opportunity_id where so.tenant_id=? and so.deleted_at is null and c.deleted_at is null and q.deleted_at is null and o.deleted_at is null");
+        List<Object> args = new ArrayList<>(List.of(actor.tenantId()));
+        appendOwnerScope(where, args, actor, "o");
+        Long total = jdbc.queryForObject("select count(1)" + where, Long.class, args.toArray());
+        List<Object> pageArgs = new ArrayList<>(args);
+        pageArgs.add(size);
+        pageArgs.add((page - 1) * size);
+        List<SalesOrder> records = jdbc.query("select so.*" + where + " order by so.updated_at desc, so.id desc limit ? offset ?", orderMapper(), pageArgs.toArray());
+        return new PageResult<>(records, page, size, total == null ? 0 : total);
+    }
     public List<SalesOrderLine> findLines(long tenantId, long orderId) { return jdbc.query("select * from crm_sales_order_line where tenant_id=? and order_id=? and deleted_at is null order by line_no", lineMapper(), tenantId, orderId); }
     public boolean existsForContract(long tenantId, long contractId) { Boolean value = jdbc.query("select exists(select 1 from crm_sales_order where tenant_id=? and contract_id=? and deleted_at is null)", rs -> rs.next() && rs.getBoolean(1), tenantId, contractId); return Boolean.TRUE.equals(value); }
     public boolean transition(long tenantId, long orderId, SalesOrder.Status from, SalesOrder.Status to, long expectedVersion, long actorId) {
@@ -46,4 +61,12 @@ public class JdbcSalesOrderRepository implements SalesOrderRepository {
     private RowMapper<SalesOrderLine> lineMapper() { return (rs, row) -> new SalesOrderLine(rs.getLong("id"), rs.getLong("tenant_id"), rs.getLong("order_id"), rs.getInt("line_no"), rs.getLong("contract_line_id"), rs.getLong("product_id"), rs.getString("product_no_snapshot"), rs.getString("sku_snapshot"), rs.getString("product_name_snapshot"), rs.getString("unit"), rs.getBigDecimal("quantity"), rs.getBigDecimal("unit_price"), rs.getBigDecimal("tax_rate"), rs.getBigDecimal("line_amount"), instant(rs, "created_at"), instant(rs, "updated_at")); }
     private Instant instant(ResultSet rs, String column) throws SQLException { Timestamp value = rs.getTimestamp(column); return value == null ? null : value.toInstant(); }
     private Timestamp timestamp(Instant value) { return value == null ? null : Timestamp.from(value); }
+    private void appendOwnerScope(StringBuilder sql, List<Object> args, Actor actor, String alias) {
+        if (actor.hasDataScope(DataScope.ALL)) return;
+        List<String> scopes = new ArrayList<>();
+        if (actor.hasDataScope(DataScope.SELF)) { scopes.add(alias + ".owner_user_id=?"); args.add(actor.userId()); }
+        if (actor.hasDataScope(DataScope.DEPARTMENT)) { scopes.add(alias + ".owner_dept_id=?"); args.add(actor.departmentId()); }
+        if (actor.hasDataScope(DataScope.DEPARTMENT_AND_SUB)) { scopes.add(alias + ".owner_dept_id in (select id from crm_department where tenant_id=? and path like ? and deleted_at is null)"); args.add(actor.tenantId()); args.add(actor.departmentPath() + "%"); }
+        sql.append(scopes.isEmpty() ? " and 1=0" : " and (" + String.join(" or ", scopes) + ")");
+    }
 }

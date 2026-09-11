@@ -1,5 +1,7 @@
 package com.aicrm.trade.quote.domain;
 
+import com.aicrm.kernel.page.PageResult;
+import com.aicrm.kernel.security.Actor;
 import java.util.List;
 import java.util.Optional;
 import java.time.LocalDate;
@@ -9,6 +11,7 @@ public interface QuoteRepository {
     QuoteVersion insertVersion(QuoteVersion version, long actorId);
     QuoteLine insertLine(QuoteLine line, long actorId);
     Optional<Quote> findQuote(long tenantId, long quoteId);
+    PageResult<Quote> page(Actor actor, long page, long size);
     Optional<QuoteVersion> findVersion(long tenantId, long quoteId, int versionNo);
     List<QuoteVersion> findVersions(long tenantId, long quoteId);
     List<QuoteLine> findLines(long tenantId, long quoteVersionId);

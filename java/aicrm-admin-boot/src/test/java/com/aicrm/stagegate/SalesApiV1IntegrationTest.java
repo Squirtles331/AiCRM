@@ -132,6 +132,10 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/orders']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/orders/{id}/actions/close']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/orders/{id}/cancellations/{cancellationId}/actions/approve']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/auth/me']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/directory/users']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/directory/departments']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/directory/public-pools']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/workbench/summary']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/reports/sales-funnel']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/reports/sales-performance']").exists())
@@ -153,6 +157,10 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/sales-playbooks/{id}/actions/publish']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/competitors']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/competitors/{id}/actions/archive']").exists());
+
+        String specification = mockMvc.perform(get("/v3/api-docs/crm-v1"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertIdentifiersDocumentedAsStrings(objectMapper.readTree(specification).path("components").path("schemas"));
     }
 
     @Test
@@ -186,6 +194,36 @@ class SalesApiV1IntegrationTest {
                                 """))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    void exposesFrontendProfileDirectoriesAndTradeLists() throws Exception {
+        seedSalesTenant();
+        String userToken = token(USER_ONE_ID);
+        String authorization = bearer(userToken);
+
+        mockMvc.perform(get("/api/v1/auth/me").header("Authorization", authorization))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.tenantId").value(String.valueOf(TENANT_ID)))
+                .andExpect(jsonPath("$.data.userId").value(String.valueOf(USER_ONE_ID)))
+                .andExpect(jsonPath("$.data.username").value("sales-one"))
+                .andExpect(jsonPath("$.data.permissions").isArray());
+        mockMvc.perform(get("/api/v1/directory/users").header("Authorization", authorization))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").value(String.valueOf(USER_ONE_ID)));
+        mockMvc.perform(get("/api/v1/directory/departments").header("Authorization", authorization))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").value(String.valueOf(ROOT_DEPARTMENT_ID)));
+        mockMvc.perform(get("/api/v1/directory/public-pools").param("resourceType", "LEAD").header("Authorization", authorization))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").value(String.valueOf(LEAD_POOL_ID)));
+        mockMvc.perform(get("/api/v1/quotes").header("Authorization", authorization))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.items").isArray())
+                .andExpect(jsonPath("$.data.page").value(1));
+        mockMvc.perform(get("/api/v1/contracts").header("Authorization", authorization))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.items").isArray());
+        mockMvc.perform(get("/api/v1/orders").header("Authorization", authorization))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.items").isArray());
     }
 
     @Test
@@ -612,6 +650,8 @@ class SalesApiV1IntegrationTest {
                                 """.formatted(opportunityId, listId, productId, priceItemId)))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
                 .andReturn().getResponse().getContentAsString()).path("data").path("id").asText();
+        mockMvc.perform(get("/api/v1/quotes").header("Authorization", bearer(token)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.items[?(@.id == '" + quoteId + "')]").isNotEmpty());
         mockMvc.perform(get("/api/v1/quotes/{id}/versions/1/lines", quoteId).header("Authorization", bearer(token)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].lineAmount").value(1800));
@@ -641,6 +681,8 @@ class SalesApiV1IntegrationTest {
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
                 .andExpect(jsonPath("$.data.totalAmount").value(1908)).andReturn().getResponse().getContentAsString();
         String contractId = objectMapper.readTree(contractResponse).path("data").path("id").asText();
+        mockMvc.perform(get("/api/v1/contracts").header("Authorization", bearer(token)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.items[?(@.id == '" + contractId + "')]").isNotEmpty());
         mockMvc.perform(post("/api/v1/contracts").header("Authorization", bearer(token)).header("Idempotency-Key", "contract-create-1")
                         .contentType(MediaType.APPLICATION_JSON).content("{\"quoteId\":" + quoteId + ",\"name\":\"CRM 年度采购合同\",\"effectiveFrom\":\"2026-01-01\",\"effectiveTo\":\"2026-12-31\"}"))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(contractId));
@@ -700,6 +742,8 @@ class SalesApiV1IntegrationTest {
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
                 .andExpect(jsonPath("$.data.totalAmount").value(1908)).andReturn().getResponse().getContentAsString();
         String orderId = objectMapper.readTree(orderResponse).path("data").path("id").asText();
+        mockMvc.perform(get("/api/v1/orders").header("Authorization", bearer(token)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.items[?(@.id == '" + orderId + "')]").isNotEmpty());
         mockMvc.perform(post("/api/v1/orders").header("Authorization", bearer(token)).header("Idempotency-Key", "order-create-1")
                         .contentType(MediaType.APPLICATION_JSON).content("{\"contractId\":" + contractId + ",\"expectedDeliveryAt\":\"2026-03-01T00:00:00Z\"}"))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(orderId));
@@ -1268,5 +1312,14 @@ class SalesApiV1IntegrationTest {
 
     private String bearer(String token) {
         return "Bearer " + token;
+    }
+
+    private void assertIdentifiersDocumentedAsStrings(JsonNode schemas) {
+        schemas.elements().forEachRemaining(schema -> schema.path("properties").fields().forEachRemaining(property -> {
+            String name = property.getKey();
+            if ("id".equals(name) || name.endsWith("Id") || name.endsWith("Ids")) {
+                assertThat(property.getValue().path("type").asText()).isEqualTo("string");
+            }
+        }));
     }
 }

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 
 final class ContractApiDtos {
     private ContractApiDtos() { }
@@ -24,4 +25,5 @@ final class ContractApiDtos {
     record ChangeView(String id, String changeNo, String contractId, String status, String reason, String beforeSnapshot,
                       String afterSnapshot, String rejectionReason, long version, Instant submittedAt, Instant approvedAt,
                       Instant rejectedAt, Instant cancelledAt) { }
+    record PageView<T>(List<T> items, long page, long size, long total) { }
 }

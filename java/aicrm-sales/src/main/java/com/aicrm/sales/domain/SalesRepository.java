@@ -18,6 +18,7 @@ public interface SalesRepository {
     PageResult<Lead> pageLeads(Actor actor, OwnershipType ownershipType, long page, long size);
     boolean isDepartmentInActorScope(Actor actor, long departmentId);
     Optional<PublicPool> findPublicPool(long tenantId, long poolId);
+    List<PublicPool> listActivePublicPools(long tenantId, PublicPool.ResourceType resourceType);
     List<PublicPool> findActiveAutoRecyclePools();
     Optional<Actor> findAutomationActor(long tenantId);
     boolean isActiveUser(long tenantId, long userId);

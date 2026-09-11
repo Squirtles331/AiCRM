@@ -32,6 +32,10 @@ spring:
 
 # 业务自定义配置
 aicrm:
+  web:
+    cors:
+      # Comma-separated frontend origins. Credentials require explicit origins instead of a wildcard.
+      allowed-origins: ${AICRM_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
   id:
     worker-id: ${AICRM_ID_WORKER_ID:0}
     datacenter-id: ${AICRM_ID_DATACENTER_ID:0}

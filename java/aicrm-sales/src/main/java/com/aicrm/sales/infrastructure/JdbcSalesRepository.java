@@ -300,6 +300,12 @@ public class JdbcSalesRepository implements SalesRepository {
     }
 
     @Override
+    public List<PublicPool> listActivePublicPools(long tenantId, PublicPool.ResourceType resourceType) {
+        return jdbcTemplate.query("select * from crm_public_pool where tenant_id=? and resource_type=? and status=1 and deleted_at is null order by name, id",
+                publicPoolMapper(), tenantId, resourceType.name());
+    }
+
+    @Override
     public List<PublicPool> findActiveAutoRecyclePools() {
         return jdbcTemplate.query("select * from crm_public_pool where status = 1 and auto_recycle_enabled = true "
                         + "and deleted_at is null order by tenant_id, resource_type, id", publicPoolMapper());

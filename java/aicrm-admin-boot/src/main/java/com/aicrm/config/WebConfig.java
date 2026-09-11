@@ -2,6 +2,7 @@ package com.aicrm.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -20,9 +21,12 @@ public class WebConfig implements WebMvcConfigurer {
     public static final String HEADER_TENANT_ID = "X-Tenant-Id";
 
     private final V1ActorContextInterceptor v1ActorContextInterceptor;
+    private final List<String> allowedOrigins;
 
-    public WebConfig(V1ActorContextInterceptor v1ActorContextInterceptor) {
+    public WebConfig(V1ActorContextInterceptor v1ActorContextInterceptor,
+                     @Value("${aicrm.web.cors.allowed-origins:http://localhost:3000,http://localhost:5173}") String allowedOrigins) {
         this.v1ActorContextInterceptor = v1ActorContextInterceptor;
+        this.allowedOrigins = List.of(allowedOrigins.split(",")).stream().map(String::trim).filter(origin -> !origin.isEmpty()).toList();
     }
 
     @Override
@@ -34,7 +38,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedOrigins(allowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

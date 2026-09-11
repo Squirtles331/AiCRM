@@ -9,6 +9,7 @@ import com.aicrm.sales.domain.SalesRepository;
 import com.aicrm.sales.domain.customer.Contact;
 import com.aicrm.sales.domain.customer.Customer;
 import com.aicrm.sales.domain.lead.Lead;
+import com.aicrm.sales.domain.pool.PublicPool;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -61,6 +62,11 @@ public class SalesReadService {
     public List<Contact> contacts(Actor actor, long customerId) {
         customer(actor, customerId);
         return repository.findContacts(actor.tenantId(), customerId);
+    }
+
+    public List<PublicPool> activePublicPools(Actor actor, PublicPool.ResourceType resourceType) {
+        requireAny(actor, "lead:read:own", "lead:read:any", "customer:read:own", "customer:read:any");
+        return repository.listActivePublicPools(actor.tenantId(), resourceType);
     }
 
     private void requirePrivateRead(Actor actor, Long ownerUserId, Long ownerDeptId,

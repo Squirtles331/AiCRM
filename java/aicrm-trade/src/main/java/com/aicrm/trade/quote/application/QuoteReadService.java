@@ -2,6 +2,7 @@ package com.aicrm.trade.quote.application;
 
 import com.aicrm.kernel.error.DomainException;
 import com.aicrm.kernel.error.ErrorCode;
+import com.aicrm.kernel.page.PageResult;
 import com.aicrm.kernel.security.Actor;
 import com.aicrm.sales.application.OpportunityReadService;
 import com.aicrm.trade.quote.domain.Quote;
@@ -28,6 +29,11 @@ public class QuoteReadService {
                 .orElseThrow(() -> new DomainException(ErrorCode.NOT_FOUND, "报价不存在"));
         opportunities.opportunity(actor, quote.opportunityId());
         return quote;
+    }
+
+    public PageResult<Quote> page(Actor actor, long page, long size) {
+        requireAny(actor, "quote:read:own", "quote:read:any", "quote:write:own", "quote:write:any");
+        return repository.page(actor, page, size);
     }
 
     public QuoteVersion currentVersion(Actor actor, long id) {
@@ -70,4 +76,9 @@ public class QuoteReadService {
                                      String productName, String unit, BigDecimal quantity, BigDecimal listPrice,
                                      BigDecimal unitPrice, BigDecimal discountRate, BigDecimal taxRate,
                                      BigDecimal lineAmount) { }
+
+    private void requireAny(Actor actor, String... permissions) {
+        for (String permission : permissions) if (actor.hasPermission(permission)) return;
+        throw new DomainException(ErrorCode.FORBIDDEN, "缺少报价查看权限");
+    }
 }

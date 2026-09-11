@@ -3,6 +3,7 @@ package com.aicrm.web.trade.order;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 final class SalesOrderApiDtos {
     private SalesOrderApiDtos() { }
@@ -14,4 +15,5 @@ final class SalesOrderApiDtos {
     record LineView(String id, int lineNo, String contractLineId, String productId, String productNo, String sku, String productName, String unit, BigDecimal quantity, BigDecimal unitPrice, BigDecimal taxRate, BigDecimal lineAmount) { }
     record CancellationView(String id, String cancelNo, String orderId, String status, String reason, String requestSnapshot,
                             String rejectionReason, Instant requestedAt, Instant completedAt, long version) { }
+    record PageView<T>(List<T> items, long page, long size, long total) { }
 }

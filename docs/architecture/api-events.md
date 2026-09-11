@@ -13,6 +13,10 @@
 | 方法与路径 | 用途 | 权限 |
 |---|---|---|
 | `POST /api/v1/auth/login` | 租户、用户名、密码登录 | 匿名；仅签发身份 JWT，权限从数据库加载 |
+| `GET /api/v1/auth/me` | 获取当前用户、角色、权限和数据范围，作为前端路由与菜单初始化依据 | 已登录用户 |
+| `GET /api/v1/directory/users` | 获取当前数据范围内的可选用户 | 已登录用户 + 数据范围 |
+| `GET /api/v1/directory/departments` | 获取当前数据范围内的可选组织 | 已登录用户 + 数据范围 |
+| `GET /api/v1/directory/public-pools?resourceType=LEAD|CUSTOMER` | 获取启用的公海选择器项 | 对应线索/客户查看权限 |
 | `GET /api/v1/leads/private` | 线索私海 | `lead:read:own/any` + 数据范围 |
 | `GET /api/v1/leads/public` | 线索公海 | 已登录用户 |
 | `POST /api/v1/leads` | 创建私海或公海线索 | `lead:create` |
@@ -45,6 +49,7 @@
 | `GET /api/v1/opportunities/{id}/stage-history` | 商机阶段历史 | 商机查看权限 |
 | `POST /api/v1/opportunities/{id}/actions/stage|win|lose|restart` | 推进、赢单、输单和重启，请求含 `version` | 对应 `opportunity:*` 命令权限 |
 | `POST /api/v1/quotes` | 以生效价目表创建带快照行的报价 | `quote:create` + `Idempotency-Key` |
+| `GET /api/v1/quotes?page&size` | 分页查询报价 | `quote:read:own/any` + 商机数据范围 |
 | `GET /api/v1/quotes/{id}` | 查询报价根 | `quote:read:own/any` + 商机数据范围 |
 | `GET /api/v1/quotes/{id}/versions` | 查询报价版本 | 同报价查看权限 |
 | `GET /api/v1/quotes/{id}/versions/{versionNo}/lines` | 查询指定版本快照行 | 同报价查看权限 |
@@ -53,6 +58,7 @@
 | `POST /api/v1/quotes/{id}/actions/withdraw-approval` | 撤回在途报价审批；请求须含 `approvalInstanceId,instanceVersion` | `quote:withdraw` |
 | `POST /api/v1/quotes/{id}/actions/expire` | 已批准报价到期处理；请求须含 `rootVersion,version` | `quote:expire` |
 | `POST /api/v1/contracts` | 从已批准报价的当前批准版本创建合同草稿；请求须含合同名称和 `Idempotency-Key` | `contract:create` + 来源商机数据范围 |
+| `GET /api/v1/contracts?page&size` | 分页查询合同 | `contract:read:own/any` + 来源商机数据范围 |
 | `GET /api/v1/contracts/{id}` | 查询合同根 | `contract:read:own/any` + 来源商机数据范围 |
 | `GET /api/v1/contracts/{id}/lines` | 查询合同不可变商业快照行 | 同合同查看权限 |
 | `POST /api/v1/contracts/{id}/actions/submit-signature` | 提交草稿合同签署；请求须含 `version` | `contract:submit-signature` |
@@ -60,6 +66,7 @@
 | `POST /api/v1/contracts/{id}/actions/withdraw-signature|void` | 撤回签署或作废合同；请求须含 `version`，作废原因必填 | `contract:withdraw-signature` / `contract:void` |
 | `POST /api/v1/contracts/{id}/changes` 及变更的 `submit|cancel|approve|reject` 动作 | 创建并处理合同变更台账；创建须含 `Idempotency-Key`，状态操作须含变更 `version` | `contract:change` / `contract:approve-change` |
 | `POST /api/v1/orders` | 从已签合同创建完整销售订单草稿；请求含 `expectedDeliveryAt` 和 `Idempotency-Key` | `order:create` + 合同来源数据范围 |
+| `GET /api/v1/orders?page&size` | 分页查询销售订单 | `order:read:own/any` + 合同来源商机数据范围 |
 | `GET /api/v1/orders/{id}` | 查询销售订单根 | `order:read:own/any` + 合同来源数据范围 |
 | `GET /api/v1/orders/{id}/lines` | 查询销售订单不可变商业快照行 | 同订单查看权限 |
 | `POST /api/v1/orders/{id}/actions/confirm|request-cancel|close` | 确认、申请取消或 CRM 内部关闭订单；申请须含 `Idempotency-Key`，关闭原因必填 | `order:confirm` / `order:cancel` / `order:close` |

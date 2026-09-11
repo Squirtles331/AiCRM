@@ -30,5 +30,6 @@ final class QuoteApiDtos {
     record LineView(String id, String quoteVersionId, int lineNo, String productId, String priceItemId, String productNo,
                     String sku, String productName, String unit, BigDecimal quantity, BigDecimal listPrice,
                     BigDecimal minimumPrice, BigDecimal unitPrice, BigDecimal discountRate, BigDecimal taxRate,
-                    BigDecimal lineAmount) { }
+                       BigDecimal lineAmount) { }
+    record PageView<T>(List<T> items, long page, long size, long total) { }
 }

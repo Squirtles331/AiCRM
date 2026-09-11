@@ -87,6 +87,8 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 
 登录后的请求使用 `Authorization: Bearer <token>`。JWT 仅保存租户和用户身份，角色、功能权限、字段权限与组织数据范围每次从服务端平台表解析，不能信任客户端声明。
 
+前端初始化调用 `GET /api/v1/auth/me` 获取当前用户、角色、权限和数据范围；表单选择器使用 `GET /api/v1/directory/users`、`GET /api/v1/directory/departments` 与 `GET /api/v1/directory/public-pools?resourceType=LEAD|CUSTOMER`。报价、合同和订单均提供 `GET /api/v1/quotes|contracts|orders?page=1&size=20`。所有请求与响应中的业务 ID 都是十进制字符串，避免浏览器 Number 丢失精度。
+
 开发环境接口文档：
 
 - Swagger UI：<http://localhost:8080/swagger-ui.html>
@@ -94,6 +96,6 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 
 ## 关键配置
 
-公共配置位于 `java/aicrm-admin-boot/src/main/resources/application.yml`。生产环境至少设置 `AICRM_JWT_SECRET`、`DB_URL`、`DB_USERNAME`、`DB_PASSWORD`、Redis 和 RabbitMQ 连接变量。JWT 密钥至少 32 字节。
+公共配置位于 `java/aicrm-admin-boot/src/main/resources/application.yml`。生产环境至少设置 `AICRM_JWT_SECRET`、`DB_URL`、`DB_USERNAME`、`DB_PASSWORD`、Redis、RabbitMQ 连接变量和 `AICRM_CORS_ALLOWED_ORIGINS`。JWT 密钥至少 32 字节；后者是逗号分隔的前端 Origin 白名单。
 
 设计与验收基线位于 `docs/architecture/`。数据库字段以 Flyway 为物理事实源，API 以 OpenAPI 和契约测试为事实源。

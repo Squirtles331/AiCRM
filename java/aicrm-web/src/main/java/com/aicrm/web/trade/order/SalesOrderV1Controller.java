@@ -12,6 +12,8 @@ import com.aicrm.web.api.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 @Validated @RestController @RequestMapping("/api/v1/orders") @Tag(name = "CRM V1 - 销售订单")
@@ -30,6 +33,7 @@ public class SalesOrderV1Controller {
     public SalesOrderV1Controller(SalesOrderCommandService commands, SalesOrderReadService reads) { this.commands = commands; this.reads = reads; }
     @PostMapping @Operation(summary = "从已签合同创建销售订单草稿")
     public ResponseEntity<ApiResponse<SalesOrderApiDtos.OrderView>> create(@Valid @RequestBody SalesOrderApiDtos.CreateRequest request, @RequestHeader("Idempotency-Key") String key) { return ResponseEntity.status(HttpStatus.CREATED).body(success(view(commands.create(actor(), new SalesOrderCommands.Create(request.contractId(), request.expectedDeliveryAt()), key)))); }
+    @GetMapping @Operation(summary = "分页查询销售订单") public ApiResponse<SalesOrderApiDtos.PageView<SalesOrderApiDtos.OrderView>> page(@RequestParam(defaultValue = "1") @Min(1) long page, @RequestParam(defaultValue = "20") @Min(1) @Max(200) long size) { var result = reads.page(actor(), page, size); return success(new SalesOrderApiDtos.PageView<>(result.records().stream().map(SalesOrderV1Controller::view).toList(), result.page(), result.size(), result.total())); }
     @PostMapping("/{id}/actions/confirm") @Operation(summary = "确认销售订单")
     public ApiResponse<SalesOrderApiDtos.OrderView> confirm(@PathVariable long id, @Valid @RequestBody SalesOrderApiDtos.VersionRequest request) { return success(view(commands.confirm(actor(), id, new SalesOrderCommands.Versioned(request.version())))); }
     @PostMapping("/{id}/actions/request-cancel") @Operation(summary = "申请取消销售订单")

@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -47,6 +48,15 @@ public class QuoteV1Controller {
         QuoteCommands.Create command = new QuoteCommands.Create(request.opportunityId(), request.priceListId(), request.validUntil(),
                 request.lines().stream().map(line -> new QuoteCommands.Line(line.productId(), line.priceItemId(), line.quantity(), line.unitPrice(), line.discountRate())).toList());
         return ResponseEntity.status(HttpStatus.CREATED).body(success(view(commands.create(actor(), command, key))));
+    }
+
+    @GetMapping
+    @Operation(summary = "分页查询报价")
+    public ApiResponse<QuoteApiDtos.PageView<QuoteApiDtos.QuoteView>> page(
+            @RequestParam(defaultValue = "1") @Min(1) long page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(200) long size) {
+        var result = reads.page(actor(), page, size);
+        return success(new QuoteApiDtos.PageView<>(result.records().stream().map(QuoteV1Controller::view).toList(), result.page(), result.size(), result.total()));
     }
 
     @GetMapping("/{id}")
