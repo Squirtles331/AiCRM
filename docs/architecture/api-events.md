@@ -22,6 +22,8 @@
 | `POST /api/v1/sales-conversations/{id}/actions/close|reopen` | 关闭或重开会话；请求含 `version` | 会话负责人或 `conversation:write:any` |
 | `GET/POST /api/v1/sales-documents` | 查询或创建 CRM 销售资料；创建含 `Idempotency-Key` | `document:read` / `document:manage` |
 | `POST /api/v1/sales-documents/{id}/actions/publish|archive` | 发布或归档销售资料；请求含 `version` | `document:manage` |
+| `GET/POST /api/v1/sales-playbooks` | 查询或创建 CRM 销售话术；创建含 `Idempotency-Key` | `playbook:read` / `playbook:manage` |
+| `POST /api/v1/sales-playbooks/{id}/actions/publish|archive` | 发布或归档销售话术；请求含 `version` | `playbook:manage` |
 | `POST /api/v1/acquisition-channels` | 创建 CRM 获客渠道；请求含 `code/name/sourceType` 和 `Idempotency-Key` | `channel:manage` |
 | `GET /api/v1/acquisition-channels`、`GET /api/v1/acquisition-channels/{id}` | 查询获客渠道列表或详情 | `channel:read/manage` |
 | `POST /api/v1/acquisition-channels/{id}/actions/activate|disable` | 启用或停用渠道；请求含 `version` | `channel:manage` |
@@ -89,6 +91,7 @@
 | `LeadCreated` | Lead | `leadId,ownershipType,sourceType` | 报表、外部同步 |
 | `SalesConversationCreated/EntryAdded/Closed/Reopened` | SalesConversation | `conversationId,customerId,status` | 销售沟通台账、审计 |
 | `SalesDocumentCreated/Published/Archived` | SalesDocument | `documentId,status,category` | 销售资料台账、审计 |
+| `SalesPlaybookCreated/Published/Archived` | SalesPlaybook | `playbookId,status,salesStage,scenario` | 销售话术台账、审计 |
 | `AcquisitionChannelCreated/Activated/Disabled` | AcquisitionChannel | `channelId,status` | 渠道台账、审计 |
 | `LeadClaimed/Released/Assigned/Transferred/Recycled` | Lead | 前后负责人、部门、公海、规则版本 | 审计、提醒 |
 | `LeadInvalidated` | Lead | `leadId,reason` | 渠道质量统计 |

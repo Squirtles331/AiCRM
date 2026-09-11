@@ -155,6 +155,10 @@ stateDiagram-v2
 
 `DRAFT -> PUBLISHED -> ARCHIVED`。资料仅为 CRM 文本内容，发布后可以查询，归档后不可重新发布；资料不承载附件上传、外部网盘同步或交付文档。
 
+## 销售话术状态机
+
+`DRAFT -> PUBLISHED -> ARCHIVED`。话术必须有销售阶段、适用场景和文本内容；草稿仅供维护，发布后供 CRM 销售团队使用，归档后不可重新发布或修改。每次迁移要求 `playbook:manage` 与匹配 `version`，并写审计和 Outbox；CRM 不根据话术自动拨号、发送消息或写入外部沟通事实。
+
 ## 私海/公海归属状态机
 
 ```mermaid

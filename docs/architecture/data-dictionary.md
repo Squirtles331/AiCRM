@@ -1,6 +1,6 @@
-# CRM 数据字典（阶段 5C）
+# CRM 数据字典（阶段 5D）
 
-版本：`M5C-DB-1.0`；状态：产品目录、商机管道、报价审批、合同与销售订单闭环、CRM 工作台、目标、报表、规则驱动评分、组织/营销连接器、获客渠道归因、销售会话及销售资料库已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V24` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
+版本：`M5D-DB-1.0`；状态：产品目录、商机管道、报价审批、合同与销售订单闭环、CRM 工作台、目标、报表、规则驱动评分、组织/营销连接器、获客渠道归因、销售会话、销售资料库及销售话术已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V25` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
 
 ## 1. 类型与通用字段组
 
@@ -123,13 +123,14 @@ V20 的 `crm_performance_score_rule` 保存名称、匹配指标、`DRAFT/ACTIVE
 
 连接器监控不创建投影或告警表，而是按 UTC 时间窗关联 `crm_connector_event` 和聚合类型为 `CONNECTOR_EVENT` 的 `crm_outbox_event`，计算受理、线索、待投递、已发布和死信数量。死信重放复用既有 Outbox 行，把状态恢复为 `PENDING` 并写 `crm_audit_log`，不复制连接器事件或 CRM 线索。
 
-## 12. 销售会话与资料库
+## 12. 销售会话、资料库与话术
 
 | 表 | 字段（类型；N=NOT NULL；默认值） | 键、检查与主要索引 |
 |---|---|---|
 | `crm_sales_conversation` | `id/tenant_id/customer_id BIGINT N`；`contact_id BIGINT NULL`；`subject VARCHAR(200) N`；`channel VARCHAR(32) N`；`status VARCHAR(16) N`；`summary VARCHAR(2000) NULL`；`owner_user_id BIGINT N`；`closed_at TIMESTAMPTZ NULL`；`version`、`AUDIT_MUTABLE` | 状态为 `OPEN/CLOSED`；关闭时间必须与关闭状态一致；客户、联系人、负责人均用同租户复合 FK；按客户和更新时间索引。 |
 | `crm_sales_conversation_entry` | `id/tenant_id/conversation_id BIGINT N`；`direction VARCHAR(16) N`；`content VARCHAR(4000) N`；`occurred_at TIMESTAMPTZ N`；`created_by/created_at` | 方向仅 `INBOUND/OUTBOUND/NOTE`；同租户会话复合 FK；触发器禁止更新和删除；按会话与沟通时间排序。 |
 | `crm_sales_document` | `id/tenant_id BIGINT N`；`title VARCHAR(200) N`；`category VARCHAR(64) N`；`content TEXT N`；`status VARCHAR(16) N`；`owner_user_id BIGINT N`；`published_at/archived_at TIMESTAMPTZ NULL`；`version`、`AUDIT_MUTABLE` | 状态为 `DRAFT/PUBLISHED/ARCHIVED`，发布时间和归档时间与状态一致；按租户、状态及更新时间索引。仅保存 CRM 文本资料，不存二进制附件。 |
+| `crm_sales_playbook` | `id/tenant_id BIGINT N`；`title VARCHAR(200) N`；`sales_stage VARCHAR(64) N`；`scenario VARCHAR(200) N`；`content TEXT N`；`status VARCHAR(16) N`；`owner_user_id BIGINT N`；`published_at/archived_at TIMESTAMPTZ NULL`；`version`、`AUDIT_MUTABLE` | 状态为 `DRAFT/PUBLISHED/ARCHIVED`，发布时间和归档时间与状态一致；按租户、状态、销售阶段及更新时间索引。仅保存 CRM 话术文本，不接入自动外呼或外部沟通事实。 |
 
 ## 13. 后续对象登记
 

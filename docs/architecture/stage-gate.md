@@ -4,7 +4,7 @@
 
 | 验收项 | 证据 | 当前状态 |
 |---|---|---|
-| 平台域、销售域、连接器、获客渠道、会话和销售资料表名及字段冻结 | 数据字典 + V1-V24 | READY |
+| 平台域、销售域、连接器、获客渠道、会话、销售资料和销售话术表名及字段冻结 | 数据字典 + V1-V25 | READY |
 | 类型、默认值、可空性、索引、唯一规则冻结 | 数据字典 + Flyway | READY |
 | 公私海不变量、租户引用、终态保护 | V7 CHECK/复合 FK/触发器 | READY |
 | 空库 Flyway 初始化 | `DatabaseStageGateTest.emptyDatabaseMigratesThroughFrozenVersion` | READY |
@@ -22,7 +22,7 @@
 
 本地需运行 Docker，然后执行 `mvn -f java/pom.xml verify`。CI 使用 `.github/workflows/database-stage-gate.yml` 在 PostgreSQL 16 Testcontainers 上执行同一命令。Windows Docker Desktop 如遇 Testcontainers 命名管道兼容问题，应启用 WSL 集成并在 Linux 环境运行，或使用仅绑定回环地址的受控 Docker API 端点；不得关闭数据库测试或人工改库后标记通过。
 
-最近一次完整自动化验收：2026-09-11，`mvn -f java/pom.xml verify` 通过，共执行 28 个测试且无失败，覆盖至 V24。Testcontainers 验证空库迁移、旧表退出、JWT 权限与租户隔离、销售和交易生命周期、工作台与目标计分、连接器、获客渠道、销售会话、销售资料权限和生命周期、审计、Outbox、OpenAPI、静态契约及 ArchUnit。
+最近一次完整自动化验收待本次 V25 变更完成后更新。验收范围包含空库迁移、JWT 权限与租户隔离、销售话术幂等创建及发布/归档生命周期、审计、Outbox、OpenAPI、静态契约及 ArchUnit。
 
 ## 第一里程碑发布门进度
 

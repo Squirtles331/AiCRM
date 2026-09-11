@@ -148,7 +148,9 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/sales-conversations']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/sales-conversations/{id}/entries']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/sales-documents']").exists())
-                .andExpect(jsonPath("$.paths['/api/v1/sales-documents/{id}/actions/publish']").exists());
+                .andExpect(jsonPath("$.paths['/api/v1/sales-documents/{id}/actions/publish']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/sales-playbooks']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/sales-playbooks/{id}/actions/publish']").exists());
     }
 
     @Test
@@ -299,6 +301,39 @@ class SalesApiV1IntegrationTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("ARCHIVED"));
         assertThat(outboxCount("SALES_DOCUMENT", Long.parseLong(documentId))).isEqualTo(3L);
         assertThat(jdbcTemplate.queryForObject("select count(*) from crm_audit_log where tenant_id=? and resource_type='SALES_DOCUMENT' and resource_id=?", Long.class, TENANT_ID, Long.parseLong(documentId))).isEqualTo(3L);
+    }
+
+    @Test
+    void managesSalesPlaybooksWithIdempotencyAndLifecycle() throws Exception {
+        seedSalesTenant();
+        seedAdminAndExitingUser();
+        String admin = token(ADMIN_USER_ID);
+        String body = "{\"title\":\"首次沟通开场\",\"salesStage\":\"QUALIFICATION\",\"scenario\":\"首次电话\",\"content\":\"先确认客户当前目标\"}";
+        mockMvc.perform(post("/api/v1/sales-playbooks").header("Authorization", bearer(token(USER_ONE_ID)))
+                        .header("Idempotency-Key", "playbook-forbidden").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isForbidden());
+        String created = mockMvc.perform(post("/api/v1/sales-playbooks").header("Authorization", bearer(admin))
+                        .header("Idempotency-Key", "playbook-create").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("DRAFT"))
+                .andReturn().getResponse().getContentAsString();
+        String playbookId = objectMapper.readTree(created).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/sales-playbooks").header("Authorization", bearer(admin))
+                        .header("Idempotency-Key", "playbook-create").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(playbookId));
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_sales_playbook where tenant_id=?", Long.class, TENANT_ID)).isEqualTo(1L);
+        mockMvc.perform(get("/api/v1/sales-playbooks").header("Authorization", bearer(admin)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].salesStage").value("QUALIFICATION"));
+        mockMvc.perform(post("/api/v1/sales-playbooks/{id}/actions/archive", playbookId).header("Authorization", bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isConflict());
+        mockMvc.perform(post("/api/v1/sales-playbooks/{id}/actions/publish", playbookId).header("Authorization", bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("PUBLISHED"));
+        mockMvc.perform(post("/api/v1/sales-playbooks/{id}/actions/archive", playbookId).header("Authorization", bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"version\":1}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("ARCHIVED"));
+        assertThat(outboxCount("SALES_PLAYBOOK", Long.parseLong(playbookId))).isEqualTo(3L);
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_audit_log where tenant_id=? and resource_type='SALES_PLAYBOOK' and resource_id=?", Long.class, TENANT_ID, Long.parseLong(playbookId))).isEqualTo(3L);
     }
 
     @Test
