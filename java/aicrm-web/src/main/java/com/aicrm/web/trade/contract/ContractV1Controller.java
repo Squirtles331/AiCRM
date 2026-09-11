@@ -71,6 +71,8 @@ public class ContractV1Controller {
     }
     @GetMapping("/{id}/changes/{changeId}") @Operation(summary = "查询合同变更申请")
     public ApiResponse<ContractApiDtos.ChangeView> change(@PathVariable long id, @PathVariable long changeId) { return success(changeView(reads.change(actor(), id, changeId))); }
+    @GetMapping("/{id}/changes") @Operation(summary = "查询合同变更申请列表")
+    public ApiResponse<List<ContractApiDtos.ChangeView>> changes(@PathVariable long id) { return success(reads.changes(actor(), id).stream().map(ContractV1Controller::changeView).toList()); }
     @PostMapping("/{id}/changes/{changeId}/actions/submit") @Operation(summary = "提交合同变更")
     public ApiResponse<ContractApiDtos.ChangeView> submitChange(@PathVariable long id, @PathVariable long changeId, @Valid @RequestBody ContractApiDtos.VersionRequest request) { return success(changeView(commands.submitChange(actor(), id, changeId, new ContractCommands.Versioned(request.version())))); }
     @PostMapping("/{id}/changes/{changeId}/actions/cancel") @Operation(summary = "取消合同变更")

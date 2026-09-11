@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public class JdbcOrderCancelRepository implements OrderCancelRepository {
@@ -28,6 +29,12 @@ public class JdbcOrderCancelRepository implements OrderCancelRepository {
     public Optional<OrderCancel> find(long tenantId, long cancellationId) {
         return jdbc.query("select * from crm_order_cancel where tenant_id=? and id=? and deleted_at is null", this::map,
                 tenantId, cancellationId).stream().findFirst();
+    }
+
+    @Override
+    public List<OrderCancel> findByOrder(long tenantId, long orderId) {
+        return jdbc.query("select * from crm_order_cancel where tenant_id=? and order_id=? and deleted_at is null order by created_at desc,id desc",
+                this::map, tenantId, orderId);
     }
 
     @Override

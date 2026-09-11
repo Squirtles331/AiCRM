@@ -90,6 +90,16 @@ public class CatalogV1Controller {
         return ResponseEntity.status(HttpStatus.CREATED).body(success(view(list)));
     }
 
+    @GetMapping("/price-lists")
+    @Operation(summary = "分页查询价目表")
+    public ApiResponse<CatalogApiDtos.PageView<CatalogApiDtos.PriceListView>> priceLists(
+            @RequestParam(defaultValue = "1") @Min(1) long page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(200) long size) {
+        PageResult<PriceList> result = reads.priceLists(actor(), page, size);
+        return success(new CatalogApiDtos.PageView<>(result.records().stream().map(CatalogV1Controller::view).toList(),
+                result.page(), result.size(), result.total()));
+    }
+
     @GetMapping("/price-lists/{id}")
     @Operation(summary = "查询价目表")
     public ApiResponse<CatalogApiDtos.PriceListView> priceList(@PathVariable long id) {

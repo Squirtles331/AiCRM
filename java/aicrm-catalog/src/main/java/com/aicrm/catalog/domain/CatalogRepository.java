@@ -16,6 +16,7 @@ public interface CatalogRepository {
     Optional<PriceList> findPriceList(long tenantId, long priceListId);
     Optional<PriceItem> findPriceItem(long tenantId, long priceItemId);
     PageResult<Product> findProducts(long tenantId, long page, long size);
+    PageResult<PriceList> findPriceLists(long tenantId, long page, long size);
     List<ProductCategory> findCategories(long tenantId);
     List<PriceItem> findPriceItems(long tenantId, long priceListId);
     boolean hasActivePriceItems(long tenantId, long priceListId);

@@ -31,6 +31,11 @@ public class CatalogReadService {
         return repository.findProducts(actor.tenantId(), page, size);
     }
 
+    public PageResult<PriceList> priceLists(Actor actor, long page, long size) {
+        require(actor, "catalog:read");
+        return repository.findPriceLists(actor.tenantId(), page, size);
+    }
+
     public Product product(Actor actor, long productId) {
         require(actor, "catalog:read");
         return repository.findProduct(actor.tenantId(), productId)

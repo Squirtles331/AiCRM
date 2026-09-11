@@ -44,6 +44,11 @@ public class ContractReadService {
         return change;
     }
 
+    public List<ContractChange> changes(Actor actor, long contractId) {
+        contract(actor, contractId);
+        return changes.findByContract(actor.tenantId(), contractId);
+    }
+
     /** Public order-source contract; order code does not import Contract domain objects. */
     public SignedOrderSource signedOrderSource(Actor actor, long id) {
         Contract contract = contract(actor, id);

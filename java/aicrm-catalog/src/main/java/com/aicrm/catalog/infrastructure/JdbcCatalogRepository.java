@@ -92,6 +92,14 @@ public class JdbcCatalogRepository implements CatalogRepository {
     }
 
     @Override
+    public PageResult<PriceList> findPriceLists(long tenantId, long page, long size) {
+        Long total = jdbcTemplate.queryForObject("select count(1) from crm_price_list where tenant_id=? and deleted_at is null", Long.class, tenantId);
+        List<PriceList> records = jdbcTemplate.query("select * from crm_price_list where tenant_id=? and deleted_at is null "
+                        + "order by updated_at desc,id desc limit ? offset ?", priceListMapper(), tenantId, size, (page - 1) * size);
+        return new PageResult<>(records, page, size, total == null ? 0 : total);
+    }
+
+    @Override
     public List<ProductCategory> findCategories(long tenantId) {
         return jdbcTemplate.query("select * from crm_product_category where tenant_id=? and deleted_at is null order by sort_order,id", categoryMapper(), tenantId);
     }

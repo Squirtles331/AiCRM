@@ -8,6 +8,8 @@ import com.aicrm.trade.contract.application.ContractReadService;
 import com.aicrm.trade.order.domain.SalesOrder;
 import com.aicrm.trade.order.domain.SalesOrderLine;
 import com.aicrm.trade.order.domain.SalesOrderRepository;
+import com.aicrm.trade.order.domain.OrderCancel;
+import com.aicrm.trade.order.domain.OrderCancelRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -15,7 +17,8 @@ import java.util.List;
 public class SalesOrderReadService {
     private final SalesOrderRepository repository;
     private final ContractReadService contracts;
-    public SalesOrderReadService(SalesOrderRepository repository, ContractReadService contracts) { this.repository = repository; this.contracts = contracts; }
+    private final OrderCancelRepository cancellations;
+    public SalesOrderReadService(SalesOrderRepository repository, ContractReadService contracts, OrderCancelRepository cancellations) { this.repository = repository; this.contracts = contracts; this.cancellations = cancellations; }
     public SalesOrder order(Actor actor, long id) {
         requireAny(actor, "order:read:own", "order:read:any", "order:write:own", "order:write:any");
         SalesOrder order = repository.find(actor.tenantId(), id).orElseThrow(() -> new DomainException(ErrorCode.NOT_FOUND, "销售订单不存在"));
@@ -27,5 +30,6 @@ public class SalesOrderReadService {
         return repository.page(actor, page, size);
     }
     public List<SalesOrderLine> lines(Actor actor, long id) { return repository.findLines(actor.tenantId(), order(actor, id).id()); }
+    public List<OrderCancel> cancellations(Actor actor, long id) { return cancellations.findByOrder(actor.tenantId(), order(actor, id).id()); }
     private void requireAny(Actor actor, String... permissions) { for (String permission : permissions) if (actor.hasPermission(permission)) return; throw new DomainException(ErrorCode.FORBIDDEN, "缺少销售订单查看权限"); }
 }

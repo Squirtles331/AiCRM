@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public class JdbcContractChangeRepository implements ContractChangeRepository {
@@ -29,6 +30,12 @@ public class JdbcContractChangeRepository implements ContractChangeRepository {
     public Optional<ContractChange> find(long tenantId, long changeId) {
         return jdbc.query("select * from crm_contract_change where tenant_id=? and id=? and deleted_at is null", this::map,
                 tenantId, changeId).stream().findFirst();
+    }
+
+    @Override
+    public List<ContractChange> findByContract(long tenantId, long contractId) {
+        return jdbc.query("select * from crm_contract_change where tenant_id=? and contract_id=? and deleted_at is null order by created_at desc,id desc",
+                this::map, tenantId, contractId);
     }
 
     @Override
