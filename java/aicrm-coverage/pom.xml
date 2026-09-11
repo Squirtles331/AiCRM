@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>aicrm-coverage</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <name>aicrm-coverage</name>
     <description>仅用于发布门禁的 CRM 全工程覆盖率聚合报告</description>
 
@@ -44,6 +44,26 @@
                         <goals>
                             <goal>report-aggregate</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-coverage-gate</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.aicrm.coverage.CoverageGate</mainClass>
+                            <arguments>
+                                <argument>${project.build.directory}/site/jacoco-aggregate/jacoco.csv</argument>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

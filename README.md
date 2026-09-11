@@ -71,7 +71,7 @@ java -jar java/aicrm-admin-boot/target/aicrm.jar
 
 构建产物为 `java/aicrm-admin-boot/target/aicrm.jar`。`clean verify` 覆盖数据库和应用集成测试；发布前还必须以 `aicrm.rabbitmq.integration.enabled=true` 运行 RabbitMQ Testcontainers 验收。Docker 未启动、测试被跳过或任一测试失败都不算通过。
 
-每次根工程 `verify` 在 `java/aicrm-coverage/target/site/jacoco-aggregate/index.html` 生成全工程覆盖率报告。当前基线为 82.32% 指令覆盖率；销售域为 69.78%，尚未达到核心领域 80% 的发布标准，因此覆盖率门禁仍未关闭。
+每次根工程 `verify` 在 `java/aicrm-coverage/target/site/jacoco-aggregate/index.html` 生成全工程覆盖率报告，并强制检查全工程不低于 70%、销售域不低于 80%。当前基线为 84.93% 指令覆盖率；销售域为 80.69%。
 
 ## 登录与接口
 
