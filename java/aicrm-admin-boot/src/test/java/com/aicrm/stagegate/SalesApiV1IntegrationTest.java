@@ -150,7 +150,9 @@ class SalesApiV1IntegrationTest {
                 .andExpect(jsonPath("$.paths['/api/v1/sales-documents']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/sales-documents/{id}/actions/publish']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/sales-playbooks']").exists())
-                .andExpect(jsonPath("$.paths['/api/v1/sales-playbooks/{id}/actions/publish']").exists());
+                .andExpect(jsonPath("$.paths['/api/v1/sales-playbooks/{id}/actions/publish']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/competitors']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/competitors/{id}/actions/archive']").exists());
     }
 
     @Test
@@ -334,6 +336,22 @@ class SalesApiV1IntegrationTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("ARCHIVED"));
         assertThat(outboxCount("SALES_PLAYBOOK", Long.parseLong(playbookId))).isEqualTo(3L);
         assertThat(jdbcTemplate.queryForObject("select count(*) from crm_audit_log where tenant_id=? and resource_type='SALES_PLAYBOOK' and resource_id=?", Long.class, TENANT_ID, Long.parseLong(playbookId))).isEqualTo(3L);
+    }
+
+    @Test
+    void managesCompetitorRegistryWithIdempotencyAndArchive() throws Exception {
+        seedSalesTenant();
+        seedAdminAndExitingUser();
+        String admin = token(ADMIN_USER_ID);
+        String body = "{\"name\":\"示例竞品\",\"positioning\":\"中型企业协作平台\",\"strengths\":\"渠道覆盖广\",\"weaknesses\":\"实施周期长\"}";
+        mockMvc.perform(post("/api/v1/competitors").header("Authorization", bearer(token(USER_ONE_ID))).header("Idempotency-Key", "competitor-forbidden").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        String created = mockMvc.perform(post("/api/v1/competitors").header("Authorization", bearer(admin)).header("Idempotency-Key", "competitor-create").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isCreated()).andExpect(jsonPath("$.data.status").value("ACTIVE")).andReturn().getResponse().getContentAsString();
+        String id = objectMapper.readTree(created).path("data").path("id").asText();
+        mockMvc.perform(post("/api/v1/competitors").header("Authorization", bearer(admin)).header("Idempotency-Key", "competitor-create").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(id));
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_competitor where tenant_id=?", Long.class, TENANT_ID)).isEqualTo(1L);
+        mockMvc.perform(post("/api/v1/competitors/{id}/actions/archive", id).header("Authorization", bearer(admin)).contentType(MediaType.APPLICATION_JSON).content("{\"version\":0}")).andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("ARCHIVED"));
+        assertThat(outboxCount("COMPETITOR", Long.parseLong(id))).isEqualTo(2L);
+        assertThat(jdbcTemplate.queryForObject("select count(*) from crm_audit_log where tenant_id=? and resource_type='COMPETITOR' and resource_id=?", Long.class, TENANT_ID, Long.parseLong(id))).isEqualTo(2L);
     }
 
     @Test

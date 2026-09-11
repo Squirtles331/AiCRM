@@ -75,6 +75,7 @@ public class PlatformPrincipalService {
             permissions.addAll(Set.of("conversation:read:any", "conversation:write:any"));
             permissions.addAll(Set.of("document:read", "document:manage"));
             permissions.addAll(Set.of("playbook:read", "playbook:manage"));
+            permissions.addAll(Set.of("competitor:read", "competitor:manage"));
             permissions.add("outbox:retry");
         }
         if (!roles.isEmpty()) {

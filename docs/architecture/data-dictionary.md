@@ -1,6 +1,6 @@
 # CRM 数据字典（阶段 5D）
 
-版本：`M5D-DB-1.0`；状态：产品目录、商机管道、报价审批、合同与销售订单闭环、CRM 工作台、目标、报表、规则驱动评分、组织/营销连接器、获客渠道归因、销售会话、销售资料库及销售话术已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V25` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
+版本：`M5E-DB-1.0`；状态：产品目录、商机管道、报价审批、合同与销售订单闭环、CRM 工作台、目标、报表、规则驱动评分、组织/营销连接器、获客渠道归因、销售会话、销售资料库、销售话术及竞争信息已实现、待发布评审；数据库：PostgreSQL 16+。本文件与 Flyway `V1` 至 `V26` 共同构成字段冻结基线；SQL 为物理事实源，文档不得单独变更。
 
 ## 1. 类型与通用字段组
 
@@ -131,6 +131,7 @@ V20 的 `crm_performance_score_rule` 保存名称、匹配指标、`DRAFT/ACTIVE
 | `crm_sales_conversation_entry` | `id/tenant_id/conversation_id BIGINT N`；`direction VARCHAR(16) N`；`content VARCHAR(4000) N`；`occurred_at TIMESTAMPTZ N`；`created_by/created_at` | 方向仅 `INBOUND/OUTBOUND/NOTE`；同租户会话复合 FK；触发器禁止更新和删除；按会话与沟通时间排序。 |
 | `crm_sales_document` | `id/tenant_id BIGINT N`；`title VARCHAR(200) N`；`category VARCHAR(64) N`；`content TEXT N`；`status VARCHAR(16) N`；`owner_user_id BIGINT N`；`published_at/archived_at TIMESTAMPTZ NULL`；`version`、`AUDIT_MUTABLE` | 状态为 `DRAFT/PUBLISHED/ARCHIVED`，发布时间和归档时间与状态一致；按租户、状态及更新时间索引。仅保存 CRM 文本资料，不存二进制附件。 |
 | `crm_sales_playbook` | `id/tenant_id BIGINT N`；`title VARCHAR(200) N`；`sales_stage VARCHAR(64) N`；`scenario VARCHAR(200) N`；`content TEXT N`；`status VARCHAR(16) N`；`owner_user_id BIGINT N`；`published_at/archived_at TIMESTAMPTZ NULL`；`version`、`AUDIT_MUTABLE` | 状态为 `DRAFT/PUBLISHED/ARCHIVED`，发布时间和归档时间与状态一致；按租户、状态、销售阶段及更新时间索引。仅保存 CRM 话术文本，不接入自动外呼或外部沟通事实。 |
+| `crm_competitor` | `id/tenant_id BIGINT N`；`name VARCHAR(200) N`；`positioning VARCHAR(1000) NULL`；`strengths/weaknesses VARCHAR(2000) NULL`；`status VARCHAR(16) N`；`owner_user_id BIGINT N`；`version`、`AUDIT_MUTABLE` | 状态为 `ACTIVE/ARCHIVED`；活跃名称租户内不区分大小写唯一；按租户、状态及更新时间索引。仅保存 CRM 竞争信息，不接入外部情报或自动分析。 |
 
 ## 13. 后续对象登记
 
